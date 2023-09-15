@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Col, Form, ListGroup, Row, Stack } from "react-bootstrap";
 import { ContentBase } from "../../components/ContentBase";
+import OperationService from '../../services/OperationService';
 
 export function OperacoesView(props) {
     return (
@@ -9,7 +10,7 @@ export function OperacoesView(props) {
             <div className='container'>
                 <Stack gap={5}>
                     <h1>{props.pagetitle}</h1>
-                    <Content id={props.operationid}/>
+                    <Content id={props.operationid} isDisabled={props.isDisabled} />
                     <br /><br />
                 </Stack>
             </div>
@@ -17,19 +18,28 @@ export function OperacoesView(props) {
     );
 }
 
-function Content(operationid) {
+function Content(props) {
 
-    var id;
     const [visibility, setVisibility] = useState([]);
     const [operation, setOperation] = useState([]);
 
-    if (isNaN(operationid)){
-        id = operationid
+    const operationService = new OperationService();
+
+    if (!isNaN(props.id)) {
+        fetchOperation(props.id);
     }
 
-    function fetchOperation(id){
-        
+    async function fetchOperation(id) {
+        await operationService.getOperationById(id)
+            .then((result) => {
+                setOperation(result.data)
+            })
+            .catch({});
     }
+
+    useEffect(() => {
+        fetchOperation();
+    }, []);
 
     return <>
         <Form>
@@ -38,21 +48,24 @@ function Content(operationid) {
 
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-name">Nome da Operação</Form.Label>
-                        <Form.Control type="text" ></Form.Control>
+                        <Form.Control type="text" disabled={props.isDisabled}>{operation.operation_name}</Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-place">Local da Operação</Form.Label>
-                        <Form.Control type="text" ></Form.Control>
+                        <Form.Control type="text" disabled={props.isDisabled}>{operation.operation_place}</Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-date">Data da Operação</Form.Label>
-                        <Form.Control type="date" ></Form.Control>
+                        <Form.Control type="date" disabled={props.isDisabled}>{operation.operation_date}</Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
-                        <Form.Select>
-                            <option>Selecione um oficial </option>
-                            <option value='1'> </option>
+                        <Form.Select disabled={props.isDisabled}>
+                            <option>Selecione um oficial</option>
+                            {operation &&
+                                <option value='1'>{operation.operation_name}</option>
+                            }
+
                         </Form.Select>
                     </Form.Group>
 

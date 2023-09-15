@@ -6,15 +6,27 @@ class OperationService {
         const result = await axios.get('http://localhost:8080/operation', {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
-                'Content-Type':'application/json',
+                'Content-Type': 'application/json',
                 Accept: "*/*"
             }
         });
         return result;
     }
 
-    async update(updatedOperation){
-        
+
+    async getOperationById(id) {
+        const result = await axios.get(`http://localhost:8080/operation/${id}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
+
+    async update(updatedOperation) {
+
     }
 
 }
