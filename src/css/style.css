@@ -1,0 +1,14 @@
+.grey-bg {
+    background-color: #CED4DA;
+    min-height: 100vh
+
+}
+
+* {
+    box-sizing: border-box;
+  }
+  
+  #page-wrap {
+    padding-bottom: 10px;
+    padding-top: 10px;
+  }
