@@ -20,7 +20,7 @@ class AuthService {
                     resolve();
                 }).catch((error) => {
                     console.log(error)
-                    reject(new Error('Credenciais inválidas. Erro: ' + error));
+                    reject(new Error('Credenciais inválidas. Erro: ' + error.response.data.error));
                 })
 
             }, 1000);

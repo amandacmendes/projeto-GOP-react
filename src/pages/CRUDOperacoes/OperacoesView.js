@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import { Card, Col, Form, ListGroup, Row, Stack } from "react-bootstrap";
 import { ContentBase } from "../../components/ContentBase";
 import OperationService from '../../services/OperationService';
+import { useParams } from "react-router-dom";
 
 export function OperacoesView(props) {
+    let params = useParams();
+
     return (
         <>
             <ContentBase />
             <div className='container'>
                 <Stack gap={5}>
                     <h1>{props.pagetitle}</h1>
-                    <Content id={props.operationid} isDisabled={props.isDisabled} />
+                    <Content id={params.id} isDisabled={props.isDisabled} />
                     <br /><br />
                 </Stack>
             </div>
@@ -26,6 +29,7 @@ function Content(props) {
     const operationService = new OperationService();
 
     if (!isNaN(props.id)) {
+        console.log('new operation')
         fetchOperation(props.id);
     }
 
@@ -34,11 +38,12 @@ function Content(props) {
             .then((result) => {
                 setOperation(result.data)
             })
-            .catch({});
+            .catch((error) => {
+                console.log(error)
+            });
     }
 
     useEffect(() => {
-        fetchOperation();
     }, []);
 
     return <>
