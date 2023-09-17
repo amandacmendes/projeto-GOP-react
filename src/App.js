@@ -6,6 +6,7 @@ import AuthService from './services/AuthService';
 import { Cadastro } from './pages/Cadastro';
 import { Login } from './pages/Login/Login';
 import { OperacoesView } from './pages/CRUDOperacoes/OperacoesView';
+import { ErrorPage } from './pages/ErrorPage';
 
 function App() {
   const isAuthenticated = AuthService.isAuthenticated();
@@ -20,15 +21,16 @@ function App() {
           <Route path='/logout' Component={Login}></Route>
           <Route path='/signup' element={<Cadastro />}></Route>
 
+          <Route path='/*' Component={ErrorPage}></Route>
+
           <Route path='/mainpage' element={isAuthenticated ? <MainPage /> : <Navigate to="/login" />}></Route>
           <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}></Route>
           <Route path='/operation' element={isAuthenticated ? <Operacoes /> : <Navigate to="/login" />}></Route>
           <Route path='/operation/new' element={isAuthenticated ? <OperacoesView pagetitle="Nova Operação" /> : <Navigate to="/login" />}></Route>
-          <Route path='/operation/:id' useParams={'id'} element={isAuthenticated ? <OperacoesView pagetitle="Visualizar Operação" /> : <Navigate to="/login" />}></Route>
+          <Route path='/operation/:id/:action' useParams={['id']} element={isAuthenticated ? <OperacoesView /> : <Navigate to="/login" />}></Route>
 
-          {
-            // /team /resources /profile
-          }
+          {/* escrever paths pra => /team /resources /profile */}
+
         </Routes>
       </Router>
     </>
