@@ -3,7 +3,6 @@ import { api } from "./api";
 class OfficerService {
 
     async getOfficers() {
-        const accessToken = sessionStorage.getItem('token');
         const result = await api.get('/officer', {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
@@ -15,7 +14,6 @@ class OfficerService {
     }
 
     async getOfficersWithTeams() {
-        const accessToken = sessionStorage.getItem('token');
 
         const officers = await api.get('/officer', {
             headers: {
@@ -66,7 +64,6 @@ class OfficerService {
     }
 
     async deleteOfficer(id) {
-        const accessToken = sessionStorage.getItem('token');
         const result = await api.delete(`/officer/${id}`, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
@@ -78,7 +75,6 @@ class OfficerService {
     }
 
     async updateOfficer(data) {
-        const accessToken = sessionStorage.getItem('token');
         const result = await api.put(`/officer/${data.id}`, {
             name: data.name,
             team_id: data.team_id
@@ -93,7 +89,6 @@ class OfficerService {
     }
 
     async createOfficer(data) {
-        const accessToken = sessionStorage.getItem('token');
         const result = await api.post('/officer', {
             name: data.name,
             team_id: data.team_id
