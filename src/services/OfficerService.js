@@ -36,7 +36,7 @@ class OfficerService {
 
         // Create a mapping of teams by their id
         const teamMap = new Map();
-        
+
         teams.data.forEach(team => {
             teamMap.set(team.id, team);
         });
@@ -65,37 +65,43 @@ class OfficerService {
         return officersWithTeams;
     }
 
-    async deleteCustomer(id) {
+    async deleteOfficer(id) {
         const accessToken = sessionStorage.getItem('token');
         const result = await api.delete(`/officer/${id}`, {
             headers: {
-                'Authorization': `Bearer ${JSON.parse(accessToken)}`
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
             }
         });
         return result;
     }
 
-    async updateCustomer(data) {
+    async updateOfficer(data) {
         const accessToken = sessionStorage.getItem('token');
         const result = await api.put(`/officer/${data.id}`, {
-            nome: data.nameCustomer,
-            email: data.emailCustomer
+            name: data.name,
+            team_id: data.team_id
         }, {
             headers: {
-                'Authorization': `Bearer ${JSON.parse(accessToken)}`
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
             }
         });
         return result;
     }
 
-    async createCustomer(data) {
+    async createOfficer(data) {
         const accessToken = sessionStorage.getItem('token');
         const result = await api.post('/officer', {
-            nome: data.nameCustomer,
-            email: data.emailCustomer
+            name: data.name,
+            team_id: data.team_id
         }, {
             headers: {
-                'Authorization': `Bearer ${JSON.parse(accessToken)}`
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
             }
         });
         return result;
