@@ -7,7 +7,7 @@ import OfficerService from "../../services/OfficerService";
 import ReasonService from "../../services/ReasonService";
 import ResourceService from "../../services/ResourceService";
 
-export function OperacoesView(props) {
+export function OperacoesNew(props) {
 
     const navigate = useNavigate();
     let params = useParams();
@@ -134,9 +134,26 @@ function Content(props) {
             setReasonSize(reasonSize - 1)
         }
     }
+    const handleReasonInput = (e) => {
+        setReason(e.target.value)
+    }
+
+
+    const handleFormSubmit = (e) => {
+
+        //CreateOperation
+
+        //Create Officer_Operation
+
+        //Create Resource_Operation
+
+        //Create Reason
+
+        console.log()
+    }
 
     return <>
-        <Form >
+        <Form onSubmit={handleFormSubmit}>
             {!show &&
                 <Alert variant="danger" onClose={() => setShow(false)} dismissible>
                     {errorMessage}
@@ -145,10 +162,9 @@ function Content(props) {
 
             <Card className="mb-3">
                 <Card.Body>
-
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-name">Nome da Operação</Form.Label>
-                        <Form.Control type="text" disabled={props.isDisabled} value={operation.operation_name}></Form.Control>
+                        <Form.Control type="text" disabled={props.isDisabled} value={operation.operation_name} ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-place">Local da Operação</Form.Label>
@@ -210,9 +226,9 @@ function Content(props) {
 
                 </Card.Body>
             </Card>
+
+
             <h3>Motivação</h3>
-
-
             <Card className="my-3">
                 <Card.Body>
                     <Form.Group className="pb-2">
@@ -233,25 +249,26 @@ function Content(props) {
                             </Col>
                         </Row>
 
-                        {reason.map((reasonItem, index) => (
-                            <Row className="mb-2" key={index}>
+
+                        {Array.from({ length: reasonSize }).map((_, index) => (
+                            <Row className="mb-2" key={index} >
                                 <Col className="col-4">
                                     <Form.Select disabled={props.isDisabled}>
-                                        {reason.length < 0 ? (reasontypes.map((reasontype) => (
-                                            <option key={reasontype.id} value={reasontype.id}>
+                                        {reasontypes.map((reasontype) => (
+                                            <option
+                                                key={reasontype.id}
+                                                value={reasontype.id}
+                                            >
                                                 {reasontype.description}
                                             </option>
-                                        ))) :
-                                            <option key={reasonItem.reasontype_id} value={reasonItem.reasontype_id}>
-                                                {reasontypes[reasonItem.reasontype_id].description}
-                                            </option>
+                                        ))
                                         }
                                     </Form.Select>
                                 </Col>
                                 <Col className="d-flex flex-row">
                                     <Form.Control
                                         type="text"
-                                        value={reasonItem.description}
+                                        onChange={(e) => handleReasonInput(e)}
                                         disabled={props.isDisabled}
                                     />
 
@@ -273,6 +290,8 @@ function Content(props) {
 
                 </Card.Body>
             </Card>
+            <Button className="my-3" type="submit"> Cadastrar </Button>
+
         </Form >
     </>
 }

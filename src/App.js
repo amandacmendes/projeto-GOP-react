@@ -9,6 +9,7 @@ import { OperacoesView } from './pages/CRUDOperacoes/OperacoesView';
 import { ErrorPage } from './pages/ErrorPage';
 import { Teams } from './pages/Teams copy/Teams';
 import { TeamsView } from './pages/Teams copy/TeamsView';
+import { OperacoesNew } from './pages/CRUDOperacoes/OperacoesNew';
 
 //import { Teams } from './pages/Teams/Teams';
 //import { TeamsView } from './pages/Teams/TeamsView';
@@ -31,7 +32,7 @@ function App() {
           <Route path='/mainpage' element={isAuthenticated ? <MainPage /> : <Navigate to="/login" />}></Route>
           <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}></Route>
           <Route path='/operation' element={isAuthenticated ? <Operacoes /> : <Navigate to="/login" />}></Route>
-          <Route path='/operation/new' element={isAuthenticated ? <OperacoesView pagetitle="Nova Operação" /> : <Navigate to="/login" />}></Route>
+          <Route path='/operation/new' element={isAuthenticated ? <OperacoesNew pagetitle="Nova Operação" /> : <Navigate to="/login" />}></Route>
           <Route path='/operation/:id/:action' useParams={['id']} element={isAuthenticated ? <OperacoesView /> : <Navigate to="/login" />}></Route>
 
 
