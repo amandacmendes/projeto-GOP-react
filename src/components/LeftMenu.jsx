@@ -33,7 +33,7 @@ export function LeftMenu() {
             </a>
             <br />
 
-            <a className="menu-item" href="/teams">
+            <a className="menu-item" href="/team">
                 Equipes Policiais
             </a>
             <a className="menu-item" href="/resources">

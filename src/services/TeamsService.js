@@ -1,15 +1,13 @@
-import axios from "axios";
 import { api } from "./api";
 import OfficerService from "./OfficerService";
 
 class TeamsService {
 
-
-    async create(team, officers) {
+    async create(team_name, officers) {
         const officerService = new OfficerService();
 
-        await api.post('/team', {
-            team_name: team.team_name,
+        var createdTeam = await api.post('/team', {
+            team_name: team_name,
             status: 'A'
         }, {
             headers: {
@@ -17,24 +15,50 @@ class TeamsService {
                 'Content-Type': 'application/json',
                 Accept: "*/*"
             }
-        }).then((result) => {
-            console.log(result.team.id)
+        })
+
+        console.log(' created ---- ' + createdTeam)
+
+        if (createdTeam) {
+
+
+        }
+
+        /*    
+        .then((result) => {
+            console.log(' linha 19 ---- ' + result)
 
             // Create an array of promises for updating officers
             const updatePromises = officers.map((officer) => officerService.updateOfficer(officer));
 
             // Use Promise.all to execute all the update promises in parallel
             Promise.all(updatePromises)
-                .then(() => {
+                .then((result) => {
                     console.log('All officers updated successfully.');
+                    return result;
                 })
                 .catch((error) => {
                     console.error(`Error updating officers: ${error}`);
                 });
         }).catch((error) => {
             console.error(`Error creating team: ${error}`);
-        });
+        });*/
 
+    }
+
+    async deleteTeam(id) {
+        await api.delete(`/team/${id}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        }).then((data) => {
+            console.log(data);
+            return data.data.message;
+        }).catch((error) => {
+            return error
+        });
     }
 
     async getAllTeams() {
@@ -83,7 +107,8 @@ class TeamsService {
             });
 
             // Convert the teamMap values back to an array
-            const result = Array.from(teamMap.values());
+            //const result = Array.from(teamMap.values());
+            const result = teamMap;
             return result;
         } catch (error) {
             console.log(error)

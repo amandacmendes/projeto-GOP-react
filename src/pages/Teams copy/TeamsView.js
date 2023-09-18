@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TeamsService from "../../services/TeamsService";
 import OfficerService from "../../services/OfficerService";
-import { useForm } from "react-hook-form";
 
 export function TeamsView(props) {
 
@@ -16,7 +15,6 @@ export function TeamsView(props) {
     if (props.pagetitle) {
         pagetitle = props.pagetitle;
     }
-
     if (params.action === 'view') {
         pagetitle = 'Visualizar Equipe'
         isDisabled = true;
@@ -57,23 +55,38 @@ function Content(props) {
 
     //Fetch all officers
     async function fetchAllOfficers() {
+
         await officerService.getOfficers()
             .then((result) => {
                 setOfficers(result.data)
             })
             .catch((error) => {
                 console.log(error)
-            });
-    }
+            })
 
+        if (props.id) {
+            await teamService.getTeamsWithOfficers()
+                .then((data) => {
+                    console.log(props.id)
+                    console.log(data.get(1).officers);
+
+                    setSelectedOfficers(data.get(1).officers)
+
+
+                    //setSelectedOfficers(officers);
+                })
+        }
+    }
 
     // Handle checkbox changes
     const handleCheckboxChange = (officer) => {
+
         const updatedOfficers = selectedOfficers.includes(officer)
-            ? selectedOfficers.filter((id) => id !== officer.id)
+            ? selectedOfficers.pop(officer)
             : [...selectedOfficers, officer];
 
         setSelectedOfficers(updatedOfficers);
+        console.log(` - handleCheckbox 75 ${selectedOfficers}`)
     };
 
     // Handle form submission
@@ -82,7 +95,6 @@ function Content(props) {
 
         // Here, you can handle creating the team with the selected officers and teamName
         console.log('Team Name:', teamName);
-        
         console.log('Selected Officers:', selectedOfficers);
 
         await teamService.create(teamName, selectedOfficers)
@@ -94,7 +106,8 @@ function Content(props) {
     };
 
     useEffect(() => {
-        fetchAllOfficers()
+        fetchAllOfficers();
+        console.log(selectedOfficers);
     }, []);
 
     return (
@@ -121,6 +134,7 @@ function Content(props) {
                             {officers.map((officer) => (
                                 <ListGroup.Item key={officer.id}>
                                     <Form.Check
+                                        key={officer.id}
                                         type="checkbox"
                                         value={officer.id}
                                         checked={selectedOfficers.includes(officer)}
