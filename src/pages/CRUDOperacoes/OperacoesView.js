@@ -49,6 +49,7 @@ function Content(props) {
     const [errorMessage, setErrorMessage] = useState();
 
     const [officers, setOfficers] = useState([]);
+    const [reason, setReason] = useState([]);
     const [reasontypes, setReasonTypes] = useState([]);
 
     const [reasonSize, setReasonSize] = useState(1);
@@ -81,13 +82,12 @@ function Content(props) {
 
         //for View and Edit - load operation from db
         if (!!props.id) {
-            console.log('new operation')
             fetchOperation(props.id);
         }
     }
 
     async function fetchOperation(id) {
-        await operationService.getOperationById(id)
+        var op = await operationService.getOperationById(id)
             .then((result) => {
                 console.log('aaaa ' + result.data)
                 setOperation(result.data)
@@ -95,6 +95,17 @@ function Content(props) {
             .catch((error) => {
                 console.log(error)
                 setErrorMessage('Erro: A operação que está tentando visualizar não existe.')
+            });
+
+        //get all reason of operation 
+        await reasonService.getReasonfromOperation(id)
+            .then((result) => {
+                console.log(result.data)
+                setReason(result.data)
+            })
+            .catch((error) => {
+                console.log(error)
+                setErrorMessage('Erro: Erro ao buscar motivações da operação.')
             });
     }
 
@@ -200,35 +211,46 @@ function Content(props) {
                                 <Form.Label controlId="form-label-reason">Descrição</Form.Label>
                             </Col>
                             <Col className="d-flex flex-row-reverse">
-                                <Button onClick={handleAddReasonClick}>
+                                <Button
+                                    onClick={handleAddReasonClick}
+                                    disabled={props.isDisabled}
+                                >
                                     Adicionar
                                 </Button>
                             </Col>
                         </Row>
 
-                        {Array.from({ length: reasonSize }).map((_, index) => (
+                        {reason.map((reasonItem, index) => (
                             <Row className="mb-2" key={index}>
                                 <Col className="col-4">
-                                    <Form.Select>
-                                        <option>Selecione</option>
-                                        {reasontypes.map((reasontype) => (
+                                    <Form.Select disabled={props.isDisabled}>                                        
+                                        {reason.length <= 0 ? (reasontypes.map((reasontype) => (
                                             <option key={reasontype.id} value={reasontype.id}>
                                                 {reasontype.description}
                                             </option>
-                                        ))}
+                                        ))) :
+                                            <option key={reasonItem.reasontype_id} value={reasonItem.reasontype_id}>
+                                                {reasontypes[reasonItem.reasontype_id].description}
+                                            </option>
+                                        }
                                     </Form.Select>
                                 </Col>
                                 <Col className="d-flex flex-row">
-                                    <Form.Control type="text"></Form.Control>
+                                    <Form.Control
+                                        type="text"
+                                        value={reasonItem.description}
+                                        disabled={props.isDisabled}
+                                    />
+
                                     <Button
                                         variant="outline-danger"
                                         className="ms-2"
                                         onClick={handleMinusReasonClick}
+                                        disabled={props.isDisabled}
                                     >
                                         <span class="material-symbols-outlined">
                                             remove
                                         </span>
-
                                     </Button>
                                 </Col>
                             </Row>
