@@ -1,6 +1,41 @@
+import axios from "axios";
 import { api } from "./api";
+import OfficerService from "./OfficerService";
 
 class TeamsService {
+
+
+    async create(team, officers) {
+        const officerService = new OfficerService();
+
+        await api.post('/team', {
+            team_name: team.team_name,
+            status: 'A'
+        }, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        }).then((result) => {
+            console.log(result.team.id)
+
+            // Create an array of promises for updating officers
+            const updatePromises = officers.map((officer) => officerService.updateOfficer(officer));
+
+            // Use Promise.all to execute all the update promises in parallel
+            Promise.all(updatePromises)
+                .then(() => {
+                    console.log('All officers updated successfully.');
+                })
+                .catch((error) => {
+                    console.error(`Error updating officers: ${error}`);
+                });
+        }).catch((error) => {
+            console.error(`Error creating team: ${error}`);
+        });
+
+    }
 
     async getAllTeams() {
         const result = await api.get('/team', {
