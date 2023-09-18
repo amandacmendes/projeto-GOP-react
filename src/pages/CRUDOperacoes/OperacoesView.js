@@ -4,20 +4,22 @@ import { ContentBase } from "../../components/ContentBase";
 import OperationService from '../../services/OperationService';
 import { useNavigate, useParams } from "react-router-dom";
 import OfficerService from "../../services/OfficerService";
+import ReasonService from "../../services/ReasonService";
 
 export function OperacoesView(props) {
 
     const navigate = useNavigate();
     let params = useParams();
     let pagetitle = '';
+    let isDisabled = false;
 
     if (props.pagetitle) {
         pagetitle = props.pagetitle;
     }
 
-
     if (params.action === 'view') {
         pagetitle = 'Visualizar Operação'
+        isDisabled = true;
     } else if (params.action === 'edit') {
         pagetitle = 'Editar Operação'
     }
@@ -32,7 +34,7 @@ export function OperacoesView(props) {
             <div className='container'>
                 <Stack gap={5}>
                     <h1>{pagetitle}</h1>
-                    <Content id={params.id} isDisabled={props.isDisabled} />
+                    <Content id={params.id} isDisabled={isDisabled} />
                     <br /><br />
                 </Stack>
             </div>
@@ -52,38 +54,48 @@ function Content(props) {
     const [reasonSize, setReasonSize] = useState(1);
 
     const operationService = new OperationService();
+    const reasonService = new ReasonService();
     const officerService = new OfficerService();
 
-    if (!!props.id) {
-        console.log('new operation')
-        fetchOperation(props.id);
+
+    async function loadInfo() {
+        // for New Operation - load officers, resources and reason types
+        await officerService.getOfficersWithTeams()
+            .then((result) => {
+                setOfficers(result)
+            })
+            .catch((error) => {
+                console.log(error)
+                setErrorMessage(`Erro: ${error.response.data.error}`)
+            });
+
+        await reasonService.getReasonTypes()
+            .then((result) => {
+                console.log(result.data)
+                setReasonTypes(result.data)
+            })
+            .catch((error) => {
+                console.log(error)
+                setErrorMessage(`Erro: ${error.response.data.error}`)
+            });
+
+        //for View and Edit - load operation from db
+        if (!!props.id) {
+            console.log('new operation')
+            fetchOperation(props.id);
+        }
     }
 
     async function fetchOperation(id) {
         await operationService.getOperationById(id)
             .then((result) => {
+                console.log('aaaa ' + result.data)
                 setOperation(result.data)
             })
             .catch((error) => {
                 console.log(error)
                 setErrorMessage('Erro: A operação que está tentando visualizar não existe.')
             });
-    }
-
-    async function loadInfo() {
-        // for New Operation - load officers, resources and reason types
-
-        await officerService.getOfficersWithTeams()
-            .then((result) => {
-                setOfficers(result)
-                console.log(officers.forEach(officer => { console.log(officer.name, officer.id) }))
-                console.log(officers.length)
-            })
-            .catch((error) => {
-                console.log(error)
-                setErrorMessage(`Erro: ${error}`)
-            });
-
     }
 
     useEffect(() => {
@@ -94,7 +106,7 @@ function Content(props) {
         setReasonSize(reasonSize + 1)
     }
     function handleMinusReasonClick() {
-        if (reasonSize > 0) {
+        if (reasonSize > 1) {
             setReasonSize(reasonSize - 1)
         }
     }
@@ -112,15 +124,15 @@ function Content(props) {
 
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-name">Nome da Operação</Form.Label>
-                        <Form.Control type="text" disabled={props.isDisabled}>{operation.operation_name}</Form.Control>
+                        <Form.Control type="text" disabled={props.isDisabled} value={operation.operation_name}></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-place">Local da Operação</Form.Label>
-                        <Form.Control type="text" disabled={props.isDisabled}>{operation.operation_place}</Form.Control>
+                        <Form.Control type="text" disabled={props.isDisabled} value={operation.operation_place}></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-date">Data da Operação</Form.Label>
-                        <Form.Control type="date" disabled={props.isDisabled}>{operation.operation_date}</Form.Control>
+                        <Form.Control type="date" disabled={props.isDisabled} value={operation.operation_date}></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
@@ -142,10 +154,11 @@ function Content(props) {
                 <Card.Body>
 
                     <Form.Label>Efetivos</Form.Label>
-                    <ListGroup >
+                    <ListGroup>
                         {officers.map((officer) => (
                             <ListGroup.Item>
                                 <Form.Check
+                                    disabled={props.isDisabled}
                                     type={"checkbox"}
                                     id={officer.id}
                                     label={officer.name}
@@ -161,6 +174,7 @@ function Content(props) {
                         {['checkbox', 'radio'].map((type) => (
                             <ListGroup.Item>
                                 <Form.Check // prettier-ignore
+                                    disabled={props.isDisabled}
                                     type={"checkbox"}
                                     id={`default-${type}`}
                                     label={`default ${type}`}
@@ -178,12 +192,12 @@ function Content(props) {
             <Card className="my-3">
                 <Card.Body>
                     <Form.Group className="pb-2">
-                        <Row>
+                        <Row className="mb-2">
                             <Col className="col-4">
-                                <Form.Label className="mb-2" controlId="form-label-reason">Objeto de trabalho policial</Form.Label>
+                                <Form.Label controlId="form-label-reason">Objeto de trabalho policial</Form.Label>
                             </Col>
                             <Col>
-                                <Form.Label className="mb-2" controlId="form-label-reason">Descrição</Form.Label>
+                                <Form.Label controlId="form-label-reason">Descrição</Form.Label>
                             </Col>
                             <Col className="d-flex flex-row-reverse">
                                 <Button onClick={handleAddReasonClick}>
@@ -205,8 +219,17 @@ function Content(props) {
                                     </Form.Select>
                                 </Col>
                                 <Col className="d-flex flex-row">
-                                    <Form.Control type="text" />
-                                    <Button className="ms-2" onClick={handleMinusReasonClick}> - </Button>
+                                    <Form.Control type="text"></Form.Control>
+                                    <Button
+                                        variant="outline-danger"
+                                        className="ms-2"
+                                        onClick={handleMinusReasonClick}
+                                    >
+                                        <span class="material-symbols-outlined">
+                                            remove
+                                        </span>
+
+                                    </Button>
                                 </Col>
                             </Row>
                         ))}

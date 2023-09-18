@@ -7,6 +7,8 @@ import { Cadastro } from './pages/Cadastro';
 import { Login } from './pages/Login/Login';
 import { OperacoesView } from './pages/CRUDOperacoes/OperacoesView';
 import { ErrorPage } from './pages/ErrorPage';
+import { Teams } from './pages/Teams/Teams';
+import { TeamsView } from './pages/Teams/TeamsView';
 
 function App() {
   const isAuthenticated = AuthService.isAuthenticated();
@@ -28,6 +30,11 @@ function App() {
           <Route path='/operation' element={isAuthenticated ? <Operacoes /> : <Navigate to="/login" />}></Route>
           <Route path='/operation/new' element={isAuthenticated ? <OperacoesView pagetitle="Nova Operação" /> : <Navigate to="/login" />}></Route>
           <Route path='/operation/:id/:action' useParams={['id']} element={isAuthenticated ? <OperacoesView /> : <Navigate to="/login" />}></Route>
+
+          
+          <Route path='/teams' element={isAuthenticated ? <Teams /> : <Navigate to="/login" />}></Route>
+          <Route path='/teams/new' element={isAuthenticated ? <TeamsView pagetitle="Nova Equipe" /> : <Navigate to="/login" />}></Route>
+          <Route path='/teams/:id/:action' useParams={['id']} element={isAuthenticated ? <TeamsView /> : <Navigate to="/login" />}></Route>
 
           {/* escrever paths pra => /team /resources /profile */}
 

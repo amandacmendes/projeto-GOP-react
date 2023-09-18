@@ -1,18 +1,22 @@
 import '../../css/style.css';
+import { Button, Form, InputGroup, Modal, Stack, Table } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
-import { Form, InputGroup, Modal, Stack, Table } from 'react-bootstrap';
-import { Button } from 'react-bootstrap';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import OperationService from '../../services/OperationService';
 import { useNavigate } from 'react-router-dom';
-import AuthService from '../../services/AuthService';
+import { useEffect, useState } from 'react';
+import TeamsService from '../../services/TeamsService';
 
-export function Operacoes() {
+export function Teams() {
+
     const navigate = useNavigate();
 
-    function handleNewOpClick() {
+    const [search, setSearch] = useState();
+
+    function handleNewTeamClick() {
         navigate('new');
+    }
+
+    function handleSearch(e) {
+        setSearch(e);
     }
 
     return (
@@ -20,11 +24,12 @@ export function Operacoes() {
             <ContentBase />
             <div className='container'>
                 <Stack gap={5}>
-                    <h1>Operações Policiais</h1>
+                    <h1>Equipes</h1>
                     <div className='d-flex flex-row w-auto justify-content-between'>
                         <Form className='w-50'>
                             <InputGroup>
-                                <Form.Control type='text' placeholder='Pesquisar pelo nome da operação...' ></Form.Control>
+                                <Form.Control type='text' placeholder='Digite o nome da equipe...'
+                                    onChange={(e) => { handleSearch(e.target.value) }}></Form.Control>
                                 <InputGroup.Text id="basic-addon2">
                                     <span class="material-symbols-outlined">
                                         search
@@ -32,57 +37,35 @@ export function Operacoes() {
                                 </InputGroup.Text>
                             </InputGroup>
                         </Form>
-                        <Button onClick={handleNewOpClick}>Registrar Nova Operação</Button>
+                        <Button onClick={handleNewTeamClick}>Registrar Nova Equipe</Button>
                     </div>
-                    <TableOperacoes searchbar="" />
+                    <TableTeams searchbar="" />
                 </Stack>
             </div>
         </>
     );
 }
 
-function TableOperacoes(props) {
+function TableTeams(props) {
 
-    const [data, setData] = useState([]);
-    const [response, setResponse] = useState('')
     const navigate = useNavigate();
+    const [data, setData] = useState([]);
 
+    const teamsService = new TeamsService();
 
-    const operationService = new OperationService();
-    const auth = new AuthService();
-
-    async function getOperations() {
+    async function getTeams() {
         try {
-            const result = await operationService.getOperations();
-            console.log(result)
-            setData(result.data)
-
+            const result = await teamsService.getTeamsWithOfficers();
+            setData(result)
         } catch (error) {
-            console.error(error);
-            navigate('/');
+            console.log(error)
+            navigate('/*');
         }
     }
 
     useEffect(() => {
-        getOperations();
+        getTeams();
     }, []);
-
-    const refreshTable = () => {
-        getOperations();
-    }
-
-    const handleDelete = (dataId) => {
-        console.log("---", dataId)
-        axios.delete(`https://64aff008c60b8f941af4e53d.mockapi.io/crud/fakeData/${dataId}`
-        ).then(function (response) {
-            console.log(response);
-            setResponse(response.statusText);
-            refreshTable();
-        }).catch(function (error) {
-            console.log(error);
-            setResponse(error.message);
-        });
-    }
 
     async function handleEditOperation(id) {
         try {
@@ -106,7 +89,7 @@ function TableOperacoes(props) {
             <Modal>
                 aa
             </Modal>
-            
+
         } catch (error) {
             console.error(error);
         }
@@ -117,30 +100,26 @@ function TableOperacoes(props) {
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Nome da Operação</th>
-                    <th>Local da Operação</th>
-                    <th>Data da Operação</th>
-                    <th>Status</th>
+                    <th>Nome da Equipe</th>
+                    <th>Quantidade Efetivos</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
+
                 {data && data.length > 0
                     ? data.map((data, index) => (
                         <TableContent
                             keys={index}
-                            operation_name={data.operation_name}
-                            operation_place={data.operation_place}
-                            operation_date={data.operation_date}
-                            status={data.status}
-                            id={data.id}
+                            team_name={data.team_name}
+                            team_size={data.officers.length}
                             viewOperation={async () =>
                                 handleViewOperation(data.id)}
                             editOperation={async () => handleEditOperation(data.id)}
                             deleteOperation={async () => handleDeleteOperation(data.id)}
                         />
                     ))
-                    : <p className="text-center">Não existe nenhuma operação cadastrada!</p>
+                    : <p className="text-center">Não existe nenhuma equipe cadastrada!</p>
                 }
 
             </tbody>
@@ -151,10 +130,8 @@ function TableOperacoes(props) {
 function TableContent(props) {
     return <tr>
         <td>{props.keys}</td>
-        <td>{props.operation_name}</td>
-        <td>{props.operation_place}</td>
-        <td>{props.operation_date}</td>
-        <td>{props.status}</td>
+        <td>{props.team_name}</td>
+        <td>{props.team_size}</td>
         <td>
             <div>
                 <Button variant="outline-success" size='sm'
