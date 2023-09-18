@@ -110,6 +110,7 @@ class TeamsService {
             //const result = Array.from(teamMap.values());
             const result = teamMap;
             return result;
+
         } catch (error) {
             console.log(error)
         }

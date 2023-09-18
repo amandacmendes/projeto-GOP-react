@@ -47,7 +47,7 @@ function Content(props) {
     const navigate = useNavigate();
 
     const [teamName, setTeamName] = useState('');
-    const [selectedOfficers, setSelectedOfficers] = useState([]);
+    var [selectedOfficers, setSelectedOfficers] = useState([]);
     const [officers, setOfficers] = useState([])
 
     const teamService = new TeamsService();
@@ -55,7 +55,6 @@ function Content(props) {
 
     //Fetch all officers
     async function fetchAllOfficers() {
-
         await officerService.getOfficers()
             .then((result) => {
                 setOfficers(result.data)
@@ -67,26 +66,37 @@ function Content(props) {
         if (props.id) {
             await teamService.getTeamsWithOfficers()
                 .then((data) => {
-                    console.log(props.id)
-                    console.log(data.get(1).officers);
-
-                    setSelectedOfficers(data.get(1).officers)
-
-
-                    //setSelectedOfficers(officers);
+                    var thisTeam = data.get(parseInt(props.id));
+                    setTeamName(data.get(parseInt(props.id)).team_name)
+                    setSelectedOfficers(Array.from(data.get(parseInt(props.id)).officers))
+                })
+                .catch((error) => {
+                    console.log(error)
                 })
         }
+
+        console.log('Fetched: ')
+    }
+
+    function handleChecked(officer_id) {
+
+        selectedOfficers.forEach(of => {
+            console.log(of.id == officer_id)
+            return !!!of.id == officer_id;
+            
+        });
+        return false
     }
 
     // Handle checkbox changes
-    const handleCheckboxChange = (officer) => {
+    const handleCheckboxChange = (e, officer) => {
 
         const updatedOfficers = selectedOfficers.includes(officer)
             ? selectedOfficers.pop(officer)
             : [...selectedOfficers, officer];
 
         setSelectedOfficers(updatedOfficers);
-        console.log(` - handleCheckbox 75 ${selectedOfficers}`)
+        console.log(` - selected officers: ${selectedOfficers}`)
     };
 
     // Handle form submission
@@ -107,7 +117,7 @@ function Content(props) {
 
     useEffect(() => {
         fetchAllOfficers();
-        console.log(selectedOfficers);
+        handleChecked();
     }, []);
 
     return (
@@ -137,8 +147,8 @@ function Content(props) {
                                         key={officer.id}
                                         type="checkbox"
                                         value={officer.id}
-                                        checked={selectedOfficers.includes(officer)}
-                                        onChange={() => handleCheckboxChange(officer)}
+                                        checked={selectedOfficers.forEach((e) => { return e.id == officer.id ? true : false})}
+                                        onChange={(e) => handleCheckboxChange(e, officer)}
                                         disabled={props.isDisabled}
                                         label={officer.name}
                                     />

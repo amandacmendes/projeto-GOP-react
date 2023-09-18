@@ -55,7 +55,7 @@ function TableTeams(props) {
     async function getTeams() {
         try {
             const result = await teamsService.getTeamsWithOfficers();
-            setData(result)
+            setData(Array.from(result.values()))
         } catch (error) {
             console.log(error)
             navigate('/*');
@@ -104,7 +104,6 @@ function TableTeams(props) {
                 </tr>
             </thead>
             <tbody>
-
                 {data && data.length > 0 ? (
                     data.map((data, index) => (
                         <TableContent
