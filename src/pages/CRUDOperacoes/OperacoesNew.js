@@ -6,6 +6,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import OfficerService from "../../services/OfficerService";
 import ReasonService from "../../services/ReasonService";
 import ResourceService from "../../services/ResourceService";
+import { useForm } from 'react-hook-form';
+
 
 export function OperacoesNew(props) {
 
@@ -61,6 +63,7 @@ function Content(props) {
     const officerService = new OfficerService();
     const resourceService = new ResourceService();
 
+    const { handleSubmit, register, formState: { errors } } = useForm();
 
     async function loadInfo() {
         // for New Operation - load officers, resources and reason types
@@ -139,7 +142,7 @@ function Content(props) {
     }
 
 
-    const handleFormSubmit = (e) => {
+    const onSubmit = (data) => {
 
         //CreateOperation
 
@@ -149,11 +152,11 @@ function Content(props) {
 
         //Create Reason
 
-        console.log()
+        console.log(data)
     }
 
     return <>
-        <Form onSubmit={handleFormSubmit}>
+        <Form onSubmit={handleSubmit(onSubmit)}>
             {!show &&
                 <Alert variant="danger" onClose={() => setShow(false)} dismissible>
                     {errorMessage}
@@ -164,19 +167,37 @@ function Content(props) {
                 <Card.Body>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-name">Nome da Operação</Form.Label>
-                        <Form.Control type="text" disabled={props.isDisabled} value={operation.operation_name} ></Form.Control>
+                        <Form.Control
+                            type="text"
+                            disabled={props.isDisabled}
+                            value={operation.operation_name}
+                            {...register('operation_name')}
+                        ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-place">Local da Operação</Form.Label>
-                        <Form.Control type="text" disabled={props.isDisabled} value={operation.operation_place}></Form.Control>
+                        <Form.Control
+                            type="text"
+                            disabled={props.isDisabled}
+                            value={operation.operation_place}
+                            {...register('operation_place')}
+                        ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-date">Data da Operação</Form.Label>
-                        <Form.Control type="date" disabled={props.isDisabled} value={operation.operation_date}></Form.Control>
+                        <Form.Control
+                            type="date"
+                            disabled={props.isDisabled}
+                            value={operation.operation_date}
+                            {...register('operation_planned_date')}
+                        ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
-                        <Form.Select disabled={props.isDisabled} >
+                        <Form.Select
+                            disabled={props.isDisabled}
+                            {...register('operation_chief')}
+                        >
                             <option>Selecione um oficial</option>
                             {officers.map((officer) => (
                                 <option key={officer.id} value={officer.id}>
@@ -194,14 +215,17 @@ function Content(props) {
                 <Card.Body>
 
                     <Form.Label>Efetivos</Form.Label>
-                    <ListGroup>
+                    <ListGroup >
                         {officers.map((officer) => (
-                            <ListGroup.Item>
+                            <ListGroup.Item >
                                 <Form.Check
                                     disabled={props.isDisabled}
                                     type={"checkbox"}
                                     id={officer.id}
+                                    key={officer.id}
                                     label={officer.name}
+                                    value={officer.id}
+                                    {...register('officer_operation_officer_id')}
                                 />
                             </ListGroup.Item>
 
@@ -218,6 +242,8 @@ function Content(props) {
                                     type={"checkbox"}
                                     id={resource.id}
                                     label={resource.description}
+                                    value={resource.id}
+                                    {...register('operation_resource_id')}
                                 />
                             </ListGroup.Item>
                         ))}
@@ -231,7 +257,7 @@ function Content(props) {
             <h3>Motivação</h3>
             <Card className="my-3">
                 <Card.Body>
-                    <Form.Group className="pb-2">
+                    <Form.Group className="pb-2" >
                         <Row className="mb-2">
                             <Col className="col-4">
                                 <Form.Label controlId="form-label-reason">Objeto de trabalho policial</Form.Label>
@@ -253,11 +279,13 @@ function Content(props) {
                         {Array.from({ length: reasonSize }).map((_, index) => (
                             <Row className="mb-2" key={index} >
                                 <Col className="col-4">
-                                    <Form.Select disabled={props.isDisabled}>
+                                    <Form.Select disabled={props.isDisabled}  >
                                         {reasontypes.map((reasontype) => (
                                             <option
                                                 key={reasontype.id}
+                                                id={'reasontypeid' + index}
                                                 value={reasontype.id}
+                                                {...register('reason')}
                                             >
                                                 {reasontype.description}
                                             </option>
@@ -266,10 +294,14 @@ function Content(props) {
                                     </Form.Select>
                                 </Col>
                                 <Col className="d-flex flex-row">
+
                                     <Form.Control
+                                        key={index}
+                                        id={'reasonid' + index}
                                         type="text"
                                         onChange={(e) => handleReasonInput(e)}
                                         disabled={props.isDisabled}
+                                        {...register('reason')}
                                     />
 
                                     <Button
