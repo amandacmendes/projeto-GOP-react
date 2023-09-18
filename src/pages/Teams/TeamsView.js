@@ -47,24 +47,35 @@ function Content(props) {
 
     const [team, setTeam] = useState([]);
     const [officers, setOfficers] = useState([]);
+    const [teamName, setTeamName] = useState('');
+
 
     const teamsService = new TeamsService();
     const officerService = new OfficerService();
 
-    async function fetchTeam(id) {
+    async function fetchTeamOfficers(id) {
         var teams;
         await teamsService.getTeamsWithOfficers()
             .then((result) => {
-                teams = result
+                teams = result;
             })
             .catch((error) => {
                 console.log(error)
             });
 
-        console.log(teams);
+        // Mapping by id
+        const teamMap = teams.reduce((acc, team) => {
+            acc[team.id] = team;
+            return acc;
+        }, {});
+
+        console.log(teamMap[id]);
+        setTeam(teamMap[id]);
+        setTeamName(teamMap[id].team_name)
+        setOfficers(teamMap[id].officers);
     }
 
-    async function fetchOfficers() {
+    async function fetchAllOfficers() {
         await officerService.getOfficers()
             .then((result) => {
                 setOfficers(result.data)
@@ -74,34 +85,68 @@ function Content(props) {
             });
     }
 
+    async function loadData() {
+        if (props.action === 'view') {
+            fetchTeamOfficers(props.id)
+        } else {
+            fetchAllOfficers();
+        }
+    }
+
+    function handleCheckboxInitState(officerTeamId) {
+        return props.id == officerTeamId ? true : false;
+    }
+
+    const handleCheckboxChange = (officerId) => {
+        // Find the officer in your data and toggle their checked status
+        const updatedOfficers = officers.map((officer) => {
+            if (officer.id === officerId) {
+                return {
+                    ...officer,
+                    team_id: officer.team_id === props.id ? null : props.id, // Toggle the team_id
+                };
+            }
+            return officer;
+        });
+
+        // Update the officers state with the updated data
+        setOfficers(updatedOfficers);
+    };
+
     useEffect(() => {
-        fetchOfficers();
+        loadData();
     }, []);
 
     return (
 
         <Form className="w-100">
-
             <Card className="mb-3">
                 <Card.Body>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-team-name">Nome da Equipe</Form.Label>
-                        <Form.Control type="text" disabled={props.isDisabled} value={team.team_name}></Form.Control>
+                        <Form.Control
+                            type="text"
+                            disabled={props.isDisabled}
+                            value={team.team_name}
+                            onChange={(e) => setTeamName(e.target.value)}
+                        >
+                        </Form.Control>
                     </Form.Group>
                     <br />
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-team-officers">Policiais</Form.Label>
                         <ListGroup>
                             {officers.map((officer) => (
-                                <ListGroup.Item>
+                                <ListGroup.Item key={officer.id}>
                                     <Form.Check
                                         disabled={props.isDisabled}
                                         type={"checkbox"}
                                         id={officer.id}
                                         label={officer.name}
+                                        checked={handleCheckboxInitState(officer.team_id)}
+                                        onChange={() => handleCheckboxChange(officer.id)}
                                     />
                                 </ListGroup.Item>
-
                             ))}
                         </ListGroup>
                     </Form.Group>
