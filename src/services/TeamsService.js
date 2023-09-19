@@ -107,8 +107,8 @@ class TeamsService {
             });
 
             // Convert the teamMap values back to an array
-            //const result = Array.from(teamMap.values());
-            const result = teamMap;
+            const result = Array.from(teamMap.values());
+            //const result = teamMap;
             return result;
 
         } catch (error) {

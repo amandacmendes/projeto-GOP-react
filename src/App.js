@@ -37,10 +37,9 @@ function App() {
           <Route path='/operation/new' element={isAuthenticated ? <OperacoesNew pagetitle="Nova Operação" /> : <Navigate to="/login" />}></Route>
           <Route path='/operation/:id/:action' useParams={['id']} element={isAuthenticated ? <OperacoesView /> : <Navigate to="/login" />}></Route>
 
-
           <Route path='/team' element={isAuthenticated ? <Teams /> : <Navigate to="/login" />}></Route>
           <Route path='/team/new' element={isAuthenticated ? <TeamsView pagetitle="Nova Equipe" /> : <Navigate to="/login" />}></Route>
-          <Route path='/team/:id/:action' useParams={['id']} element={isAuthenticated ? <TeamsView /> : <Navigate to="/login" />}></Route>
+          <Route path='/team/:id/:action' useParams={['id', 'action']} element={isAuthenticated ? <TeamsView /> : <Navigate to="/login" />}></Route>
 
           <Route path='/resources' element={isAuthenticated ? <Resources /> : <Navigate to="/login" />}></Route>
           <Route path='/resources/new' element={isAuthenticated ? <ResourcesNew pagetitle="Novo Recurso" /> : <Navigate to="/login" />}></Route>

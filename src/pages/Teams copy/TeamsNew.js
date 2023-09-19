@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import TeamsService from "../../services/TeamsService";
 import OfficerService from "../../services/OfficerService";
 
-export function TeamsView(props) {
+export function TeamsNew(props) {
 
     const navigate = useNavigate();
     let pagetitle = '';
@@ -47,7 +47,7 @@ function Content(props) {
     const navigate = useNavigate();
 
     const [teamName, setTeamName] = useState('');
-    const [selectedOfficers, setSelectedOfficers] = useState([]);
+    var [selectedOfficers, setSelectedOfficers] = useState([]);
     const [officers, setOfficers] = useState([])
 
     const teamService = new TeamsService();
@@ -64,43 +64,30 @@ function Content(props) {
             })
 
         if (!!props.id) {
+            console.log(props.id)
             await teamService.getTeamsWithOfficers()
                 .then((data) => {
-                    //setTeamName(data.get(parseInt(props.id)).team_name)
                     console.log(data)
-                    console.log(props.id)
+                    var thisTeam = data.get(parseInt(props.id));
 
-                    data.forEach((d) => {
-                        if (d.id == props.id) {
-                            setTeamName(d.team_name)
-
-                            var selOfficers = d.officers.reduce((acc, officer) => {
-                                acc[officer.id] = officer;
-                                return acc;
-                            }, {})
-
-                            setSelectedOfficers(selOfficers)
-                        }
-                    })
-
+                    setTeamName(data.get(parseInt(props.id)).team_name)
+                    setSelectedOfficers(Array.from(data.get(parseInt(props.id)).officers))
                 })
                 .catch((error) => {
                     console.log(error)
                 })
         }
 
-        console.log('Fetched: ' + selectedOfficers)
+        console.log('Fetched: '+props.id+selectedOfficers)
     }
 
     function handleChecked(officer_id) {
 
-        /*
         selectedOfficers.forEach(of => {
             console.log(of.id == officer_id)
             return !!!of.id == officer_id;
-
+            
         });
-        */
         return false
     }
 
@@ -163,7 +150,7 @@ function Content(props) {
                                         key={officer.id}
                                         type="checkbox"
                                         value={officer.id}
-                                        checked={selectedOfficers.hasOwnProperty(officer.id)}
+                                        checked={selectedOfficers.forEach((e) => { return e.id == officer.id ? true : false})}
                                         onChange={(e) => handleCheckboxChange(e, officer)}
                                         disabled={props.isDisabled}
                                         label={officer.name}
