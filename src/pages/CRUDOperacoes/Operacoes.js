@@ -152,7 +152,7 @@ function TableContent(props) {
         <td>{props.keys}</td>
         <td>{props.operation_name}</td>
         <td>{props.operation_place}</td>
-        <td>{props.operation_date}</td>
+        <td>{new Date(Date.parse(props.operation_date)).toLocaleDateString('pt-BR')}</td>
         <td>{props.status}</td>
         <td>
             <div>
