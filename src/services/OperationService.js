@@ -31,7 +31,7 @@ class OperationService {
         const result = await api.post('/operation', {
             operation_name: data.operation_name,
             operation_place: data.operation_place,
-            operation_planned_date: data.operation_planned_date,
+            operation_planned_date: new Date(data.operation_planned_date) ,
             operation_date: data.operation_date,
             status: "OPENED"
         }, {

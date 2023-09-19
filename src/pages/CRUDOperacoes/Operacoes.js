@@ -130,7 +130,7 @@ function TableOperacoes(props) {
                             keys={index}
                             operation_name={data.operation_name}
                             operation_place={data.operation_place}
-                            operation_date={data.operation_date}
+                            operation_date={data.operation_date ? data.operation_date : data.operation_planned_date}
                             status={data.status}
                             id={data.id}
                             viewOperation={async () =>

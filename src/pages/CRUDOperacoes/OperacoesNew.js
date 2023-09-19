@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Card, Col, Form, ListGroup, Row, Stack } from "react-bootstrap";
+import { Alert, Button, Card, Col, Form, FormGroup, ListGroup, Row, Stack } from "react-bootstrap";
 import { ContentBase } from "../../components/ContentBase";
 import OperationService from '../../services/OperationService';
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,6 +7,10 @@ import OfficerService from "../../services/OfficerService";
 import ReasonService from "../../services/ReasonService";
 import ResourceService from "../../services/ResourceService";
 import { useForm } from 'react-hook-form';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import InputGroup from 'react-bootstrap/InputGroup';
+import DropdownToggle from "react-bootstrap/DropdownToggle";
 
 
 export function OperacoesNew(props) {
@@ -62,6 +66,9 @@ function Content(props) {
     const reasonService = new ReasonService();
     const officerService = new OfficerService();
     const resourceService = new ResourceService();
+
+    const navigate = useNavigate();
+
 
     const { handleSubmit, register, formState: { errors } } = useForm();
 
@@ -142,17 +149,53 @@ function Content(props) {
     }
 
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
 
-        //CreateOperation
+        try {
+            console.log('--- - -' + data)
 
-        //Create Officer_Operation
+            //CreateOperation
+            await operationService.createOperation({
+                operation_name: data.operation_name,
+                operation_place: data.operation_place,
+                operation_planned_date: data.operation_planned_date,
 
-        //Create Resource_Operation
+            }).then((result) => {
+                //Create Officer_Operation
+                //console.log("officer " + result)
 
-        //Create Reason
+                data.officer_operation_officer_id.forEach(async of => {
 
-        console.log(data)
+                    await officerService.createOfficerOperation({
+                        officer_id: of,
+                        operation_id: result.data.id
+                    }).then((result) => {
+                        //console.log("officerop " + result)
+
+                        //Create Resource_Operation
+                        data.operation_resource_id.forEach(async res => {
+
+                            await resourceService.createResourceOperation({
+                                resource_id: res,
+                                operation_id: result.data.operation_id
+                            }).then((result) => {
+                                console.log("resourceop " + result)
+                                navigate(-1)
+                            }).catch((e) => console.log("err resourceop " + e))
+                        });
+
+                    }).catch((e) => console.log(e))
+                });
+            }).catch((e) => {
+                console.log(e)
+            });
+
+            //Create Reason
+            console.log(data)
+
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return <>
@@ -283,9 +326,8 @@ function Content(props) {
                                         {reasontypes.map((reasontype) => (
                                             <option
                                                 key={reasontype.id}
-                                                id={'reasontypeid' + index}
+                                                id={'reasontypeid-' + index}
                                                 value={reasontype.id}
-                                                {...register('reason')}
                                             >
                                                 {reasontype.description}
                                             </option>
@@ -297,11 +339,11 @@ function Content(props) {
 
                                     <Form.Control
                                         key={index}
-                                        id={'reasonid' + index}
+                                        id={'reasonid-' + index}
                                         type="text"
                                         onChange={(e) => handleReasonInput(e)}
                                         disabled={props.isDisabled}
-                                        {...register('reason')}
+                                    // {...register('reason')}
                                     />
 
                                     <Button

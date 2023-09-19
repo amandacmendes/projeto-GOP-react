@@ -40,7 +40,7 @@ class ResourceService {
 
     async createResourceOperation(data) {
         const result = await api.post('/resourceoperation', {
-            resource_id: data.reasontype_id,
+            resource_id: data.resource_id,
             operation_id: data.operation_id
         }, {
             headers: {
