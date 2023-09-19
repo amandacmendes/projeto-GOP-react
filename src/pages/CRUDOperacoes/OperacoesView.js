@@ -233,20 +233,27 @@ function Content(props) {
                             </Col>
                         </Row>
 
-                        {reason.map((reasonItem, index) => (
-                            <Row className="mb-2" key={index}>
+                        {reason.map((reasonItem) => (
+                            <Row className="mb-2" key={reasonItem.id}>
                                 <Col className="col-4">
-                                    <Form.Select disabled={props.isDisabled}>
-                                        {reason.length < 0 ? (reasontypes.map((reasontype) => (
-                                            <option key={reasontype.id} value={reasontype.id}>
-                                                {reasontype.description}
-                                            </option>
-                                        ))) :
-                                            <option key={reasonItem.reasontype_id} value={reasonItem.reasontype_id}>
-                                                {reasontypes[reasonItem.reasontype_id].description}
-                                            </option>
+
+                                    <Form.Select disabled={props.isDisabled} value={reasonItem.reasonTypeId || ''}>
+                                        {(props.isDisabled) ? (reasontypes.filter((r) => r.id == reasonItem.reasontype_id)
+                                            .map((type) => (
+                                                <option key={type.id} value={type.id}>
+                                                    {type.description}
+                                                </option>
+                                            ))) :
+                                            (reasontypes.map((reasontype) => (
+                                                <option key={reasontype.id} value={reasontype.id}>
+                                                    {reasontype.description}
+                                                </option>
+                                            )))
+
                                         }
                                     </Form.Select>
+
+
                                 </Col>
                                 <Col className="d-flex flex-row">
                                     <Form.Control
