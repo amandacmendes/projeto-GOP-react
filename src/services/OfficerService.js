@@ -63,6 +63,20 @@ class OfficerService {
         return officersWithTeams;
     }
 
+    async getAllOfficersFromOperation(data) {
+        const operation_id = data.id;
+
+        const officerOperation = await api.get(`/officeroperation/operation/${operation_id}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return officerOperation;
+
+    }
+
     async deleteOfficer(id) {
         const result = await api.delete(`/officer/${id}`, {
             headers: {
@@ -102,7 +116,7 @@ class OfficerService {
         return result;
     }
 
-    async createOfficerOperation(data){
+    async createOfficerOperation(data) {
         const result = await api.post('/officeroperation', {
             officer_id: data.officer_id,
             operation_id: data.operation_id

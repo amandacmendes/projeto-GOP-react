@@ -61,6 +61,10 @@ function Content(props) {
     const officerService = new OfficerService();
     const resourceService = new ResourceService();
 
+    const [selectedOfficers, setSelectedOfficers] = useState([]);
+    const [selectedResources, setSelectedResources] = useState([]);
+    
+
 
     async function loadInfo() {
         // for New Operation - load officers, resources and reason types
@@ -96,7 +100,35 @@ function Content(props) {
         //for View and Edit - load operation from db
         if (!!props.id) {
             fetchOperation(props.id);
+            fetchSelectedOfficers(props.id);
+            fetchSelectedResources(props.id);
         }
+    }
+
+    async function fetchSelectedOfficers(operation_id) {
+
+        await officerService.getAllOfficersFromOperation({ id: operation_id })
+            .then((result) => {
+                const selOfficers = result.data.reduce((acc, officer) => {
+                    acc[officer.officer_id] = officer;
+                    return acc;
+                }, {})
+                setSelectedOfficers(selOfficers)
+            })
+        console.log(selectedOfficers)
+    }
+    
+    async function fetchSelectedResources(operation_id) {
+
+        await resourceService.getAllResourcesFromOperation({ id: operation_id })
+            .then((result) => {
+                const selResources = result.data.reduce((acc, resource) => {
+                    acc[resource.resource_id] = resource;
+                    return acc;
+                }, {})
+                setSelectedResources(selResources)
+            })
+        console.log(selectedResources)
     }
 
     async function fetchOperation(id) {
@@ -135,6 +167,7 @@ function Content(props) {
         }
     }
 
+
     return <>
         <Form >
             {!show &&
@@ -156,7 +189,11 @@ function Content(props) {
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-date">Data da Operação</Form.Label>
-                        <Form.Control type="date" disabled={props.isDisabled} value={operation.operation_date}></Form.Control>
+                        <Form.Control type="date" disabled={props.isDisabled}
+                            value={new Date(Date.parse(operation.date ?
+                                operation.operation_date :
+                                operation.operation_planned_date)).toLocaleDateString('fr-CA')}>
+                        </Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
@@ -186,6 +223,7 @@ function Content(props) {
                                     type={"checkbox"}
                                     id={officer.id}
                                     label={officer.name}
+                                    checked={selectedOfficers.hasOwnProperty(officer.id)}
                                 />
                             </ListGroup.Item>
 
@@ -202,6 +240,7 @@ function Content(props) {
                                     type={"checkbox"}
                                     id={resource.id}
                                     label={resource.description}
+                                    checked={selectedResources.hasOwnProperty(resource.id)}
                                 />
                             </ListGroup.Item>
                         ))}

@@ -13,7 +13,8 @@ class ResourceService {
         return result;
     }
 
-    async getAllResourcesFromOperation(operation_id) {
+    async getAllResourcesFromOperation(data) {
+        const operation_id = data.id;
         const result = await api.get(`/resourceoperation/operation/${operation_id}`, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
