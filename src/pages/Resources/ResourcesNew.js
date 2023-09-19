@@ -11,6 +11,7 @@ export function ResourcesNew(props) {
     let params = useParams();
     let pagetitle = '';
     let isDisabled = false;
+    let action = 'new';
 
     if (props.pagetitle) {
         pagetitle = props.pagetitle;
@@ -19,8 +20,10 @@ export function ResourcesNew(props) {
     if (params.action === 'view') {
         pagetitle = 'Visualizar Recurso'
         isDisabled = true;
+        action = params.action;
     } else if (params.action === 'edit') {
         pagetitle = 'Editar Recurso'
+        action = params.action;
     }
 
     if (pagetitle === '') {
@@ -33,7 +36,7 @@ export function ResourcesNew(props) {
             <div className='container'>
                 <Stack gap={5}>
                     <h1>{pagetitle}</h1>
-                    <Content id={params.id} isDisabled={isDisabled} />
+                    <Content id={params.id} isDisabled={isDisabled} pageAction={action} />
                     <br /><br />
                 </Stack>
             </div>
@@ -86,21 +89,36 @@ function Content(props) {
     const onSubmit = async (data) => {
         try {
 
-            console.log(' submit --- - -' + data + data.description + data.resourcetype_id)
+            console.log(' submit --- - -' + data + data.description + data.resourcetype_id+props.pageAction)
 
-            //CreateOperation
-            await resourceService.createResource({
-                description: data.description,
-                resourcetype_id: data.resourcetype_id
-            }).then((result) => {
-                console.log(result)
-            }).then((data) => {
-                navigate('/resources')
-            }).catch((e) => {
-                console.log(e)
-            });
+            if (props.pageAction == 'new') {
 
-
+                //Create 
+                await resourceService.createResource({
+                    description: data.description,
+                    resourcetype_id: data.resourcetype_id
+                }).then((result) => {
+                    console.log(result)
+                }).then((data) => {
+                    navigate('/resources')
+                }).catch((e) => {
+                    console.log(e)
+                });
+            } else if (props.pageAction == 'edit') {
+                console.log('update')
+                //Update 
+                await resourceService.updateResource({
+                    id: props.id,
+                    description: data.description,
+                    resourcetype_id: data.resourcetype_id
+                }).then((result) => {
+                    console.log(result)
+                }).then((data) => {
+                    navigate('/resources')
+                }).catch((e) => {
+                    console.log(e)
+                });
+            }
 
         } catch (error) {
             console.log(error)
@@ -119,6 +137,7 @@ function Content(props) {
                             disabled={props.isDisabled}
                             value={resource.description}
                             {...register('description')}
+                            onChange={(e)=> setResource({...resource, description: e.target.value})}
                         ></Form.Control>
                     </Form.Group>
 
@@ -140,7 +159,7 @@ function Content(props) {
                 </Card.Body>
             </Card>
 
-            <Button className="my-3" type="submit"> Cadastrar </Button>
+            <Button className="my-3" type="submit" hidden={props.isDisabled}> {props.pageAction == 'new' ? 'Cadastrar' : 'Registrar Edições'} </Button>
 
 
         </Form>

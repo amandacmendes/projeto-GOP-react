@@ -78,7 +78,9 @@ class ResourceService {
     }
 
     async updateResource(data) {
-        const result = await api.put('/resource', {
+        console.log('service update '+data)
+        const id = data.id;
+        const result = await api.put(`/resource/${id}`, {
             description: data.description,
             reasontype_id: data.reasontype_id
         }, {
