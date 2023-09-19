@@ -10,6 +10,7 @@ import { ErrorPage } from './pages/ErrorPage';
 import { Teams } from './pages/Teams copy/Teams';
 import { TeamsView } from './pages/Teams copy/TeamsView';
 import { OperacoesNew } from './pages/CRUDOperacoes/OperacoesNew';
+import { Resources } from './pages/Resources/Resources';
 
 //import { Teams } from './pages/Teams/Teams';
 //import { TeamsView } from './pages/Teams/TeamsView';
@@ -40,6 +41,8 @@ function App() {
           <Route path='/team/new' element={isAuthenticated ? <TeamsView pagetitle="Nova Equipe" /> : <Navigate to="/login" />}></Route>
           <Route path='/team/:id/:action' useParams={['id']} element={isAuthenticated ? <TeamsView /> : <Navigate to="/login" />}></Route>
 
+          <Route path='/resources' element={isAuthenticated ? <Resources /> : <Navigate to="/login" />}></Route>
+         
           {/* escrever paths pra => /team /resources /profile */}
 
         </Routes>
