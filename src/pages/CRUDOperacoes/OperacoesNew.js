@@ -148,7 +148,7 @@ function Content(props) {
     const onSubmit = async (data) => {
 
         try {
-            console.log('--- - -' + data)
+            console.log('--- - -' + data + data.operation_chief)
 
             //CreateOperation
             await operationService.createOperation({

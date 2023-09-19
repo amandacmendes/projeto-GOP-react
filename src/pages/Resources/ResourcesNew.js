@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {  Card, Form, Stack } from "react-bootstrap";
+import { Button, Card, Form, Stack } from "react-bootstrap";
 import { ContentBase } from "../../components/ContentBase";
 import { useNavigate, useParams } from "react-router-dom";
 import ResourceService from "../../services/ResourceService";
@@ -85,7 +85,8 @@ function Content(props) {
 
     const onSubmit = async (data) => {
         try {
-            console.log(' submit --- - -' + data)
+
+            console.log(' submit --- - -' + data + data.description + data.resourcetype_id)
 
             //CreateOperation
             await resourceService.createResource({
@@ -93,9 +94,13 @@ function Content(props) {
                 resourcetype_id: data.resourcetype_id
             }).then((result) => {
                 console.log(result)
+            }).then((data) => {
+                navigate('/resources')
             }).catch((e) => {
                 console.log(e)
             });
+
+
 
         } catch (error) {
             console.log(error)
@@ -108,7 +113,7 @@ function Content(props) {
             <Card className="mb-3">
                 <Card.Body>
                     <Form.Group className="pb-2">
-                        <Form.Label className="mb-2" >Descrição do Recurso</Form.Label>
+                        <Form.Label className="mb-2" controlId="form-input-resource-description">Descrição do Recurso</Form.Label>
                         <Form.Control
                             type="text"
                             disabled={props.isDisabled}
@@ -118,11 +123,12 @@ function Content(props) {
                     </Form.Group>
 
                     <Form.Group className="pb-2">
-                        <Form.Label className="mb-2" controlId="form-input-operation-leader">Tipo de Recurso</Form.Label>
+                        <Form.Label className="mb-2" controlId="form-input-resourcetype-id">Tipo de Recurso</Form.Label>
                         <Form.Select
                             disabled={props.isDisabled}
                             {...register('resourcetype_id')}
                         >
+                            <option>--</option>
                             {resourceTypes.map((type) => (
                                 <option key={type.id} value={type.id}>
                                     {type.description}
@@ -134,6 +140,7 @@ function Content(props) {
                 </Card.Body>
             </Card>
 
+            <Button className="my-3" type="submit"> Cadastrar </Button>
 
 
         </Form>

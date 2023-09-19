@@ -52,7 +52,7 @@ class ResourceService {
     async createResource(data) {
         const result = await api.post('/resource', {
             description: data.description,
-            resourcetype_id: data.reasontype_id
+            resourcetype_id: data.resourcetype_id
         }, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
