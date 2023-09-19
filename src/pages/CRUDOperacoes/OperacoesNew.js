@@ -15,6 +15,7 @@ export function OperacoesNew(props) {
     let params = useParams();
     let pagetitle = '';
     let isDisabled = false;
+    let action = 'new';
 
     if (props.pagetitle) {
         pagetitle = props.pagetitle;
@@ -23,8 +24,10 @@ export function OperacoesNew(props) {
     if (params.action === 'view') {
         pagetitle = 'Visualizar Operação'
         isDisabled = true;
+        action = params.action;
     } else if (params.action === 'edit') {
         pagetitle = 'Editar Operação'
+        action = params.action;
     }
 
     if (pagetitle === '') {
@@ -37,7 +40,7 @@ export function OperacoesNew(props) {
             <div className='container'>
                 <Stack gap={5}>
                     <h1>{pagetitle}</h1>
-                    <Content id={params.id} isDisabled={isDisabled} />
+                    <Content id={params.id} isDisabled={isDisabled} pageAction={action} />
                     <br /><br />
                 </Stack>
             </div>
@@ -150,44 +153,90 @@ function Content(props) {
         try {
             console.log('--- - -' + data + data.operation_chief)
 
-            //CreateOperation
-            await operationService.createOperation({
-                operation_name: data.operation_name,
-                operation_place: data.operation_place,
-                operation_planned_date: data.operation_planned_date,
+            if (props.pageAction == 'new') {
+                //CreateOperation
+                await operationService.createOperation({
+                    operation_name: data.operation_name,
+                    operation_place: data.operation_place,
+                    operation_planned_date: data.operation_planned_date,
 
-            }).then((result) => {
-                //Create Officer_Operation
-                //console.log("officer " + result)
+                }).then((result) => {
+                    //Create Officer_Operation
+                    //console.log("officer " + result)
 
-                data.officer_operation_officer_id.forEach(async of => {
+                    data.officer_operation_officer_id.forEach(async of => {
 
-                    await officerService.createOfficerOperation({
-                        officer_id: of,
-                        operation_id: result.data.id
-                    }).then((result) => {
-                        //console.log("officerop " + result)
+                        await officerService.createOfficerOperation({
+                            officer_id: of,
+                            operation_id: result.data.id
+                        }).then((result) => {
+                            //console.log("officerop " + result)
 
-                        //Create Resource_Operation
-                        data.operation_resource_id.forEach(async res => {
+                            //Create Resource_Operation
+                            data.operation_resource_id.forEach(async res => {
 
-                            await resourceService.createResourceOperation({
-                                resource_id: res,
-                                operation_id: result.data.operation_id
-                            }).then((result) => {
-                                console.log("resourceop " + result)
-                                navigate(-1)
-                            }).catch((e) => console.log("err resourceop " + e))
-                        });
+                                await resourceService.createResourceOperation({
+                                    resource_id: res,
+                                    operation_id: result.data.operation_id
+                                }).then((result) => {
+                                    console.log("resourceop " + result)
+                                    navigate(-1)
+                                }).then((res) => {
 
-                    }).catch((e) => console.log(e))
+                                    navigate('/operation')
+                                    //Create Reason
+                                    //console.log(data)
+                                }).catch((e) => console.log("err resourceop " + e))
+                            });
+
+                        }).catch((e) => console.log(e))
+                    });
+                }).catch((e) => {
+                    console.log(e)
                 });
-            }).catch((e) => {
-                console.log(e)
-            });
 
-            //Create Reason
-            console.log(data)
+
+            } else if (props.pageAction == 'edit') {
+
+                //Update
+                await operationService.update({
+                    id: props.id,
+                    operation_name: data.operation_name,
+                    operation_place: data.operation_place,
+                    operation_planned_date: data.operation_planned_date,
+
+                }).then((result) => {
+                    //Create Officer_Operation
+                    //console.log("officer " + result)
+
+                    data.officer_operation_officer_id.forEach(async of => {
+
+                        await officerService.updateOfficer({
+                            officer_id: of,
+                            operation_id: result.data.id
+                        }).then((result) => {
+                            //console.log("officerop " + result)
+
+                            //Create Resource_Operation
+                            data.operation_resource_id.forEach(async res => {
+
+                                await resourceService.updateResourceOperation({
+                                    resource_id: res,
+                                    operation_id: result.data.operation_id
+                                }).then((result) => {
+                                    console.log("resourceop " + result)
+                                    navigate(-1)
+                                }).catch((e) => console.log("err resourceop " + e))
+                            });
+
+                        }).catch((e) => console.log(e))
+                    });
+                }).catch((e) => {
+                    console.log(e)
+                });
+
+
+            }
 
         } catch (error) {
             console.log(error)
@@ -211,6 +260,7 @@ function Content(props) {
                             disabled={props.isDisabled}
                             value={operation.operation_name}
                             {...register('operation_name')}
+                            onChange={(e) => setOperation({ ...operation, operation_name: e.target.value })}
                         ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
@@ -220,6 +270,7 @@ function Content(props) {
                             disabled={props.isDisabled}
                             value={operation.operation_place}
                             {...register('operation_place')}
+                            onChange={(e) => setOperation({ ...operation, operation_place: e.target.value })}
                         ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
