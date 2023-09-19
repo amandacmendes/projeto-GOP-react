@@ -7,10 +7,6 @@ import OfficerService from "../../services/OfficerService";
 import ReasonService from "../../services/ReasonService";
 import ResourceService from "../../services/ResourceService";
 import { useForm } from 'react-hook-form';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import InputGroup from 'react-bootstrap/InputGroup';
-import DropdownToggle from "react-bootstrap/DropdownToggle";
 
 
 export function OperacoesNew(props) {

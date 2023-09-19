@@ -1,8 +1,7 @@
-import { Button, Form, InputGroup, Modal, Stack, Table } from "react-bootstrap";
+import { Button, Form, InputGroup, Stack, Table } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import TeamsService from '../../services/TeamsService';
 import ResourceService from "../../services/ResourceService";
 
 export function Resources() {
@@ -65,10 +64,6 @@ function TableResources(props) {
             console.log(error)
             navigate('/*');
         }
-    }
-
-    const mappedResourceTypes = () => {
-
     }
 
     useEffect(() => {

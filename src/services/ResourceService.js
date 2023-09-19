@@ -12,6 +12,7 @@ class ResourceService {
         });
         return result;
     }
+
     async getResourceTypes() {
         const result = await api.get('/resourcetype', {
             headers: {
@@ -26,6 +27,19 @@ class ResourceService {
     async getAllResourcesFromOperation(data) {
         const operation_id = data.id;
         const result = await api.get(`/resourceoperation/operation/${operation_id}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
+
+    
+    async getResourceById(data) {
+        const id = data.id;
+        const result = await api.get(`/resource/${id}`, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
                 'Content-Type': 'application/json',
