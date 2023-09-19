@@ -103,10 +103,9 @@ function TableOperacoes(props) {
     async function handleDeleteOperation(id) {
         try {
 
-            <Modal>
-                aa
-            </Modal>
-            
+            operationService.deleteCascade({ id: id })
+            getOperations();
+
         } catch (error) {
             console.error(error);
         }

@@ -38,6 +38,20 @@ class ResourceService {
         return result;
     }
 
+    async createResourceOperation(data) {
+        const result = await api.post('/resourceoperation', {
+            resource_id: data.reasontype_id,
+            operation_id: data.operation_id
+        }, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
+
     async updateResource(data) {
         const result = await api.put('/resource', {
             description: data.description,

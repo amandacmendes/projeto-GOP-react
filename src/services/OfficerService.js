@@ -102,6 +102,19 @@ class OfficerService {
         return result;
     }
 
+    async createOfficerOperation(data){
+        const result = await api.post('/officeroperation', {
+            officer_id: data.officer_id,
+            operation_id: data.operation_id
+        }, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
 }
 
 export default OfficerService;
