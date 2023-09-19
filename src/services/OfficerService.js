@@ -102,6 +102,23 @@ class OfficerService {
         return result;
     }
 
+    async bulkUpdateOfficer(officersArray) {
+
+        // Create an array of promises for updating officers
+        const updatePromises = officersArray.map((officer) => this.updateOfficer(officer));
+
+        // Use Promise.all to execute all the update promises in parallel
+        Promise.all(updatePromises)
+            .then((result) => {
+                console.log('All officers updated successfully.');
+                return result;
+            })
+            .catch((error) => {
+                console.error(`Error updating officers: ${error}`);
+            });
+
+    }
+
     async createOfficer(data) {
         const result = await api.post('/officer', {
             name: data.name,

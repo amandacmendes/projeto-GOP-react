@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TeamsService from "../../services/TeamsService";
 import OfficerService from "../../services/OfficerService";
+import { useForm } from 'react-hook-form';
 
 export function TeamsNew(props) {
 
@@ -11,15 +12,18 @@ export function TeamsNew(props) {
     let pagetitle = '';
     let isDisabled = false;
     let params = useParams();
+    let action = 'new';
 
     if (props.pagetitle) {
         pagetitle = props.pagetitle;
     }
     if (params.action === 'view') {
         pagetitle = 'Visualizar Equipe'
+        action = params.action;
         isDisabled = true;
     } else if (params.action === 'edit') {
         pagetitle = 'Editar Equipe'
+        action = params.action;
     }
 
     if (pagetitle === '') {
@@ -33,7 +37,7 @@ export function TeamsNew(props) {
                 <Stack gap={5}>
                     <h1>{pagetitle}</h1>
                     <div className='d-flex flex-row w-auto justify-content-between'>
-                        <Content id={params.id} isDisabled={isDisabled} action={params.action} />
+                        <Content id={params.id} isDisabled={isDisabled} pageAction={action} />
                     </div>
                     <br /><br />
                 </Stack>
@@ -45,6 +49,7 @@ export function TeamsNew(props) {
 function Content(props) {
 
     const navigate = useNavigate();
+    const { handleSubmit, register, formState: { errors } } = useForm();
 
     const [teamName, setTeamName] = useState('');
     var [selectedOfficers, setSelectedOfficers] = useState([]);
@@ -57,6 +62,7 @@ function Content(props) {
     async function fetchAllOfficers() {
         await officerService.getOfficers()
             .then((result) => {
+                console.log(result.data)
                 setOfficers(result.data)
             })
             .catch((error) => {
@@ -78,62 +84,59 @@ function Content(props) {
                 })
         }
 
-        console.log('Fetched: '+props.id+selectedOfficers)
+        console.log('Fetched: ' + props.id + selectedOfficers)
     }
-
-    function handleChecked(officer_id) {
-
-        selectedOfficers.forEach(of => {
-            console.log(of.id == officer_id)
-            return !!!of.id == officer_id;
-            
-        });
-        return false
-    }
-
-    // Handle checkbox changes
-    const handleCheckboxChange = (e, officer) => {
-
-        const updatedOfficers = selectedOfficers.includes(officer)
-            ? selectedOfficers.pop(officer)
-            : [...selectedOfficers, officer];
-
-        setSelectedOfficers(updatedOfficers);
-        console.log(` - selected officers: ${selectedOfficers}`)
-    };
 
     // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const onSubmit = async (data) => {
 
-        // Here, you can handle creating the team with the selected officers and teamName
-        console.log('Team Name:', teamName);
-        console.log('Selected Officers:', selectedOfficers);
+        if (props.pageAction == 'new') {
+            // Create team
+            await teamService.create({ team_name: data.team_name })
+                .then((result) => {
 
-        await teamService.create(teamName, selectedOfficers)
-            .then((result) => {
-                console.log('Team Created! ' + result)
-            }).catch((error) => {
-                console.log(error)
-            });
+                    console.log(result)
+
+                    // Update officers
+                    var arrOfficer = [];
+
+                    data.team_officers.forEach(officer_id => {
+                        console.log(officer_id)
+                        arrOfficer = [...arrOfficer, { id: officer_id, team_id: result.data.id }]
+                    });
+
+                    officerService.bulkUpdateOfficer(arrOfficer).then((result) => {
+                        console.log(result)
+                    }).catch((error) => {
+                        console.log(error)
+                    });
+                }).catch((error) => {
+                    console.log(error)
+                })
+        } else if (props.pageAction == 'edit') {
+
+            console.log('edit mode :p')
+        }
+
     };
 
     useEffect(() => {
         fetchAllOfficers();
-        handleChecked();
+        //handleChecked();
     }, []);
 
     return (
 
-        <Form className="w-100" noValidate onSubmit={handleSubmit} >
+        <Form className="w-100" noValidate onSubmit={handleSubmit(onSubmit)} >
             <Card className="mb-3">
                 <Card.Body>
                     <Form.Group className="pb-2">
-                        <Form.Label className="mb-2" controlId="form-input-team-name">Nome da Equipe</Form.Label>
+                        <Form.Label className="mb-2" >Nome da Equipe</Form.Label>
                         <Form.Control
                             type="text"
                             id="teamName"
                             value={teamName}
+                            {...register('team_name')}
                             onChange={(e) => setTeamName(e.target.value)}
                             disabled={props.isDisabled}
                             required
@@ -142,25 +145,27 @@ function Content(props) {
                     </Form.Group>
                     <br />
                     <Form.Group className="pb-2">
-                        <Form.Label className="mb-2" controlId="form-input-team-officers">Policiais</Form.Label>
+                        <Form.Label className="mb-2" >Policiais</Form.Label>
                         <ListGroup>
                             {officers.map((officer) => (
                                 <ListGroup.Item key={officer.id}>
                                     <Form.Check
-                                        key={officer.id}
-                                        type="checkbox"
-                                        value={officer.id}
-                                        checked={selectedOfficers.forEach((e) => { return e.id == officer.id ? true : false})}
-                                        onChange={(e) => handleCheckboxChange(e, officer)}
                                         disabled={props.isDisabled}
+                                        type="checkbox"
+                                        id={officer.id}
+                                        key={officer.id}
                                         label={officer.name}
+                                        value={officer.id}
+                                        //checked={selectedOfficers.forEach((e) => { return e.id == officer.id ? true : false })}
+                                        //onChange={(e) => handleCheckboxChange(e, officer)}
+                                        {...register('team_officers')}
                                     />
                                 </ListGroup.Item>
                             ))}
                         </ListGroup>
                     </Form.Group>
 
-                    <Button variant="primary" type="submit">Cadastrar</Button>
+                    <Button variant="primary" type="submit">{(props.pageAction == 'new') ? 'Cadastrar' : 'Editar'}</Button>
                 </Card.Body>
             </Card>
         </Form>

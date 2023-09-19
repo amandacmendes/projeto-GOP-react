@@ -3,11 +3,10 @@ import OfficerService from "./OfficerService";
 
 class TeamsService {
 
-    async create(team_name, officers) {
-        const officerService = new OfficerService();
+    async create(team) {
 
-        var createdTeam = await api.post('/team', {
-            team_name: team_name,
+        const result = await api.post('/team', {
+            team_name: team.team_name,
             status: 'A'
         }, {
             headers: {
@@ -17,33 +16,7 @@ class TeamsService {
             }
         })
 
-        console.log(' created ---- ' + createdTeam)
-
-        if (createdTeam) {
-
-
-        }
-
-        /*    
-        .then((result) => {
-            console.log(' linha 19 ---- ' + result)
-
-            // Create an array of promises for updating officers
-            const updatePromises = officers.map((officer) => officerService.updateOfficer(officer));
-
-            // Use Promise.all to execute all the update promises in parallel
-            Promise.all(updatePromises)
-                .then((result) => {
-                    console.log('All officers updated successfully.');
-                    return result;
-                })
-                .catch((error) => {
-                    console.error(`Error updating officers: ${error}`);
-                });
-        }).catch((error) => {
-            console.error(`Error creating team: ${error}`);
-        });*/
-
+        return result;
     }
 
     async deleteTeam(id) {

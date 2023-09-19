@@ -12,6 +12,7 @@ import { TeamsView } from './pages/Teams copy/TeamsView';
 import { OperacoesNew } from './pages/CRUDOperacoes/OperacoesNew';
 import { Resources } from './pages/Resources/Resources';
 import { ResourcesNew } from './pages/Resources/ResourcesNew';
+import { TeamsNew } from './pages/Teams copy/TeamsNew';
 
 //import { Teams } from './pages/Teams/Teams';
 //import { TeamsView } from './pages/Teams/TeamsView';
@@ -38,8 +39,8 @@ function App() {
           <Route path='/operation/:id/:action' useParams={['id']} element={isAuthenticated ? <OperacoesView /> : <Navigate to="/login" />}></Route>
 
           <Route path='/team' element={isAuthenticated ? <Teams /> : <Navigate to="/login" />}></Route>
-          <Route path='/team/new' element={isAuthenticated ? <TeamsView pagetitle="Nova Equipe" /> : <Navigate to="/login" />}></Route>
-          <Route path='/team/:id/:action' useParams={['id', 'action']} element={isAuthenticated ? <TeamsView /> : <Navigate to="/login" />}></Route>
+          <Route path='/team/new' element={isAuthenticated ? <TeamsNew pagetitle="Nova Equipe" /> : <Navigate to="/login" />}></Route>
+          <Route path='/team/:id/:action' useParams={['id', 'action']} element={isAuthenticated ? <TeamsNew /> : <Navigate to="/login" />}></Route>
 
           <Route path='/resources' element={isAuthenticated ? <Resources /> : <Navigate to="/login" />}></Route>
           <Route path='/resources/new' element={isAuthenticated ? <ResourcesNew pagetitle="Novo Recurso" /> : <Navigate to="/login" />}></Route>
