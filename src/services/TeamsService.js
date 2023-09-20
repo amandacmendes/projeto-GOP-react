@@ -3,6 +3,7 @@ import OfficerService from "./OfficerService";
 
 class TeamsService {
 
+
     async create(team) {
 
         const result = await api.post('/team', {
@@ -19,19 +20,51 @@ class TeamsService {
         return result;
     }
 
-    async deleteTeam(id) {
-        await api.delete(`/team/${id}`, {
+
+    async update(team) {
+
+        const result = await api.put(`/team/${team.id}`, {
+            team_name: team.team_name,
+            status: 'A'
+        }, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
                 'Content-Type': 'application/json',
                 Accept: "*/*"
             }
-        }).then((data) => {
-            console.log(data);
-            return data.data.message;
-        }).catch((error) => {
-            return error
-        });
+        })
+
+        return result;
+    }
+
+    async updateTeamAndTeamOfficers(team, officers) {
+        const result = await api.put('/team', {
+            team_name: team.team_name,
+            status: 'A'
+        }, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        }).then((result) => {
+
+        })
+
+        return result;
+    }
+
+    async delete(id) {
+
+        //delete team
+        const result = await api.delete(`/team/${id}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        })
+        return result;
     }
 
     async getAllTeams() {

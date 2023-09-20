@@ -25,7 +25,7 @@ function App() {
 
       <Router>
         <Routes>
-          <Route path='/' element={<Navigate to="/login"/>}></Route>
+          <Route path='/' element={<Navigate to="/login" />}></Route>
           <Route path='/login' Component={Login}></Route>
           <Route path='/logout' Component={Login}></Route>
           <Route path='/signup' element={<Cadastro />}></Route>
@@ -40,7 +40,7 @@ function App() {
 
           <Route path='/team' element={isAuthenticated ? <Teams /> : <Navigate to="/login" />}></Route>
           <Route path='/team/new' element={isAuthenticated ? <TeamsNew pagetitle="Nova Equipe" /> : <Navigate to="/login" />}></Route>
-          <Route path='/team/:id/:action' useParams={['id', 'action']} element={isAuthenticated ? <TeamsNew /> : <Navigate to="/login" />}></Route>
+          <Route path='/team/:id/:action' useParams={['id', 'action']} element={isAuthenticated ? <TeamsView /> : <Navigate to="/login" />}></Route>
 
           <Route path='/resources' element={isAuthenticated ? <Resources /> : <Navigate to="/login" />}></Route>
           <Route path='/resources/new' element={isAuthenticated ? <ResourcesNew pagetitle="Novo Recurso" /> : <Navigate to="/login" />}></Route>

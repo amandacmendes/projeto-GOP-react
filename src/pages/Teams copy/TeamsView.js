@@ -67,6 +67,7 @@ function Content(props) {
             await teamService.getTeamsWithOfficers()
                 .then((data) => {
                     //setTeamName(data.get(parseInt(props.id)).team_name)
+                    console.log("FETCH ")
                     console.log(data)
                     console.log(props.id)
 
@@ -107,28 +108,52 @@ function Content(props) {
     // Handle checkbox changes
     const handleCheckboxChange = (e, officer) => {
 
-        const updatedOfficers = selectedOfficers.includes(officer)
-            ? selectedOfficers.pop(officer)
-            : [...selectedOfficers, officer];
+        if (!selectedOfficers.hasOwnProperty(e.target.value)) {
+            //include officer in selectedOfficers list
+            setSelectedOfficers({
+                ...selectedOfficers,
+                [e.target.value]: officer,
+            });
+            console.log(selectedOfficers)
 
-        setSelectedOfficers(updatedOfficers);
-        console.log(` - selected officers: ${selectedOfficers}`)
+        } else {
+            //exclude officer from selectedOfficers list 
+            const updatedOfficers = { ...selectedOfficers };
+            delete updatedOfficers[e.target.value];
+            setSelectedOfficers(updatedOfficers);
+            console.log(selectedOfficers)
+        }
+
     };
 
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Here, you can handle creating the team with the selected officers and teamName
-        console.log('Team Name:', teamName);
-        console.log('Selected Officers:', selectedOfficers);
-
-        await teamService.create(teamName, selectedOfficers)
+        // Update team
+        await teamService.update({ id: props.id, team_name: teamName })
             .then((result) => {
-                console.log('Team Created! ' + result)
+                console.log('Team Updated! ')
             }).catch((error) => {
                 console.log(error)
             });
+
+        // Bulk Update Officers List
+        // NEEDS_ALERT : Isto irá retirar policiais de outro time. Deseja continuar? 
+
+        const selectedOfficersNewTeamId = { ...selectedOfficers };
+
+        Object.keys(selectedOfficersNewTeamId).forEach((officerId) => {
+            selectedOfficersNewTeamId[officerId].team_id = props.id;
+        });
+
+        await officerService.bulkUpdateOfficer(Object.values(selectedOfficersNewTeamId))
+            .then((result) => {
+                console.log('All officers Updated! ')
+            }).catch((error) => {
+                console.log(error)
+            });
+
     };
 
     useEffect(() => {
