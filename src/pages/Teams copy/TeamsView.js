@@ -128,7 +128,6 @@ function Content(props) {
 
         // Bulk Update Officers List
         // NEEDS_ALERT : Isto irá retirar policiais de outro time. Deseja continuar? 
-
         const selectedOfficersNewTeamId = { ...selectedOfficers };
 
         //origOfficers = officers.reduce    - const origOfficers = { ...officers };

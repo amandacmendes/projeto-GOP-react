@@ -35,7 +35,7 @@ export function OperacoesView(props) {
             <div className='container'>
                 <Stack gap={5}>
                     <h1>{pagetitle}</h1>
-                    <Content id={params.id} isDisabled={isDisabled} />
+                    <Content id={params.id} isDisabled={isDisabled} action={params.action} />
                     <br /><br />
                 </Stack>
             </div>
@@ -63,8 +63,6 @@ function Content(props) {
 
     const [selectedOfficers, setSelectedOfficers] = useState([]);
     const [selectedResources, setSelectedResources] = useState([]);
-    
-
 
     async function loadInfo() {
         // for New Operation - load officers, resources and reason types
@@ -117,7 +115,7 @@ function Content(props) {
             })
         console.log(selectedOfficers)
     }
-    
+
     async function fetchSelectedResources(operation_id) {
 
         await resourceService.getAllResourcesFromOperation({ id: operation_id })
@@ -167,6 +165,79 @@ function Content(props) {
         }
     }
 
+    // Handle checkbox changes on Officers
+    const handleCheckboxChangeOfficer = (e, officer) => {
+
+        if (!selectedOfficers.hasOwnProperty(e.target.value)) {
+            //include officer in selectedOfficers list
+            setSelectedOfficers({
+                ...selectedOfficers,
+                [e.target.value]: officer,
+            });
+            console.log(selectedOfficers)
+
+        } else {
+            //exclude officer from selectedOfficers list 
+            const updatedOfficers = { ...selectedOfficers };
+            delete updatedOfficers[e.target.value];
+            setSelectedOfficers(updatedOfficers);
+            console.log(selectedOfficers)
+        }
+    };
+
+    // Handle checkbox changes on Officers
+    const handleCheckboxChangeResource = (e, resource) => {
+
+        if (!selectedResources.hasOwnProperty(e.target.value)) {
+            //include resource in selectedResources list
+            setSelectedResources({
+                ...selectedResources,
+                [e.target.value]: resource,
+            });
+            console.log(selectedResources)
+
+        } else {
+            //exclude resource from selectedResources list 
+            const updatedResources = { ...selectedResources };
+            delete updatedResources[e.target.value];
+            setSelectedResources(updatedResources);
+            console.log(selectedResources)
+        }
+    };
+
+    async function bulkHandleOfficer() {
+
+        // Checks officerOperation
+        // gets all officer_operation where operation_id = props_id ; OfficerOperationVal
+
+        // if OfficerOperationVal doesnt has Selected Officers, will need insert into officer_operation
+
+        // if one OfficerOperationVal.officers is not inside Selected Officers, will need delete officer_operation
+
+    }
+
+    async function bulkHandleResources() {
+
+        // Checks resourceOperation
+        // gets all resource_operation where operation_id = props_id ; ResourceOperationVal
+
+        // if ResourceOperationVal doesnt has Selected Resources, will need insert into resource_operation
+
+        // if one ResourceOperationVal.resource is not inside Selected Resources, will need delete resource_operation
+
+    }
+
+    async function updateOperation() {
+
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        updateOperation();
+        bulkHandleOfficer();
+        bulkHandleResources();
+    }
 
     return <>
         <Form >
@@ -178,18 +249,30 @@ function Content(props) {
 
             <Card className="mb-3">
                 <Card.Body>
-
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-name">Nome da Operação</Form.Label>
-                        <Form.Control type="text" disabled={props.isDisabled} value={operation.operation_name}></Form.Control>
+                        <Form.Control
+                            type="text"
+                            disabled={props.isDisabled}
+                            value={operation.operation_name}
+                            required
+                        ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-place">Local da Operação</Form.Label>
-                        <Form.Control type="text" disabled={props.isDisabled} value={operation.operation_place}></Form.Control>
+                        <Form.Control
+                            type="text"
+                            disabled={props.isDisabled}
+                            value={operation.operation_place}
+                            required
+                        ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-date">Data da Operação</Form.Label>
-                        <Form.Control type="date" disabled={props.isDisabled}
+                        <Form.Control
+                            type="date"
+                            disabled={props.isDisabled}
+                            required
                             value={new Date(Date.parse(operation.date ?
                                 operation.operation_date :
                                 operation.operation_planned_date)).toLocaleDateString('fr-CA')}>
@@ -200,7 +283,10 @@ function Content(props) {
                         <Form.Select disabled={props.isDisabled} >
                             <option>Selecione um oficial</option>
                             {officers.map((officer) => (
-                                <option key={officer.id} value={officer.id}>
+                                <option
+                                    key={officer.id}
+                                    value={officer.id}
+                                >
                                     {officer.name}
                                 </option>
                             ))}
@@ -210,7 +296,10 @@ function Content(props) {
                 </Card.Body>
             </Card>
 
+
+
             <h3>Recursos</h3>
+
             <Card className="my-3">
                 <Card.Body>
 
@@ -219,11 +308,14 @@ function Content(props) {
                         {officers.map((officer) => (
                             <ListGroup.Item>
                                 <Form.Check
-                                    disabled={props.isDisabled}
-                                    type={"checkbox"}
                                     id={officer.id}
-                                    label={officer.name}
+                                    key={officer.id}
+                                    type={"checkbox"}
+                                    value={officer.id}
                                     checked={selectedOfficers.hasOwnProperty(officer.id)}
+                                    onChange={(e) => handleCheckboxChangeOfficer(e, officer)}
+                                    disabled={props.isDisabled}
+                                    label={officer.name}
                                 />
                             </ListGroup.Item>
 
@@ -236,21 +328,24 @@ function Content(props) {
                         {resources.map((resource) => (
                             <ListGroup.Item>
                                 <Form.Check // prettier-ignore
-                                    disabled={props.isDisabled}
-                                    type={"checkbox"}
                                     id={resource.id}
-                                    label={resource.description}
+                                    key={resource.id}
+                                    type={"checkbox"}
+                                    value={resource.id}
                                     checked={selectedResources.hasOwnProperty(resource.id)}
+                                    onChange={(e) => handleCheckboxChangeResource(e, resource)}
+                                    disabled={props.isDisabled}
+                                    label={resource.description}
                                 />
                             </ListGroup.Item>
                         ))}
                     </ListGroup>
-
-
                 </Card.Body>
             </Card>
-            <h3>Motivação</h3>
 
+
+
+            <h3>Motivação</h3>
 
             <Card className="my-3">
                 <Card.Body>
@@ -319,6 +414,9 @@ function Content(props) {
 
                 </Card.Body>
             </Card>
+            <Button variant="primary" type="submit" hidden={props.isDisabled}>
+                {props.action == 'edit' ? 'Registrar Edições' : 'Cadastrar'}
+            </Button>
         </Form >
     </>
 }
