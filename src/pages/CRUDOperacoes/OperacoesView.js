@@ -113,7 +113,7 @@ function Content(props) {
                 }, {})
                 setSelectedOfficers(selOfficers)
             })
-        console.log(selectedOfficers)
+        //console.log(selectedOfficers)
     }
 
     async function fetchSelectedResources(operation_id) {
@@ -126,13 +126,14 @@ function Content(props) {
                 }, {})
                 setSelectedResources(selResources)
             })
-        console.log(selectedResources)
+        //console.log(selectedResources)
     }
 
     async function fetchOperation(id) {
         var op = await operationService.getOperationById(id)
             .then((result) => {
-                console.log('aaaa ' + result.data)
+                console.log('operation:')
+                console.log(result.data)
                 setOperation(result.data)
             })
             .catch((error) => {
@@ -143,7 +144,7 @@ function Content(props) {
         //get all reason of operation 
         await reasonService.getReasonfromOperation(id)
             .then((result) => {
-                console.log(result.data)
+                //console.log(result.data)
                 setReason(result.data)
             })
             .catch((error) => {
@@ -255,6 +256,11 @@ function Content(props) {
                             type="text"
                             disabled={props.isDisabled}
                             value={operation.operation_name}
+                            onChange={(e) => {
+                                const updatedOperation = { ...operation };
+                                updatedOperation.operation_name = e.target.value
+                                setOperation(updatedOperation)
+                            }}
                             required
                         ></Form.Control>
                     </Form.Group>
@@ -264,6 +270,11 @@ function Content(props) {
                             type="text"
                             disabled={props.isDisabled}
                             value={operation.operation_place}
+                            onChange={(e) => {
+                                const updatedOperation = { ...operation };
+                                updatedOperation.operation_place = e.target.value
+                                setOperation(updatedOperation)
+                            }}
                             required
                         ></Form.Control>
                     </Form.Group>
@@ -275,12 +286,24 @@ function Content(props) {
                             required
                             value={new Date(Date.parse(operation.date ?
                                 operation.operation_date :
-                                operation.operation_planned_date)).toLocaleDateString('fr-CA')}>
-                        </Form.Control>
+                                operation.operation_planned_date)).toLocaleDateString('fr-CA')}
+                            onChange={(e) => {
+                                const updatedOperation = { ...operation };
+                                updatedOperation.operation_planned_date = e.target.value
+                                setOperation(updatedOperation)
+                            }}
+                        ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
-                        <Form.Select disabled={props.isDisabled} >
+                        <Form.Select
+                            disabled={props.isDisabled}
+                            onChange={(e) => {
+                                const updatedOperation = { ...operation };
+                                updatedOperation.lead_officer_id = e.target.value
+                                setOperation(updatedOperation)
+                            }}
+                        >
                             <option>Selecione um oficial</option>
                             {officers.map((officer) => (
                                 <option
