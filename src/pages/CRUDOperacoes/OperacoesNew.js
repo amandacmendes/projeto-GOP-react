@@ -151,7 +151,7 @@ function Content(props) {
     const onSubmit = async (data) => {
 
         try {
-            console.log('--- - -' + data + data.operation_chief)
+            console.log('--- - -' + data + data.lead_officer_id)
 
             if (props.pageAction == 'new') {
                 //CreateOperation
@@ -286,7 +286,7 @@ function Content(props) {
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
                         <Form.Select
                             disabled={props.isDisabled}
-                            {...register('operation_chief')}
+                            {...register('lead_officer_id')}
                         >
                             <option>Selecione um oficial</option>
                             {officers.map((officer) => (
