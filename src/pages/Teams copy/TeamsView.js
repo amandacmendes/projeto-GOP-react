@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TeamsService from "../../services/TeamsService";
 import OfficerService from "../../services/OfficerService";
+import { isDisabled } from "@testing-library/user-event/dist/utils";
 
 export function TeamsView(props) {
 
@@ -53,7 +54,6 @@ function Content(props) {
     const teamService = new TeamsService();
     const officerService = new OfficerService();
 
-    //Fetch all officers
     async function fetchAllOfficers() {
         await officerService.getOfficers()
             .then((result) => {
@@ -91,18 +91,6 @@ function Content(props) {
         }
 
         console.log('Fetched: ' + selectedOfficers)
-    }
-
-    function handleChecked(officer_id) {
-
-        /*
-        selectedOfficers.forEach(of => {
-            console.log(of.id == officer_id)
-            return !!!of.id == officer_id;
-
-        });
-        */
-        return false
     }
 
     // Handle checkbox changes
@@ -143,11 +131,49 @@ function Content(props) {
 
         const selectedOfficersNewTeamId = { ...selectedOfficers };
 
+        //origOfficers = officers.reduce    - const origOfficers = { ...officers };
+        const origOfficers = officers.reduce((acc, officer) => {
+            acc[officer.id] = officer;
+            return acc;
+        }, {})
+
+        var allOfficersUpdateObj = { ...selectedOfficersNewTeamId };
+
+        console.log("-----")
+        console.log(origOfficers)
+        console.log("-----")
+        console.log("-----")
+        console.log(selectedOfficers)
+        console.log("-----")
+
+        // Sets this team_id in all selected officers 
         Object.keys(selectedOfficersNewTeamId).forEach((officerId) => {
             selectedOfficersNewTeamId[officerId].team_id = props.id;
         });
 
-        await officerService.bulkUpdateOfficer(Object.values(selectedOfficersNewTeamId))
+        //If any originalOfficer is not in selected officers BUT origOfficer.team_id == props.id, update with ''
+        Object.keys(origOfficers).forEach((officerId) => {
+
+            console.log(origOfficers[officerId].id + " original: (officer_name:" + origOfficers[officerId].name + "team_id " + origOfficers[officerId].team_id)
+
+            if (selectedOfficersNewTeamId[officerId]) {
+                console.log(selectedOfficersNewTeamId[officerId].id + " selected w new team id: (officer_name:" + selectedOfficersNewTeamId[officerId].name + "team_id " + origOfficers[officerId].team_id)
+            } else {
+                console.log(" not exists in selectedOfficersNewTeamId")
+
+                if (origOfficers[officerId].team_id == props.id) {
+                    console.log("but its id is " + origOfficers[officerId].team_id)
+                    console.log("So it should be set to '' ")
+                    origOfficers[officerId].team_id = null;
+                    allOfficersUpdateObj[officerId] = origOfficers[officerId]; // Add the officer to allOfficersUpdateObj
+                }
+            }
+        });
+
+        console.log("All Officers to Update: ")
+        console.log(allOfficersUpdateObj)
+
+        await officerService.bulkUpdateOfficer(Object.values(allOfficersUpdateObj))
             .then((result) => {
                 console.log('All officers Updated! ')
             }).catch((error) => {
@@ -158,7 +184,6 @@ function Content(props) {
 
     useEffect(() => {
         fetchAllOfficers();
-        handleChecked();
     }, []);
 
     return (
@@ -198,7 +223,9 @@ function Content(props) {
                         </ListGroup>
                     </Form.Group>
 
-                    <Button variant="primary" type="submit">Cadastrar</Button>
+                    <Button variant="primary" type="submit" hidden={props.isDisabled}>
+                        {props.action == 'edit' ? 'Registrar Edições' : 'Cadastrar'}
+                    </Button>
                 </Card.Body>
             </Card>
         </Form>
