@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import OfficerService from "../../services/OfficerService";
 import ReasonService from "../../services/ReasonService";
 import ResourceService from "../../services/ResourceService";
+import { useForm } from "react-hook-form";
 
 export function OperacoesView(props) {
 
@@ -63,6 +64,9 @@ function Content(props) {
 
     const [selectedOfficers, setSelectedOfficers] = useState([]);
     const [selectedResources, setSelectedResources] = useState([]);
+
+    const { handleSubmit, register, formState: { errors } } = useForm();
+    const navigate = useNavigate();
 
     async function loadInfo() {
         // for New Operation - load officers, resources and reason types
@@ -232,16 +236,62 @@ function Content(props) {
 
     }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const onSubmit = async (data) => {
+        //e.preventDefault();
 
-        updateOperation();
-        bulkHandleOfficer();
-        bulkHandleResources();
+        console.log(operation)
+        console.log(selectedOfficers)
+        console.log(selectedResources)
+
+        console.log("data: ")
+        console.log(data)
+        console.log("---------")
+
+        if (props.action == 'edit') {
+
+            //Update
+            await operationService.update({
+                id: props.id,
+                operation_name: data.operation_name,
+                operation_place: data.operation_place,
+                operation_planned_date: data.operation_planned_date,
+                lead_officer_id: data.lead_officer_id
+
+            }).then((result) => {
+                //Create Officer_Operation
+                //console.log("officer " + result)
+
+                data.officer_operation_officer_id.forEach(async of => {
+
+                    await officerService.updateOfficer({
+                        officer_id: of,
+                        operation_id: result.data.id
+                    }).then((result) => {
+                        //console.log("officerop " + result)
+
+                        //Create Resource_Operation
+                        data.operation_resource_id.forEach(async res => {
+
+                            await resourceService.updateResourceOperation({
+                                resource_id: res,
+                                operation_id: result.data.operation_id
+                            }).then((result) => {
+                                console.log("resourceop " + result)
+                                navigate(-1)
+                            }).catch((e) => console.log("err resourceop " + e))
+                        });
+
+                    }).catch((e) => console.log(e))
+                });
+            }).catch((e) => {
+                console.log(e)
+            });
+        }
+
     }
 
     return <>
-        <Form >
+        <Form onSubmit={handleSubmit(onSubmit)}>
             {!show &&
                 <Alert variant="danger" onClose={() => setShow(false)} dismissible>
                     {errorMessage}
@@ -256,11 +306,8 @@ function Content(props) {
                             type="text"
                             disabled={props.isDisabled}
                             value={operation.operation_name}
-                            onChange={(e) => {
-                                const updatedOperation = { ...operation };
-                                updatedOperation.operation_name = e.target.value
-                                setOperation(updatedOperation)
-                            }}
+                            {...register('operation_name')}
+                            onChange={(e) => setOperation({ ...operation, operation_name: e.target.value })}
                             required
                         ></Form.Control>
                     </Form.Group>
@@ -270,11 +317,8 @@ function Content(props) {
                             type="text"
                             disabled={props.isDisabled}
                             value={operation.operation_place}
-                            onChange={(e) => {
-                                const updatedOperation = { ...operation };
-                                updatedOperation.operation_place = e.target.value
-                                setOperation(updatedOperation)
-                            }}
+                            {...register('operation_place')}
+                            onChange={(e) => setOperation({ ...operation, operation_place: e.target.value })}
                             required
                         ></Form.Control>
                     </Form.Group>
@@ -287,17 +331,14 @@ function Content(props) {
                             value={new Date(Date.parse(operation.date ?
                                 operation.operation_date :
                                 operation.operation_planned_date)).toLocaleDateString('fr-CA')}
-                            onChange={(e) => {
-                                const updatedOperation = { ...operation };
-                                updatedOperation.operation_planned_date = e.target.value
-                                setOperation(updatedOperation)
-                            }}
+                            {...register('operation_planned_date')}
                         ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
                         <Form.Select
                             disabled={props.isDisabled}
+                            value={operation.lead_officer_id}
                             onChange={(e) => {
                                 const updatedOperation = { ...operation };
                                 updatedOperation.lead_officer_id = e.target.value
@@ -309,6 +350,7 @@ function Content(props) {
                                 <option
                                     key={officer.id}
                                     value={officer.id}
+                                    {...register('lead_officer_id')}
                                 >
                                     {officer.name}
                                 </option>
@@ -394,7 +436,11 @@ function Content(props) {
                             <Row className="mb-2" key={reasonItem.id}>
                                 <Col className="col-4">
 
-                                    <Form.Select disabled={props.isDisabled} value={reasonItem.reasonTypeId || ''}>
+                                    <Form.Select
+                                        disabled={props.isDisabled}
+                                        value={reasonItem.reasonTypeId || ''}
+                                    >
+
                                         {(props.isDisabled) ? (reasontypes.filter((r) => r.id == reasonItem.reasontype_id)
                                             .map((type) => (
                                                 <option key={type.id} value={type.id}>
@@ -406,7 +452,6 @@ function Content(props) {
                                                     {reasontype.description}
                                                 </option>
                                             )))
-
                                         }
                                     </Form.Select>
 

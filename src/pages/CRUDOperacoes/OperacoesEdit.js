@@ -159,7 +159,6 @@ function Content(props) {
                     operation_name: data.operation_name,
                     operation_place: data.operation_place,
                     operation_planned_date: data.operation_planned_date,
-                    lead_officer_id: data.lead_officer_id
 
                 }).then((result) => {
                     //Create Officer_Operation
@@ -205,6 +204,7 @@ function Content(props) {
                     operation_name: data.operation_name,
                     operation_place: data.operation_place,
                     operation_planned_date: data.operation_planned_date,
+                    lead_officer_id: data.lead_officer_id
 
                 }).then((result) => {
                     //Create Officer_Operation
@@ -287,7 +287,6 @@ function Content(props) {
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
                         <Form.Select
                             disabled={props.isDisabled}
-                            value={operation.lead_officer_id}
                             {...register('lead_officer_id')}
                         >
                             <option>Selecione um oficial</option>

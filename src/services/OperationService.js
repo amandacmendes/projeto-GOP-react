@@ -31,9 +31,13 @@ class OperationService {
         const result = await api.post('/operation', {
             operation_name: data.operation_name,
             operation_place: data.operation_place,
-            operation_planned_date: new Date(data.operation_planned_date) ,
+            operation_planned_date: new Date(data.operation_planned_date),
             operation_date: data.operation_date,
-            status: "OPENED"
+            lead_officer_id: data.lead_officer_id,
+            status: "OPENED",
+            operation_results_deaths: data.operation_results_deaths,
+            operation_results_arrests: data.operation_results_arrests,
+            operation_results_report: data.operation_results_report,
         }, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
@@ -45,7 +49,24 @@ class OperationService {
     }
 
     async update(data) {
-
+        const result = await api.put(`/operation/${data.id}`, {
+            operation_name: data.operation_name,
+            operation_place: data.operation_place,
+            operation_planned_date: new Date(data.operation_planned_date),
+            operation_date: data.operation_date,
+            lead_officer_id: data.lead_officer_id,
+            status: "OPENED",
+            operation_results_deaths: data.operation_results_deaths,
+            operation_results_arrests: data.operation_results_arrests,
+            operation_results_report: data.operation_results_report,
+        }, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
     }
 
     async deleteOperation(data) {
