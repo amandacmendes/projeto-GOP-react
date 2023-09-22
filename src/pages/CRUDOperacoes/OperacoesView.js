@@ -257,6 +257,8 @@ function Content(props) {
 
             console.log("action edit")
 
+            console.log(officers)
+
             //Update
             await operationService.update({
                 id: props.id,
@@ -336,14 +338,13 @@ function Content(props) {
                             id="datecontrol"
                             type="date"
                             disabled={props.isDisabled}
-                            //onLoad={(e) => document.getElementById('datecontrol').innerText = `${Date.parse(operation.operation_planned_date).toLocaleDateString('en-IN')}`}
-                            //required
-                            value={new Date(Date.parse(operation.operation_planned_date)).toLocaleDateString('en-IN')}
+                            value={operation.operation_planned_date ? new Date(operation.operation_planned_date).toLocaleDateString('fr-CA') : ''}
+                            //value={new Date(Date.parse(operation.operation_planned_date)).toLocaleDateString('fr-CA')}
                             //value={operation.operation_planned_date}
                             onChange={(e) => {
-                                var data = new Date(Date.parse(e.target.value)).toLocaleDateString('fr-CA')
-                                console.log(data)
-                                setOperation({ ...operation, operation_planned_date: data })
+                                console.log('aaaaa')
+                                var formattedDate = e.target.value.split('-').reverse().join('-');
+                                setOperation({ ...operation, operation_planned_date: formattedDate });
                             }}
                             {...register('operation_planned_date')}
                         ></Form.Control>
@@ -358,7 +359,7 @@ function Content(props) {
                             <option>Selecione um oficial</option>
                             {officers.map((officer) => (
                                 <option
-                                    selected={(officer.id == operation.lead_officer_id ? 'true' : '')}
+                                    selected={(officer.id == operation.lead_officer_id ? true : false)}
                                     key={officer.id}
                                     value={officer.id}
                                 >
@@ -381,7 +382,7 @@ function Content(props) {
                     <Form.Label>Efetivos</Form.Label>
                     <ListGroup>
                         {officers.map((officer) => (
-                            <ListGroup.Item>
+                            <ListGroup.Item key={officer.id}>
                                 <Form.Check
                                     id={officer.id}
                                     key={officer.id}

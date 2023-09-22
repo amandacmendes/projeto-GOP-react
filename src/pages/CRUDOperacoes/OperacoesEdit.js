@@ -1,21 +1,19 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Card, Col, Form, FormGroup, ListGroup, Row, Stack } from "react-bootstrap";
+import { Alert, Button, Card, Col, Form, ListGroup, Row, Stack } from "react-bootstrap";
 import { ContentBase } from "../../components/ContentBase";
 import OperationService from '../../services/OperationService';
 import { useNavigate, useParams } from "react-router-dom";
 import OfficerService from "../../services/OfficerService";
 import ReasonService from "../../services/ReasonService";
 import ResourceService from "../../services/ResourceService";
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 
-
-export function OperacoesNew(props) {
+export function OperacoesEdit(props) {
 
     const navigate = useNavigate();
     let params = useParams();
     let pagetitle = '';
     let isDisabled = false;
-    let action = 'new';
 
     if (props.pagetitle) {
         pagetitle = props.pagetitle;
@@ -24,10 +22,8 @@ export function OperacoesNew(props) {
     if (params.action === 'view') {
         pagetitle = 'Visualizar Operação'
         isDisabled = true;
-        action = params.action;
     } else if (params.action === 'edit') {
         pagetitle = 'Editar Operação'
-        action = params.action;
     }
 
     if (pagetitle === '') {
@@ -40,7 +36,7 @@ export function OperacoesNew(props) {
             <div className='container'>
                 <Stack gap={5}>
                     <h1>{pagetitle}</h1>
-                    <Content id={params.id} isDisabled={isDisabled} pageAction={action} />
+                    <Content id={params.id} isDisabled={isDisabled} action={params.action} />
                     <br /><br />
                 </Stack>
             </div>
@@ -66,10 +62,11 @@ function Content(props) {
     const officerService = new OfficerService();
     const resourceService = new ResourceService();
 
-    const navigate = useNavigate();
-
+    const [selectedOfficers, setSelectedOfficers] = useState([]);
+    const [selectedResources, setSelectedResources] = useState([]);
 
     const { handleSubmit, register, formState: { errors } } = useForm();
+    const navigate = useNavigate();
 
     async function loadInfo() {
         // for New Operation - load officers, resources and reason types
@@ -105,13 +102,42 @@ function Content(props) {
         //for View and Edit - load operation from db
         if (!!props.id) {
             fetchOperation(props.id);
+            fetchSelectedOfficers(props.id);
+            fetchSelectedResources(props.id);
         }
+    }
+
+    async function fetchSelectedOfficers(operation_id) {
+
+        await officerService.getAllOfficersFromOperation({ id: operation_id })
+            .then((result) => {
+                const selOfficers = result.data.reduce((acc, officer) => {
+                    acc[officer.officer_id] = officer;
+                    return acc;
+                }, {})
+                setSelectedOfficers(selOfficers)
+            })
+        //console.log(selectedOfficers)
+    }
+
+    async function fetchSelectedResources(operation_id) {
+
+        await resourceService.getAllResourcesFromOperation({ id: operation_id })
+            .then((result) => {
+                const selResources = result.data.reduce((acc, resource) => {
+                    acc[resource.resource_id] = resource;
+                    return acc;
+                }, {})
+                setSelectedResources(selResources)
+            })
+        //console.log(selectedResources)
     }
 
     async function fetchOperation(id) {
         var op = await operationService.getOperationById(id)
             .then((result) => {
-                console.log('aaaa ' + result.data)
+                console.log('operation:')
+                console.log(result.data)
                 setOperation(result.data)
             })
             .catch((error) => {
@@ -122,7 +148,7 @@ function Content(props) {
         //get all reason of operation 
         await reasonService.getReasonfromOperation(id)
             .then((result) => {
-                console.log(result.data)
+                //console.log(result.data)
                 setReason(result.data)
             })
             .catch((error) => {
@@ -143,105 +169,135 @@ function Content(props) {
             setReasonSize(reasonSize - 1)
         }
     }
-    const handleReasonInput = (e) => {
-        setReason(e.target.value)
+
+    // Handle checkbox changes on Officers
+    const handleCheckboxChangeOfficer = (e, officer) => {
+
+        if (!selectedOfficers.hasOwnProperty(e.target.value)) {
+            //include officer in selectedOfficers list
+            setSelectedOfficers({
+                ...selectedOfficers,
+                [e.target.value]: officer,
+            });
+            console.log(selectedOfficers)
+
+        } else {
+            //exclude officer from selectedOfficers list 
+            const updatedOfficers = { ...selectedOfficers };
+            delete updatedOfficers[e.target.value];
+            setSelectedOfficers(updatedOfficers);
+            console.log(selectedOfficers)
+        }
+    };
+
+    // Handle checkbox changes on Officers
+    const handleCheckboxChangeResource = (e, resource) => {
+
+        if (!selectedResources.hasOwnProperty(e.target.value)) {
+            //include resource in selectedResources list
+            setSelectedResources({
+                ...selectedResources,
+                [e.target.value]: resource,
+            });
+            console.log(selectedResources)
+
+        } else {
+            //exclude resource from selectedResources list 
+            const updatedResources = { ...selectedResources };
+            delete updatedResources[e.target.value];
+            setSelectedResources(updatedResources);
+            console.log(selectedResources)
+        }
+    };
+
+    async function bulkHandleOfficer() {
+
+        // Checks officerOperation
+        // gets all officer_operation where operation_id = props_id ; OfficerOperationVal
+
+        // if OfficerOperationVal doesnt has Selected Officers, will need insert into officer_operation
+
+        // if one OfficerOperationVal.officers is not inside Selected Officers, will need delete officer_operation
+
     }
 
+    async function bulkHandleResources() {
+
+        // Checks resourceOperation
+        // gets all resource_operation where operation_id = props_id ; ResourceOperationVal
+
+        // if ResourceOperationVal doesnt has Selected Resources, will need insert into resource_operation
+
+        // if one ResourceOperationVal.resource is not inside Selected Resources, will need delete resource_operation
+
+    }
+
+    async function updateOperation() {
+
+    }
 
     const onSubmit = async (data) => {
+        //e.preventDefault();
 
-        try {
-            console.log('--- - -' + data + data.lead_officer_id)
+        console.log("data: ")
+        console.log(data)
+        console.log("---------")
+        console.log("operation: ")
+        console.log(operation)
+        console.log("---------")
+        console.log("selectedOfficers: ")
+        console.log(selectedOfficers)
+        console.log("---------")
+        console.log("selectedResources: ")
+        console.log(selectedResources)
+        console.log("---------")
 
-            if (props.pageAction == 'new') {
-                //CreateOperation
-                await operationService.createOperation({
-                    operation_name: data.operation_name,
-                    operation_place: data.operation_place,
-                    operation_planned_date: data.operation_planned_date,
 
-                }).then((result) => {
-                    //Create Officer_Operation
-                    //console.log("officer " + result)
+        if (props.action == 'edt') {
 
-                    data.officer_operation_officer_id.forEach(async of => {
+            console.log("action edit")
 
-                        await officerService.createOfficerOperation({
-                            officer_id: of,
-                            operation_id: result.data.id
-                        }).then((result) => {
-                            //console.log("officerop " + result)
+            console.log(officers)
 
-                            //Create Resource_Operation
-                            data.operation_resource_id.forEach(async res => {
+            //Update
+            await operationService.update({
+                id: props.id,
+                operation_name: data.operation_name,
+                operation_place: data.operation_place,
+                operation_planned_date: data.operation_planned_date,
+                lead_officer_id: data.lead_officer_id
 
-                                await resourceService.createResourceOperation({
-                                    resource_id: res,
-                                    operation_id: result.data.operation_id
-                                }).then((result) => {
-                                    console.log("resourceop " + result)
-                                    navigate(-1)
-                                }).then((res) => {
+            }).then((result) => {
+                //Create Officer_Operation
+                //console.log("officer " + result)
 
-                                    navigate('/operation')
-                                    //Create Reason
-                                    //console.log(data)
-                                }).catch((e) => console.log("err resourceop " + e))
-                            });
+                data.officer_operation_officer_id.forEach(async of => {
 
-                        }).catch((e) => console.log(e))
-                    });
-                }).catch((e) => {
-                    console.log(e)
+                    await officerService.updateOfficer({
+                        officer_id: of,
+                        operation_id: result.data.id
+                    }).then((result) => {
+                        //console.log("officerop " + result)
+
+                        //Create Resource_Operation
+                        data.operation_resource_id.forEach(async res => {
+
+                            await resourceService.updateResourceOperation({
+                                resource_id: res,
+                                operation_id: result.data.operation_id
+                            }).then((result) => {
+                                console.log("resourceop " + result)
+                                navigate(-1)
+                            }).catch((e) => console.log("err resourceop " + e))
+                        });
+
+                    }).catch((e) => console.log(e))
                 });
-
-
-            } else if (props.pageAction == 'edit') {
-
-                //Update
-                await operationService.update({
-                    id: props.id,
-                    operation_name: data.operation_name,
-                    operation_place: data.operation_place,
-                    operation_planned_date: data.operation_planned_date,
-                    lead_officer_id: data.lead_officer_id
-
-                }).then((result) => {
-                    //Create Officer_Operation
-                    //console.log("officer " + result)
-
-                    data.officer_operation_officer_id.forEach(async of => {
-
-                        await officerService.updateOfficer({
-                            officer_id: of,
-                            operation_id: result.data.id
-                        }).then((result) => {
-                            //console.log("officerop " + result)
-
-                            //Create Resource_Operation
-                            data.operation_resource_id.forEach(async res => {
-
-                                await resourceService.updateResourceOperation({
-                                    resource_id: res,
-                                    operation_id: result.data.operation_id
-                                }).then((result) => {
-                                    console.log("resourceop " + result)
-                                    navigate(-1)
-                                }).catch((e) => console.log("err resourceop " + e))
-                            });
-
-                        }).catch((e) => console.log(e))
-                    });
-                }).catch((e) => {
-                    console.log(e)
-                });
-
-
-            }
-
-        } catch (error) {
-            console.log(error)
+            }).catch((e) => {
+                console.log(e)
+            });
         }
+
     }
 
     return <>
@@ -262,6 +318,7 @@ function Content(props) {
                             value={operation.operation_name}
                             {...register('operation_name')}
                             onChange={(e) => setOperation({ ...operation, operation_name: e.target.value })}
+                            required
                         ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
@@ -272,14 +329,23 @@ function Content(props) {
                             value={operation.operation_place}
                             {...register('operation_place')}
                             onChange={(e) => setOperation({ ...operation, operation_place: e.target.value })}
+                            required
                         ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-date">Data da Operação</Form.Label>
                         <Form.Control
+                            id="datecontrol"
                             type="date"
                             disabled={props.isDisabled}
-                            value={operation.operation_date}
+                            value={operation.operation_planned_date ? new Date(operation.operation_planned_date).toLocaleDateString('fr-CA') : ''}
+                            //value={new Date(Date.parse(operation.operation_planned_date)).toLocaleDateString('fr-CA')}
+                            //value={operation.operation_planned_date}
+                            onChange={(e) => {
+                                console.log('aaaaa')
+                                var formattedDate = e.target.value.split('-').reverse().join('-');
+                                setOperation({ ...operation, operation_planned_date: formattedDate });
+                            }}
                             {...register('operation_planned_date')}
                         ></Form.Control>
                     </Form.Group>
@@ -288,10 +354,15 @@ function Content(props) {
                         <Form.Select
                             disabled={props.isDisabled}
                             {...register('lead_officer_id')}
+                            onChange={(e) => { setOperation({ ...operation, lead_officer_id: e.target.value }) }}
                         >
                             <option>Selecione um oficial</option>
                             {officers.map((officer) => (
-                                <option key={officer.id} value={officer.id}>
+                                <option
+                                    selected={(officer.id == operation.lead_officer_id ? true : false)}
+                                    key={officer.id}
+                                    value={officer.id}
+                                >
                                     {officer.name}
                                 </option>
                             ))}
@@ -301,22 +372,26 @@ function Content(props) {
                 </Card.Body>
             </Card>
 
+
+
             <h3>Recursos</h3>
+
             <Card className="my-3">
                 <Card.Body>
 
                     <Form.Label>Efetivos</Form.Label>
-                    <ListGroup >
+                    <ListGroup>
                         {officers.map((officer) => (
-                            <ListGroup.Item >
+                            <ListGroup.Item key={officer.id}>
                                 <Form.Check
-                                    disabled={props.isDisabled}
-                                    type={"checkbox"}
                                     id={officer.id}
                                     key={officer.id}
-                                    label={officer.name}
+                                    type={"checkbox"}
                                     value={officer.id}
-                                    {...register('officer_operation_officer_id')}
+                                    checked={selectedOfficers.hasOwnProperty(officer.id)}
+                                    onChange={(e) => handleCheckboxChangeOfficer(e, officer)}
+                                    disabled={props.isDisabled}
+                                    label={officer.name}
                                 />
                             </ListGroup.Item>
 
@@ -329,26 +404,28 @@ function Content(props) {
                         {resources.map((resource) => (
                             <ListGroup.Item>
                                 <Form.Check // prettier-ignore
-                                    disabled={props.isDisabled}
-                                    type={"checkbox"}
                                     id={resource.id}
-                                    label={resource.description}
+                                    key={resource.id}
+                                    type={"checkbox"}
                                     value={resource.id}
-                                    {...register('operation_resource_id')}
+                                    checked={selectedResources.hasOwnProperty(resource.id)}
+                                    onChange={(e) => handleCheckboxChangeResource(e, resource)}
+                                    disabled={props.isDisabled}
+                                    label={resource.description}
                                 />
                             </ListGroup.Item>
                         ))}
                     </ListGroup>
-
-
                 </Card.Body>
             </Card>
 
 
+
             <h3>Motivação</h3>
+
             <Card className="my-3">
                 <Card.Body>
-                    <Form.Group className="pb-2" >
+                    <Form.Group className="pb-2">
                         <Row className="mb-2">
                             <Col className="col-4">
                                 <Form.Label controlId="form-label-reason">Objeto de trabalho policial</Form.Label>
@@ -366,32 +443,36 @@ function Content(props) {
                             </Col>
                         </Row>
 
-
-                        {Array.from({ length: reasonSize }).map((_, index) => (
-                            <Row className="mb-2" key={index} >
+                        {reason.map((reasonItem) => (
+                            <Row className="mb-2" key={reasonItem.id}>
                                 <Col className="col-4">
-                                    <Form.Select disabled={props.isDisabled}  >
-                                        {reasontypes.map((reasontype) => (
-                                            <option
-                                                key={reasontype.id}
-                                                id={'reasontypeid-' + index}
-                                                value={reasontype.id}
-                                            >
-                                                {reasontype.description}
-                                            </option>
-                                        ))
+
+                                    <Form.Select
+                                        disabled={props.isDisabled}
+                                        value={reasonItem.reasonTypeId || ''}
+                                    >
+
+                                        {(props.isDisabled) ? (reasontypes.filter((r) => r.id == reasonItem.reasontype_id)
+                                            .map((type) => (
+                                                <option key={type.id} value={type.id}>
+                                                    {type.description}
+                                                </option>
+                                            ))) :
+                                            (reasontypes.map((reasontype) => (
+                                                <option key={reasontype.id} value={reasontype.id}>
+                                                    {reasontype.description}
+                                                </option>
+                                            )))
                                         }
                                     </Form.Select>
+
+
                                 </Col>
                                 <Col className="d-flex flex-row">
-
                                     <Form.Control
-                                        key={index}
-                                        id={'reasonid-' + index}
                                         type="text"
-                                        onChange={(e) => handleReasonInput(e)}
+                                        value={reasonItem.description}
                                         disabled={props.isDisabled}
-                                    // {...register('reason')}
                                     />
 
                                     <Button
@@ -412,8 +493,9 @@ function Content(props) {
 
                 </Card.Body>
             </Card>
-            <Button className="my-3" type="submit"> Cadastrar </Button>
-
+            <Button variant="primary" type="submit" hidden={props.isDisabled}>
+                {props.action == 'edit' ? 'Registrar Edições' : 'Cadastrar'}
+            </Button>
         </Form >
     </>
 }

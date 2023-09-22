@@ -104,7 +104,9 @@ function TableOperacoes(props) {
         try {
 
             operationService.deleteCascade({ id: id })
-            getOperations();
+                .then(() => {
+                    getOperations();
+                })
 
         } catch (error) {
             console.error(error);
