@@ -181,12 +181,13 @@ function Content(props) {
                                     operation_id: result.data.operation_id
                                 }).then((result) => {
                                     console.log("resourceop " + result)
-                                    navigate(-1)
+                                    navigate('/operation')
                                 }).then((res) => {
 
-                                    navigate('/operation')
                                     //Create Reason
                                     //console.log(data)
+
+                                    navigate('/operation')
                                 }).catch((e) => console.log("err resourceop " + e))
                             });
 

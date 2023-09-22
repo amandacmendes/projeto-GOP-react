@@ -4,6 +4,7 @@ import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import TeamsService from '../../services/TeamsService';
+import OfficerService from '../../services/OfficerService';
 
 export function Teams() {
 
@@ -51,6 +52,7 @@ function TableTeams(props) {
     const [data, setData] = useState([]);
 
     const teamsService = new TeamsService();
+    const officerService = new OfficerService();
 
     async function getTeams() {
         try {
@@ -84,7 +86,28 @@ function TableTeams(props) {
 
     async function handleDeleteTeam(id) {
         try {
-            await teamsService.deleteTeam(id);
+
+            const officers = data.filter((thisTeam) => thisTeam.id == id)[0].officers
+            console.log(officers)
+
+            const updatedOfficers = officers.map(officer => ({
+                ...officer,
+                team_id: null
+            }));
+
+            // Bulk Update: 
+            const updatePromises = updatedOfficers.map((officer) => officerService.updateOfficer(officer));
+
+            Promise.all(updatePromises)
+                .then((result) => {
+                    console.log('All officers updated successfully.');
+                    teamsService.delete(id);
+                    return result;
+                })
+                .catch((error) => {
+                    console.error(`Error updating officers: ${error}`);
+                });
+
             getTeams();
 
         } catch (error) {

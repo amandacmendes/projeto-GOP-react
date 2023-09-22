@@ -16,7 +16,6 @@ class AuthService {
                 }).then((response) => {
                     const data = response.data;
                     sessionStorage.setItem('token', data.accessToken);
-                    console.log(sessionStorage.getItem('token'))
                     resolve();
                 }).catch((error) => {
                     console.log(error)
@@ -35,7 +34,6 @@ class AuthService {
                         email,
                         password
                     }).then(function (response) {
-                        console.log('----', response);
                         resolve();
                     }).catch(function (error) {
                         console.log(error);

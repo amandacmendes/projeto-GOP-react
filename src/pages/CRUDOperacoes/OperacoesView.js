@@ -239,15 +239,23 @@ function Content(props) {
     const onSubmit = async (data) => {
         //e.preventDefault();
 
-        console.log(operation)
-        console.log(selectedOfficers)
-        console.log(selectedResources)
-
         console.log("data: ")
         console.log(data)
         console.log("---------")
+        console.log("operation: ")
+        console.log(operation)
+        console.log("---------")
+        console.log("selectedOfficers: ")
+        console.log(selectedOfficers)
+        console.log("---------")
+        console.log("selectedResources: ")
+        console.log(selectedResources)
+        console.log("---------")
 
-        if (props.action == 'edit') {
+
+        if (props.action == 'edt') {
+
+            console.log("action edit")
 
             //Update
             await operationService.update({
@@ -325,12 +333,18 @@ function Content(props) {
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-date">Data da Operação</Form.Label>
                         <Form.Control
+                            id="datecontrol"
                             type="date"
                             disabled={props.isDisabled}
-                            required
-                            value={new Date(Date.parse(operation.date ?
-                                operation.operation_date :
-                                operation.operation_planned_date)).toLocaleDateString('fr-CA')}
+                            //onLoad={(e) => document.getElementById('datecontrol').innerText = `${Date.parse(operation.operation_planned_date).toLocaleDateString('en-IN')}`}
+                            //required
+                            value={new Date(Date.parse(operation.operation_planned_date)).toLocaleDateString('en-IN')}
+                            //value={operation.operation_planned_date}
+                            onChange={(e) => {
+                                var data = new Date(Date.parse(e.target.value)).toLocaleDateString('fr-CA')
+                                console.log(data)
+                                setOperation({ ...operation, operation_planned_date: data })
+                            }}
                             {...register('operation_planned_date')}
                         ></Form.Control>
                     </Form.Group>
@@ -338,19 +352,15 @@ function Content(props) {
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
                         <Form.Select
                             disabled={props.isDisabled}
-                            value={operation.lead_officer_id}
-                            onChange={(e) => {
-                                const updatedOperation = { ...operation };
-                                updatedOperation.lead_officer_id = e.target.value
-                                setOperation(updatedOperation)
-                            }}
+                            {...register('lead_officer_id')}
+                            onChange={(e) => { setOperation({ ...operation, lead_officer_id: e.target.value }) }}
                         >
                             <option>Selecione um oficial</option>
                             {officers.map((officer) => (
                                 <option
+                                    selected={(officer.id == operation.lead_officer_id ? 'true' : '')}
                                     key={officer.id}
                                     value={officer.id}
-                                    {...register('lead_officer_id')}
                                 >
                                     {officer.name}
                                 </option>

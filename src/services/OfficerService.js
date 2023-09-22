@@ -31,7 +31,6 @@ class OfficerService {
             }
         });
 
-
         // Create a mapping of teams by their id
         const teamMap = new Map();
 
@@ -90,6 +89,20 @@ class OfficerService {
 
     async updateOfficer(data) {
         const result = await api.put(`/officer/${data.id}`, {
+            name: data.name,
+            team_id: data.team_id
+        }, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
+
+    async updateOfficerBasedOnTeam(data) {
+        const result = await api.put(`/officer/team/${data.tid}`, {
             name: data.name,
             team_id: data.team_id
         }, {
