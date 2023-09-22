@@ -210,6 +210,22 @@ function Content(props) {
         }
     };
 
+    function formatDate(dateString, format) {
+
+        const [year, month, day] = String(dateString).split('T')[0].split('-');
+
+        if (format === 'yyyy-MM-dd') {
+            return `${year}-${month}-${day}`;
+        }
+        if (format === 'dd-MM-yyyy') {
+            return `${day}-${month}-${year}`;
+        }
+
+        return `${year}-${month}-${day}`;
+    }
+
+
+
     async function bulkHandleOfficer() {
 
         // Checks officerOperation
@@ -239,6 +255,13 @@ function Content(props) {
     const onSubmit = async (data) => {
         //e.preventDefault();
 
+
+        const updatedOperation = { ...operation }
+        updatedOperation.operation_planned_date = data.operation_planned_date
+        setOperation(updatedOperation)
+
+
+
         console.log("data: ")
         console.log(data)
         console.log("---------")
@@ -251,6 +274,7 @@ function Content(props) {
         console.log("selectedResources: ")
         console.log(selectedResources)
         console.log("---------")
+
 
 
         if (props.action == 'edt') {
@@ -338,15 +362,12 @@ function Content(props) {
                             id="datecontrol"
                             type="date"
                             disabled={props.isDisabled}
-                            value={operation.operation_planned_date ? new Date(operation.operation_planned_date).toLocaleDateString('fr-CA') : ''}
-                            //value={new Date(Date.parse(operation.operation_planned_date)).toLocaleDateString('fr-CA')}
-                            //value={operation.operation_planned_date}
-                            onChange={(e) => {
-                                console.log('aaaaa')
-                                var formattedDate = e.target.value.split('-').reverse().join('-');
-                                setOperation({ ...operation, operation_planned_date: formattedDate });
-                            }}
+                            value={formatDate(operation.operation_planned_date, 'yyyy-MM-dd')}
                             {...register('operation_planned_date')}
+                            onChange={(e) => {
+                                const date = formatDate(e.target.value, 'yyyy-MM-dd')
+                                setOperation({ ...operation, operation_planned_date: e.target.value })
+                            }}
                         ></Form.Control>
                     </Form.Group>
                     <Form.Group className="pb-2">
