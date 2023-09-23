@@ -4,7 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TeamsService from "../../services/TeamsService";
 import OfficerService from "../../services/OfficerService";
-import { isDisabled } from "@testing-library/user-event/dist/utils";
+import { useForm } from 'react-hook-form';
+
 
 export function TeamsView(props) {
 
@@ -46,6 +47,8 @@ export function TeamsView(props) {
 function Content(props) {
 
     const navigate = useNavigate();
+    const { handleSubmit, register, formState: { errors } } = useForm();
+
 
     const [teamName, setTeamName] = useState('');
     const [selectedOfficers, setSelectedOfficers] = useState([]);
@@ -66,11 +69,6 @@ function Content(props) {
         if (!!props.id) {
             await teamService.getTeamsWithOfficers()
                 .then((data) => {
-                    //setTeamName(data.get(parseInt(props.id)).team_name)
-                    console.log("FETCH ")
-                    console.log(data)
-                    console.log(props.id)
-
                     data.forEach((d) => {
                         if (d.id == props.id) {
                             setTeamName(d.team_name)
@@ -89,8 +87,6 @@ function Content(props) {
                     console.log(error)
                 })
         }
-
-        console.log('Fetched: ' + selectedOfficers)
     }
 
     // Handle checkbox changes
@@ -115,8 +111,8 @@ function Content(props) {
     };
 
     // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const onSubmit = async (e) => {
+        //e.preventDefault();
 
         // Update team
         await teamService.update({ id: props.id, team_name: teamName })
@@ -183,11 +179,15 @@ function Content(props) {
 
     useEffect(() => {
         fetchAllOfficers();
+        console.log('selectedOfficers: ')
+        console.log(selectedOfficers)
+        console.log('officers: ')
+        console.log(officers)
     }, []);
 
     return (
 
-        <Form className="w-100" noValidate onSubmit={handleSubmit} >
+        <Form className="w-100" noValidate onSubmit={handleSubmit(onSubmit)} >
             <Card className="mb-3">
                 <Card.Body>
                     <Form.Group className="pb-2">
@@ -209,13 +209,15 @@ function Content(props) {
                             {officers.map((officer) => (
                                 <ListGroup.Item key={officer.id}>
                                     <Form.Check
+                                        id={officer.id}
                                         key={officer.id}
-                                        type="checkbox"
+                                        type={"checkbox"}
                                         value={officer.id}
                                         checked={selectedOfficers.hasOwnProperty(officer.id)}
                                         onChange={(e) => handleCheckboxChange(e, officer)}
                                         disabled={props.isDisabled}
                                         label={officer.name}
+                                        //{...register('team_officers')}
                                     />
                                 </ListGroup.Item>
                             ))}

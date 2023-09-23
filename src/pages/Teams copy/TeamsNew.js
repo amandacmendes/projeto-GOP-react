@@ -90,33 +90,28 @@ function Content(props) {
     // Handle form submission
     const onSubmit = async (data) => {
 
-        if (props.pageAction == 'new') {
-            // Create team
-            await teamService.create({ team_name: data.team_name })
-                .then((result) => {
+        // Create team
+        await teamService.create({ team_name: data.team_name })
+            .then((result) => {
 
+                console.log(result)
+
+                // Update officers
+                var arrOfficer = [];
+
+                data.team_officers.forEach(officer_id => {
+                    console.log(officer_id)
+                    arrOfficer = [...arrOfficer, { id: officer_id, team_id: result.data.id }]
+                });
+
+                officerService.bulkUpdateOfficer(arrOfficer).then((result) => {
                     console.log(result)
-
-                    // Update officers
-                    var arrOfficer = [];
-
-                    data.team_officers.forEach(officer_id => {
-                        console.log(officer_id)
-                        arrOfficer = [...arrOfficer, { id: officer_id, team_id: result.data.id }]
-                    });
-
-                    officerService.bulkUpdateOfficer(arrOfficer).then((result) => {
-                        console.log(result)
-                    }).catch((error) => {
-                        console.log(error)
-                    });
                 }).catch((error) => {
                     console.log(error)
-                })
-        } else if (props.pageAction == 'edit') {
-
-            console.log('edit mode :p')
-        }
+                });
+            }).catch((error) => {
+                console.log(error)
+            })
 
     };
 
