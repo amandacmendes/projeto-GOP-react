@@ -36,7 +36,7 @@ class ResourceService {
         return result;
     }
 
-    
+
     async getResourceById(data) {
         const id = data.id;
         const result = await api.get(`/resource/${id}`, {
@@ -78,7 +78,7 @@ class ResourceService {
     }
 
     async updateResource(data) {
-        console.log('service update '+data)
+        console.log('service update ' + data)
         const id = data.id;
         const result = await api.put(`/resource/${id}`, {
             description: data.description,
@@ -94,7 +94,7 @@ class ResourceService {
     }
 
     async updateResourceOperation(data) {
-        console.log('service update '+data)
+        console.log('service update ' + data)
         const oid = data.operation_id;
         const rid = data.resource_id;
         const result = await api.put(`/resource/${rid}/operation/${oid}`, {
@@ -120,6 +120,21 @@ class ResourceService {
         });
         return result;
     }
+
+    async deleteResourceOperation(data) {
+
+        const rid = data.resource_id;
+        const oid = data.operation_id;
+        const result = await api.delete(`/resource/${rid}/operation/${oid}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
+
 
 }
 

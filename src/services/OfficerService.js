@@ -159,6 +159,21 @@ class OfficerService {
         });
         return result;
     }
+
+
+    async deleteOfficerOperation(data) {
+        const ofid = data.officer_id;
+        const oid = data.operation_id;
+
+        const result = await api.delete(`/officer/${ofid}/operation/${oid}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
 }
 
 export default OfficerService;

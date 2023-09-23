@@ -65,6 +65,10 @@ function Content(props) {
     const [selectedOfficers, setSelectedOfficers] = useState([]);
     const [selectedResources, setSelectedResources] = useState([]);
 
+    //For edit purposes
+    const [selectedOfficersBeforeEdit, setSelectedOfficersBeforeEdit] = useState([]);
+    const [selectedResourcesBeforeEdit, setSelectedResourcesBeforeEdit] = useState([]);
+
     const { handleSubmit, register, formState: { errors } } = useForm();
     const navigate = useNavigate();
 
@@ -81,7 +85,7 @@ function Content(props) {
 
         await reasonService.getReasonTypes()
             .then((result) => {
-                console.log(result.data)
+                
                 setReasonTypes(result.data)
             })
             .catch((error) => {
@@ -91,7 +95,6 @@ function Content(props) {
 
         await resourceService.getResources()
             .then((result) => {
-                console.log(result.data)
                 setResources(result.data)
             })
             .catch((error) => {
@@ -115,9 +118,9 @@ function Content(props) {
                     acc[officer.officer_id] = officer;
                     return acc;
                 }, {})
-                setSelectedOfficers(selOfficers)
+                setSelectedOfficers(selOfficers);
+                setSelectedOfficersBeforeEdit(selOfficers);
             })
-        //console.log(selectedOfficers)
     }
 
     async function fetchSelectedResources(operation_id) {
@@ -128,16 +131,14 @@ function Content(props) {
                     acc[resource.resource_id] = resource;
                     return acc;
                 }, {})
-                setSelectedResources(selResources)
+                setSelectedResources(selResources);
+                setSelectedResourcesBeforeEdit(selResources);
             })
-        //console.log(selectedResources)
     }
 
     async function fetchOperation(id) {
         var op = await operationService.getOperationById(id)
             .then((result) => {
-                console.log('operation:')
-                console.log(result.data)
                 setOperation(result.data)
             })
             .catch((error) => {
@@ -148,7 +149,6 @@ function Content(props) {
         //get all reason of operation 
         await reasonService.getReasonfromOperation(id)
             .then((result) => {
-                //console.log(result.data)
                 setReason(result.data)
             })
             .catch((error) => {
@@ -179,14 +179,12 @@ function Content(props) {
                 ...selectedOfficers,
                 [e.target.value]: officer,
             });
-            console.log(selectedOfficers)
 
         } else {
             //exclude officer from selectedOfficers list 
             const updatedOfficers = { ...selectedOfficers };
             delete updatedOfficers[e.target.value];
             setSelectedOfficers(updatedOfficers);
-            console.log(selectedOfficers)
         }
     };
 
@@ -199,14 +197,12 @@ function Content(props) {
                 ...selectedResources,
                 [e.target.value]: resource,
             });
-            console.log(selectedResources)
 
         } else {
             //exclude resource from selectedResources list 
             const updatedResources = { ...selectedResources };
             delete updatedResources[e.target.value];
             setSelectedResources(updatedResources);
-            console.log(selectedResources)
         }
     };
 
@@ -226,102 +222,75 @@ function Content(props) {
 
 
 
-    async function bulkHandleOfficer() {
+    async function updateOfficerOperation() {
 
-        // Checks officerOperation
-        // gets all officer_operation where operation_id = props_id ; OfficerOperationVal
+        // Check for officer_operations to create
+        for (const selOfficer in selectedOfficers) {
+            if (selectedOfficers[selOfficer].name) {
+                //Create officer_operation from selectedOfficers
+                await officerService.createOfficerOperation({ officer_id: selectedOfficers[selOfficer].id, operation_id: props.id })
+            }
+        }
 
-        // if OfficerOperationVal doesnt has Selected Officers, will need insert into officer_operation
-
-        // if one OfficerOperationVal.officers is not inside Selected Officers, will need delete officer_operation
-
-    }
-
-    async function bulkHandleResources() {
-
-        // Checks resourceOperation
-        // gets all resource_operation where operation_id = props_id ; ResourceOperationVal
-
-        // if ResourceOperationVal doesnt has Selected Resources, will need insert into resource_operation
-
-        // if one ResourceOperationVal.resource is not inside Selected Resources, will need delete resource_operation
+        // Check for officer_operations to delete
+        for (const origOfficers in selectedOfficersBeforeEdit) {
+            if (!(selectedOfficers.hasOwnProperty(origOfficers))) {
+                // delete officer_operation of this orig_officer, its not on the selected list anymore
+                await officerService.deleteOfficerOperation(selectedOfficersBeforeEdit[origOfficers])
+            }
+        }
 
     }
 
-    async function updateOperation() {
+    async function updateResourceOperation() {
 
+        // Check for resource_operation to create
+        for (const selResource in selectedResources) {
+            if (selectedResources[selResource].description) {
+                await resourceService.createResourceOperation({ resource_id: selectedResources[selResource].id, operation_id: props.id })
+            }
+        }
+
+        // Check for resource_operation to delete
+        for (const origResource in selectedResourcesBeforeEdit) {
+            if (!(selectedResources.hasOwnProperty(origResource))) {
+                await resourceService.deleteResourceOperation(selectedResourcesBeforeEdit[origResource])
+            }
+        }
     }
+
 
     const onSubmit = async (data) => {
         //e.preventDefault();
 
+        if (data.operation_planned_date) {
+            const updatedOperation = { ...operation }
+            updatedOperation.operation_planned_date = data.operation_planned_date
+            setOperation(updatedOperation)
+        }
 
-        const updatedOperation = { ...operation }
-        updatedOperation.operation_planned_date = data.operation_planned_date
-        setOperation(updatedOperation)
-
-
-
-        console.log("data: ")
-        console.log(data)
-        console.log("---------")
-        console.log("operation: ")
-        console.log(operation)
-        console.log("---------")
-        console.log("selectedOfficers: ")
-        console.log(selectedOfficers)
-        console.log("---------")
-        console.log("selectedResources: ")
-        console.log(selectedResources)
-        console.log("---------")
-
-
-
-        if (props.action == 'edt') {
-
-            console.log("action edit")
-
-            console.log(officers)
+        if (props.action == 'edit') {
 
             //Update
             await operationService.update({
                 id: props.id,
-                operation_name: data.operation_name,
-                operation_place: data.operation_place,
-                operation_planned_date: data.operation_planned_date,
-                lead_officer_id: data.lead_officer_id
+                operation_name: operation.operation_name,
+                operation_place: operation.operation_place,
+                operation_planned_date: operation.operation_planned_date,
+                lead_officer_id: operation.lead_officer_id
 
             }).then((result) => {
-                //Create Officer_Operation
-                //console.log("officer " + result)
+                updateOfficerOperation().then((result) => {
+                    updateResourceOperation().then((result) => {
 
-                data.officer_operation_officer_id.forEach(async of => {
-
-                    await officerService.updateOfficer({
-                        officer_id: of,
-                        operation_id: result.data.id
-                    }).then((result) => {
-                        //console.log("officerop " + result)
-
-                        //Create Resource_Operation
-                        data.operation_resource_id.forEach(async res => {
-
-                            await resourceService.updateResourceOperation({
-                                resource_id: res,
-                                operation_id: result.data.operation_id
-                            }).then((result) => {
-                                console.log("resourceop " + result)
-                                navigate(-1)
-                            }).catch((e) => console.log("err resourceop " + e))
-                        });
-
-                    }).catch((e) => console.log(e))
+                        navigate('/operation');
+                    });
                 });
-            }).catch((e) => {
-                console.log(e)
+
+            }).catch((error) => {
+                console.log(error)
             });
         }
-
     }
 
     return <>
