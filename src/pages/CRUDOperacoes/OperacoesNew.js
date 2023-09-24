@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import OfficerService from "../../services/OfficerService";
 import ReasonService from "../../services/ReasonService";
 import ResourceService from "../../services/ResourceService";
-import { useForm } from 'react-hook-form';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 
 
 export function OperacoesNew(props) {
@@ -55,9 +55,15 @@ function Content(props) {
     const [errorMessage, setErrorMessage] = useState();
 
     const [officers, setOfficers] = useState([]);
+
     const [reason, setReason] = useState([]);
     const [reasontypes, setReasonTypes] = useState([]);
     const [resources, setResources] = useState([]);
+
+
+
+    const [reasonsObj, setReasonsObj] = useState({ index: 1, description: '', reasontype_id: 0 });
+
 
     const [reasonSize, setReasonSize] = useState(1);
 
@@ -104,14 +110,23 @@ function Content(props) {
 
         //for View and Edit - load operation from db
         if (!!props.id) {
-            fetchOperation(props.id);
+            //fetchOperation(props.id);
+            
+            console.log('reason: ')
+            console.log(reason)
         }
+    }
+
+    // If new
+    function initializeReason() {
+        const initialReason = [{ id: null, description: '', reasontype_id: reasontypes[0]?.id || null }];
+        setReason(initialReason);
     }
 
     async function fetchOperation(id) {
         var op = await operationService.getOperationById(id)
             .then((result) => {
-                console.log('aaaa ' + result.data)
+                //console.log('aaaa ' + result.data)
                 setOperation(result.data)
             })
             .catch((error) => {
@@ -122,7 +137,6 @@ function Content(props) {
         //get all reason of operation 
         await reasonService.getReasonfromOperation(id)
             .then((result) => {
-                console.log(result.data)
                 setReason(result.data)
             })
             .catch((error) => {
@@ -132,19 +146,19 @@ function Content(props) {
     }
 
     useEffect(() => {
-        loadInfo()
+        loadInfo();
+        initializeReason();
     }, []);
 
     function handleAddReasonClick() {
         setReasonSize(reasonSize + 1)
+        //setReasonsObj(...reasonsObj, { index: reasonsObj.length+1, description: '', reasontype_id: 0 })
     }
-    function handleMinusReasonClick() {
-        if (reasonSize > 1) {
-            setReasonSize(reasonSize - 1)
-        }
+    function handleMinusReasonClick(index) {
+        
     }
     const handleReasonInput = (e) => {
-        setReason(e.target.value)
+        //setReason(e.target.value)
     }
 
 
@@ -314,7 +328,7 @@ function Content(props) {
                                 <Form.Check
                                     disabled={props.isDisabled}
                                     type={"checkbox"}
-                                    id={officer.id}
+                                    id={'officer-' + officer.id}
                                     key={officer.id}
                                     label={officer.name}
                                     value={officer.id}
@@ -333,7 +347,7 @@ function Content(props) {
                                 <Form.Check // prettier-ignore
                                     disabled={props.isDisabled}
                                     type={"checkbox"}
-                                    id={resource.id}
+                                    id={'resource-' + resource.id}
                                     label={resource.description}
                                     value={resource.id}
                                     {...register('operation_resource_id')}
@@ -386,7 +400,6 @@ function Content(props) {
                                     </Form.Select>
                                 </Col>
                                 <Col className="d-flex flex-row">
-
                                     <Form.Control
                                         key={index}
                                         id={'reasonid-' + index}

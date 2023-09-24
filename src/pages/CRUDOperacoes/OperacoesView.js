@@ -51,11 +51,10 @@ function Content(props) {
     const [errorMessage, setErrorMessage] = useState();
 
     const [officers, setOfficers] = useState([]);
-    const [reason, setReason] = useState([]);
-    const [reasontypes, setReasonTypes] = useState([]);
     const [resources, setResources] = useState([]);
 
-    const [reasonSize, setReasonSize] = useState(1);
+    const [reason, setReason] = useState([]);
+    const [reasontypes, setReasonTypes] = useState([]);
 
     const operationService = new OperationService();
     const reasonService = new ReasonService();
@@ -68,6 +67,7 @@ function Content(props) {
     //For edit purposes
     const [selectedOfficersBeforeEdit, setSelectedOfficersBeforeEdit] = useState([]);
     const [selectedResourcesBeforeEdit, setSelectedResourcesBeforeEdit] = useState([]);
+    const [origReason, setOrigReason] = useState([]);
 
     const { handleSubmit, register, formState: { errors } } = useForm();
     const navigate = useNavigate();
@@ -85,7 +85,6 @@ function Content(props) {
 
         await reasonService.getReasonTypes()
             .then((result) => {
-                
                 setReasonTypes(result.data)
             })
             .catch((error) => {
@@ -107,6 +106,9 @@ function Content(props) {
             fetchOperation(props.id);
             fetchSelectedOfficers(props.id);
             fetchSelectedResources(props.id);
+
+            console.log('reason: ')
+            console.log(reason)
         }
     }
 
@@ -139,35 +141,60 @@ function Content(props) {
     async function fetchOperation(id) {
         var op = await operationService.getOperationById(id)
             .then((result) => {
-                setOperation(result.data)
+                setOperation(result.data);
             })
             .catch((error) => {
-                console.log(error)
-                setErrorMessage('Erro: A operação que está tentando visualizar não existe.')
+                console.log(error);
+                setErrorMessage('Erro: A operação que está tentando visualizar não existe.');
             });
 
         //get all reason of operation 
         await reasonService.getReasonfromOperation(id)
             .then((result) => {
-                setReason(result.data)
+                setReason(result.data);
+                setOrigReason(result.data);
             })
             .catch((error) => {
-                console.log(error)
-                setErrorMessage('Erro: Erro ao buscar motivações da operação.')
+                console.log(error);
+                setErrorMessage('Erro: Erro ao buscar motivações da operação.');
             });
     }
 
     useEffect(() => {
         loadInfo()
+        //handleAddReasonClick();
+        //handleMinusReasonClick();
     }, []);
 
+    //Handle add button on reason
     function handleAddReasonClick() {
-        setReasonSize(reasonSize + 1)
+        const newReasonArr = [...reason, { id: null, description: '', reasontype_id: 1, operation_id: props.id }];
+        console.log('click +');
+        console.log(newReasonArr);
+        setReason(newReasonArr);
     }
-    function handleMinusReasonClick() {
-        if (reasonSize > 1) {
-            setReasonSize(reasonSize - 1)
-        }
+    //Handle delete button on reason items
+    function handleMinusReasonClick(index) {
+        const newReasonArr = [...reason.slice(0, index), ...reason.slice(index + 1)];
+        console.log('click -');
+        console.log(newReasonArr);
+        setReason(newReasonArr);
+    }
+    // Handle reasontype change
+    function handleReasonTypeChange(e, index) {
+        const newReasonArr = [...reason];
+        newReasonArr[index].reasontype_id = parseInt(e.target.value); // Assuming the reasontype_id is an integer
+        console.log('reasontype change: ');
+        console.log(newReasonArr);
+        setReason(newReasonArr);
+    }
+    // Handle reason description change
+    function handleReasonDescriptionChange(e, index) {
+        const newReasonArr = [...reason];
+        newReasonArr[index].description = e.target.value;
+        console.log('reasondescription change: ');
+        console.log(newReasonArr);
+        setReason(newReasonArr);
     }
 
     // Handle checkbox changes on Officers
@@ -259,9 +286,45 @@ function Content(props) {
         }
     }
 
+    async function updateReasons() {
+
+        // Check for reasons to create
+        for (const i in reason) {
+            if (!reason[i].id) {
+
+                console.log('create reason')
+                console.log(reason[i])
+
+                await reasonService.createReason(reason[i])
+            }
+        }
+
+        // Check for resource_operation to update or delete
+        for (const i in origReason) {
+            if (reason.includes(origReason[i])) {
+
+                if (!(reason.indexOf(origReason[i]) === origReason[i])) {
+                    //update
+
+                    console.log('update reason')
+                    console.log(origReason[i])
+
+                    await reasonService.updateReason(origReason[i])
+                }
+
+            } else {
+                // delete
+
+                console.log('delete reason')
+                console.log(origReason[i])
+
+                await reasonService.deleteReason(origReason[i])
+
+            }
+        }
+    }
 
     const onSubmit = async (data) => {
-        //e.preventDefault();
 
         if (data.operation_planned_date) {
             const updatedOperation = { ...operation }
@@ -280,10 +343,17 @@ function Content(props) {
                 lead_officer_id: operation.lead_officer_id
 
             }).then((result) => {
+
                 updateOfficerOperation().then((result) => {
+
                     updateResourceOperation().then((result) => {
 
-                        navigate('/operation');
+                        updateReasons().then((result) => {
+
+                            console.log('done! ')
+                            //navigate('/operation');
+                        });
+
                     });
                 });
 
@@ -411,9 +481,159 @@ function Content(props) {
 
 
 
+
+
             <h3>Motivação</h3>
 
             <Card className="my-3">
+                <Card.Body>
+                    <Form.Group className="pb-2">
+                        <Row className="mb-2">
+                            <Col className="col-4">
+                                <Form.Label controlId="form-label-reason">Objeto de trabalho policial</Form.Label>
+                            </Col>
+                            <Col>
+                                <Form.Label controlId="form-label-reason">Descrição</Form.Label>
+                            </Col>
+                            <Col className="d-flex flex-row-reverse">
+                                <Button
+                                    onClick={handleAddReasonClick}
+                                    disabled={props.isDisabled}
+                                >
+                                    Adicionar
+                                </Button>
+                            </Col>
+                        </Row>
+
+
+                        {reason.map((reasonItem, index) => (
+                            <Row className="mb-2" key={index}>
+                                <Col className="col-4">
+
+                                    <Form.Select
+                                        disabled={props.isDisabled}
+                                        value={reasonItem.reasonTypeId}
+                                        onChange={(e) => { handleReasonTypeChange(e, index) }}
+                                    >
+                                        {(reasontypes.map((reasontype) => (
+                                            <option
+                                                key={reasontype.id}
+                                                value={reasontype.id}
+                                                selected={reasontype.id == reasonItem.reasontype_id ? true : ''}
+                                            >
+                                                {reasontype.description}
+                                            </option>
+                                        )))
+                                        }
+                                        {/*(props.isDisabled) ?
+                                            (reasontypes.filter((r) => r.id == reasonItem.reasontype_id)
+                                                .map((type) => (
+                                                    <option key={type.id} value={type.id}>
+                                                        {type.description}
+                                                    </option>
+                                                )))
+                                            :
+                                            (reasontypes.map((reasontype) => (
+                                                <option
+                                                    key={reasontype.id}
+                                                    value={reasontype.id}
+                                                    selected={reasontype.id == reasonItem.reasontype_id ? true : ''}
+                                                >
+                                                    {reasontype.description}
+                                                </option>
+                                            )))
+                                        */}
+                                    </Form.Select>
+                                </Col>
+
+                                <Col className="d-flex flex-row">
+                                    <Form.Control
+                                        disabled={props.isDisabled}
+                                        type="text"
+                                        value={reasonItem.description}
+                                        onChange={(e) => { handleReasonDescriptionChange(e, index) }}
+                                    />
+                                    <Button
+                                        disabled={props.isDisabled}
+                                        variant="outline-danger"
+                                        className="ms-2"
+                                        onClick={() => handleMinusReasonClick(index)}>
+                                        <span className="material-symbols-outlined">remove</span>
+                                    </Button>
+                                </Col>
+                            </Row>
+                        ))}
+
+
+                        {/*reason.map((reasonItem) => (
+                            <Row className="mb-2" key={reasonItem.id}>
+
+                                <Col className="col-4">
+
+                                    <Form.Select
+                                        disabled={props.isDisabled}
+                                        value={reasonItem.reasonTypeId}
+                                        id={`reason-reasontype-${reason}`}
+                                        onChange={(e) => { console.log(e.target.value) }}
+                                    >
+                                        {(props.isDisabled) ?
+
+                                            (reasontypes.filter((r) => r.id == reasonItem.reasontype_id)
+                                                .map((type) => (
+                                                    <option key={type.id} value={type.id}>
+                                                        {type.description}
+                                                    </option>
+                                                )))
+
+                                            :
+
+                                            (reasontypes.map((reasontype) => (
+                                                <option key={reasontype.id} value={reasontype.id}>
+                                                    {reasontype.description}
+                                                </option>
+                                            )))
+                                        }
+                                    </Form.Select>
+
+
+                                </Col>
+
+
+                                <Col className="d-flex flex-row">
+                                    <Form.Control
+                                        type="text"
+                                        value={reasonItem.description}
+                                        disabled={props.isDisabled}
+                                    />
+
+                                    <Button
+                                        variant="outline-danger"
+                                        className="ms-2"
+                                        onClick={handleMinusReasonClick}
+                                        disabled={props.isDisabled}
+                                    >
+                                        <span class="material-symbols-outlined">
+                                            remove
+                                        </span>
+                                    </Button>
+                                </Col>
+                            </Row>
+                        ))
+                        */}
+
+                    </Form.Group>
+
+                </Card.Body>
+            </Card>
+
+
+
+
+
+
+            {/*
+            <h3>Motivação</h3>
+            <Card className="my-3" hidden>
                 <Card.Body>
                     <Form.Group className="pb-2">
                         <Row className="mb-2">
@@ -478,11 +698,11 @@ function Content(props) {
                                 </Col>
                             </Row>
                         ))}
-
                     </Form.Group>
-
                 </Card.Body>
             </Card>
+            */}
+
             <Button variant="primary" type="submit" hidden={props.isDisabled}>
                 {props.action == 'edit' ? 'Registrar Edições' : 'Cadastrar'}
             </Button>
