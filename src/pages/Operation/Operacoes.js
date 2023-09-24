@@ -7,6 +7,7 @@ import axios from 'axios';
 import OperationService from '../../services/OperationService';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
+import { StatusTag } from '../../components/StatusTag';
 
 export function Operacoes() {
     const navigate = useNavigate();
@@ -142,13 +143,15 @@ function TableContent(props) {
         <td>{props.operation_name}</td>
         <td>{props.operation_place}</td>
         <td>{new Date(Date.parse(props.operation_date)).toLocaleDateString('pt-BR')}</td>
-        <td>{props.status}</td>
+        <td>
+            <StatusTag id={props.id} status={props.status} ></StatusTag>
+        </td>
         <td>
             <div>
                 <Button variant="outline-success" size='sm'
                     onClick={props.viewOperation}>
                     <span class="material-symbols-outlined">
-                        pageview
+                        visibility
                     </span>
                 </Button>{' '}
                 <Button variant="outline-primary" size='sm' onClick={props.editOperation}>
@@ -164,5 +167,5 @@ function TableContent(props) {
                 </Button>{' '}
             </div>
         </td>
-    </tr>
+    </tr >
 }
