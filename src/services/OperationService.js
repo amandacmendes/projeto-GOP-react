@@ -38,6 +38,7 @@ class OperationService {
             operation_results_deaths: data.operation_results_deaths,
             operation_results_arrests: data.operation_results_arrests,
             operation_results_report: data.operation_results_report,
+            operation_results_seizures: data.operation_results_seizures
         }, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
@@ -59,6 +60,7 @@ class OperationService {
             operation_results_deaths: data.operation_results_deaths,
             operation_results_arrests: data.operation_results_arrests,
             operation_results_report: data.operation_results_report,
+            operation_results_seizures: data.operation_results_seizures
         }, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),

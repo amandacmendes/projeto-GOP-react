@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Card, Col, Form, ListGroup, Row, Stack } from "react-bootstrap";
+import { Alert, Button, Card, Col, Form, ListGroup, Overlay, OverlayTrigger, Row, Stack, Tooltip } from "react-bootstrap";
 import { ContentBase } from "../../components/ContentBase";
 import OperationService from '../../services/OperationService';
 import { useNavigate, useParams } from "react-router-dom";
@@ -49,6 +49,8 @@ export function OperacoesView(props) {
 }
 
 function Content(props) {
+
+    const [isDisabledParam, setIsDisabledParam] = useState(props.isDisabled);
 
     const [operation, setOperation] = useState([]);
     const [show, setShow] = useState(true);
@@ -142,6 +144,10 @@ function Content(props) {
     async function fetchOperation(id) {
         var op = await operationService.getOperationById(id)
             .then((result) => {
+
+                if (result.data.status != 'OPENED') {
+                    setIsDisabledParam(true);
+                }
                 setOperation(result.data);
             })
             .catch((error) => {
@@ -354,17 +360,26 @@ function Content(props) {
 
             {(operation.status == 'OPENED') &&
                 <div className="mb-3 d-flex flex-row-reverse">
-                    <Button
-                        disabled={props.isDisabled}
-                        className="px-5 d-flex-column align-items-center justify-content-center"
-                        variant="warning"
-                        type="button"
-                        onClick={changeStatus} >
-                        <b>
-                            <span className="material-symbols-outlined">local_police</span>
-                            Mudar Status para Deflagrada
-                        </b>
-                    </Button>
+                    <OverlayTrigger
+                        placement="top"
+                        delay={{ show: 70, hide: 400 }}
+                        overlay={
+                            <Tooltip>
+                                Ao clicar neste botão você mudará o status desta operação para "Deflagrada", e não poderá mais editar as informações.
+                            </Tooltip>
+                        }>
+                        <Button
+                            disabled={isDisabledParam}
+                            className="px-5 d-flex-column align-items-center justify-content-center"
+                            variant="warning"
+                            type="button"
+                            onClick={changeStatus} >
+                            <b>
+                                <span className="material-symbols-outlined">local_police</span>
+                                Mudar Status para Deflagrada
+                            </b>
+                        </Button>
+                    </OverlayTrigger>
                 </div>
             }
 
@@ -380,7 +395,7 @@ function Content(props) {
                         <Form.Label className="mb-2" controlId="form-input-operation-name">Nome da Operação</Form.Label>
                         <Form.Control
                             type="text"
-                            disabled={props.isDisabled}
+                            disabled={isDisabledParam}
                             value={operation.operation_name}
                             {...register('operation_name')}
                             onChange={(e) => setOperation({ ...operation, operation_name: e.target.value })}
@@ -391,7 +406,7 @@ function Content(props) {
                         <Form.Label className="mb-2" controlId="form-input-operation-place">Local da Operação</Form.Label>
                         <Form.Control
                             type="text"
-                            disabled={props.isDisabled}
+                            disabled={isDisabledParam}
                             value={operation.operation_place}
                             {...register('operation_place')}
                             onChange={(e) => setOperation({ ...operation, operation_place: e.target.value })}
@@ -403,7 +418,7 @@ function Content(props) {
                         <Form.Control
                             id="datecontrol"
                             type="date"
-                            disabled={props.isDisabled}
+                            disabled={isDisabledParam}
                             value={formatDate(operation.operation_planned_date, 'yyyy-MM-dd')}
                             {...register('operation_planned_date')}
                             onChange={(e) => {
@@ -415,7 +430,7 @@ function Content(props) {
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-operation-leader">Responsavel pela Operação</Form.Label>
                         <Form.Select
-                            disabled={props.isDisabled}
+                            disabled={isDisabledParam}
                             {...register('lead_officer_id')}
                             onChange={(e) => { setOperation({ ...operation, lead_officer_id: e.target.value }) }}
                         >
@@ -453,7 +468,7 @@ function Content(props) {
                                     value={officer.id}
                                     checked={selectedOfficers.hasOwnProperty(officer.id)}
                                     onChange={(e) => handleCheckboxChangeOfficer(e, officer)}
-                                    disabled={props.isDisabled}
+                                    disabled={isDisabledParam}
                                     label={officer.name}
                                 />
                             </ListGroup.Item>
@@ -473,7 +488,7 @@ function Content(props) {
                                     value={resource.id}
                                     checked={selectedResources.hasOwnProperty(resource.id)}
                                     onChange={(e) => handleCheckboxChangeResource(e, resource)}
-                                    disabled={props.isDisabled}
+                                    disabled={isDisabledParam}
                                     label={resource.description}
                                 />
                             </ListGroup.Item>
@@ -501,7 +516,7 @@ function Content(props) {
                             <Col className="d-flex flex-row-reverse">
                                 <Button
                                     onClick={handleAddReasonClick}
-                                    disabled={props.isDisabled}
+                                    disabled={isDisabledParam}
                                 >
                                     Adicionar
                                 </Button>
@@ -514,7 +529,7 @@ function Content(props) {
                                 <Col className="col-4">
 
                                     <Form.Select
-                                        disabled={props.isDisabled}
+                                        disabled={isDisabledParam}
                                         value={reasonItem.reasonTypeId}
                                         onChange={(e) => { handleReasonTypeChange(e, index) }}
                                     >
@@ -533,13 +548,13 @@ function Content(props) {
 
                                 <Col className="d-flex flex-row">
                                     <Form.Control
-                                        disabled={props.isDisabled}
+                                        disabled={isDisabledParam}
                                         type="text"
                                         value={reasonItem.description}
                                         onChange={(e) => { handleReasonDescriptionChange(e, index) }}
                                     />
                                     <Button
-                                        disabled={props.isDisabled}
+                                        disabled={isDisabledParam}
                                         variant="outline-danger"
                                         className="ms-2"
                                         onClick={() => handleMinusReasonClick(index)}>
@@ -557,7 +572,7 @@ function Content(props) {
                     Voltar a Página Anterior
                 </Button>
 
-                <Button variant="primary" type="submit" hidden={props.isDisabled}>
+                <Button variant="primary" type="submit" hidden={isDisabledParam}>
                     {props.action == 'edit' ? 'Registrar Edições' : ''}
                 </Button>
             </div>

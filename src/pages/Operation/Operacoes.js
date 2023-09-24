@@ -1,6 +1,6 @@
 import '../../css/style.css';
 import { ContentBase } from '../../components/ContentBase';
-import { Form, InputGroup, Modal, Stack, Table } from 'react-bootstrap';
+import { Form, InputGroup, Modal, OverlayTrigger, Stack, Table, Tooltip } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -108,7 +108,7 @@ function TableOperacoes(props) {
                     <th>#</th>
                     <th>Nome da Operação</th>
                     <th>Local da Operação</th>
-                    <th>Data da Operação</th>
+                    <th>Data Prevista da Operação</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
@@ -143,28 +143,78 @@ function TableContent(props) {
         <td>{props.operation_name}</td>
         <td>{props.operation_place}</td>
         <td>{new Date(Date.parse(props.operation_date)).toLocaleDateString('pt-BR')}</td>
-        <td>
-            <StatusTag id={props.id} status={props.status} ></StatusTag>
+        <td colSpan={1} className='text-center'>
+            <StatusTag id={props.id} operation_name={props.operation_name} status={props.status} ></StatusTag>
         </td>
-        <td>
+        <td colSpan={1} className='text-center'>
             <div>
-                <Button variant="outline-success" size='sm'
-                    onClick={props.viewOperation}>
-                    <span class="material-symbols-outlined">
-                        visibility
+
+                <OverlayTrigger
+                    placement="top"
+                    delay={{ show: 200, hide: 200 }}
+                    overlay={
+                        <Tooltip>
+                            Visualizar operação
+                        </Tooltip>
+                    }
+                >
+                    <Button variant="outline-success" size='sm'
+                        onClick={props.viewOperation}>
+                        <span class="material-symbols-outlined">
+                            visibility
+                        </span>
+                    </Button>
+                </OverlayTrigger>
+                {' '}
+
+                <OverlayTrigger
+                    placement="top"
+                    delay={{ show: 200, hide: 200 }}
+                    overlay={
+                        <Tooltip>
+                            {(props.status == 'OPENED') ? 'Editar operação' : 'Não é possivel editar operações já deflagradas.'}
+                        </Tooltip>
+                    }
+                >
+                    <span className="d-inline-block">
+                        <Button
+                            variant={(props.status == 'OPENED') ? 'outline-primary' : 'outline-secondary'}
+                            size='sm'
+                            onClick={props.editOperation}
+                            disabled={(props.status == 'OPENED') ? false : true}
+                        >
+                            <span class="material-symbols-outlined">
+                                edit
+                            </span>
+                        </Button>
                     </span>
-                </Button>{' '}
-                <Button variant="outline-primary" size='sm' onClick={props.editOperation}>
-                    <span class="material-symbols-outlined">
-                        edit
+                </OverlayTrigger>
+                {' '}
+
+                <OverlayTrigger
+                    placement="top"
+                    delay={{ show: 200, hide: 200 }}
+                    overlay={
+                        <Tooltip>
+                            {(props.status == 'FINISHED') ? 'Não é possivel excluir operações já concluidas.' : 'Excluir operação'}
+                        </Tooltip>
+                    }
+                >
+                    <span className="d-inline-block">
+                        <Button
+                            variant={(props.status == 'FINISHED') ? 'outline-secondary' : 'outline-danger'}
+                            size='sm'
+                            onClick={props.deleteOperation}
+                            disabled={(props.status == 'FINISHED') ? true : false}
+                        >
+                            <span class="material-symbols-outlined">
+                                delete
+                            </span>
+                        </Button>
                     </span>
-                </Button>{' '}
-                <Button variant="outline-danger" size='sm'
-                    onClick={props.deleteOperation}>
-                    <span class="material-symbols-outlined">
-                        delete
-                    </span>
-                </Button>{' '}
+                </OverlayTrigger>
+                {' '}
+
             </div>
         </td>
     </tr >
