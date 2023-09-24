@@ -180,103 +180,44 @@ function Content(props) {
     const onSubmit = async (data) => {
 
         try {
-            console.log('--- - -' + data + data.lead_officer_id)
+            console.log(' OPERACOES NEW - ' + data + data.lead_officer_id)
 
-            if (props.pageAction == 'new') {
-                //CreateOperation
-                await operationService.createOperation({
-                    operation_name: data.operation_name,
-                    operation_place: data.operation_place,
-                    operation_planned_date: data.operation_planned_date,
-                    lead_officer_id: data.lead_officer_id
 
-                }).then((result) => {
-                    //Create Officer_Operation
+            // Create Operation
+            const operationResult = await operationService.createOperation({
+                operation_name: data.operation_name,
+                operation_place: data.operation_place,
+                operation_planned_date: data.operation_planned_date,
+                lead_officer_id: data.lead_officer_id
+            });
 
-                    data.officer_operation_officer_id.forEach(async of => {
-
-                        await officerService.createOfficerOperation({
-                            officer_id: of,
-                            operation_id: result.data.id
-                        }).then((result) => {
-
-                            //Create Resource_Operation
-                            data.operation_resource_id.forEach(async res => {
-
-                                await resourceService.createResourceOperation({
-                                    resource_id: res,
-                                    operation_id: result.data.operation_id
-                                }).then((result) => {
-                                    console.log("resourceop " + result)
-
-                                    const op_id = result.data.operation_id;
-
-                                    //Create Reason
-                                    reason.forEach(async reasonItem => {
-                                        var reasonItemEdit = reasonItem;
-                                        reasonItemEdit.operation_id = op_id;
-                                        await reasonService.createReason(reasonItemEdit)
-                                            .then((r) => {
-                                                console.log(r.data)
-                                            });
-                                    });
-
-                                }).catch((e) =>
-                                    console.log("err resourceop " + e)
-                                ).finally((r) => {
-                                    console.log('done!!!!!')
-                                    //navigate('/operation')
-                                })
-                            });
-
-                        }).catch((e) => console.log(e))
-                    });
-                }).catch((e) => {
-                    console.log(e)
+            // Create Officer_Operation
+            for (const of of data.officer_operation_officer_id) {
+                const officerOperationResult = await officerService.createOfficerOperation({
+                    officer_id: of,
+                    operation_id: operationResult.data.id
                 });
-
-
-            } else if (props.pageAction == 'edit') {
-
-                //Update
-                await operationService.update({
-                    id: props.id,
-                    operation_name: data.operation_name,
-                    operation_place: data.operation_place,
-                    operation_planned_date: data.operation_planned_date,
-
-                }).then((result) => {
-                    //Create Officer_Operation
-                    //console.log("officer " + result)
-
-                    data.officer_operation_officer_id.forEach(async of => {
-
-                        await officerService.updateOfficer({
-                            officer_id: of,
-                            operation_id: result.data.id
-                        }).then((result) => {
-                            //console.log("officerop " + result)
-
-                            //Create Resource_Operation
-                            data.operation_resource_id.forEach(async res => {
-
-                                await resourceService.updateResourceOperation({
-                                    resource_id: res,
-                                    operation_id: result.data.operation_id
-                                }).then((result) => {
-                                    console.log("resourceop " + result)
-                                    navigate(-1)
-                                }).catch((e) => console.log("err resourceop " + e))
-                            });
-
-                        }).catch((e) => console.log(e))
-                    });
-                }).catch((e) => {
-                    console.log(e)
-                });
-
-
+                console.log(officerOperationResult.data);
             }
+
+            // Create Resource_Operation
+            for (const res of data.operation_resource_id) {
+                const resourceOperationResult = await resourceService.createResourceOperation({
+                    resource_id: res,
+                    operation_id: operationResult.data.id // Assuming operationResult has the correct property name
+                });
+                console.log(resourceOperationResult.data);
+            }
+
+            // Create Reason
+            for (const reasonItemEdit of reason) {
+                reasonItemEdit.operation_id = operationResult.data.id; // Assuming operationResult has the correct property name
+                const reasonResult = await reasonService.createReason(reasonItemEdit);
+                console.log(reasonResult.data);
+            }
+
+            console.log("All operations completed successfully.");
+            navigate('/operation');
 
         } catch (error) {
             console.log(error)

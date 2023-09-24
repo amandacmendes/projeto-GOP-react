@@ -69,8 +69,6 @@ class ReasonService {
         return result;
     }
 
-    
-
 }
 
 export default ReasonService;

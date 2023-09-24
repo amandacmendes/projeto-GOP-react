@@ -285,14 +285,9 @@ function Content(props) {
     }
 
     async function updateReasons() {
-
         // Check for reasons to create
         for (const i in reason) {
             if (!reason[i].id) {
-
-                console.log('create reason')
-                console.log(reason[i])
-
                 await reasonService.createReason(reason[i])
             }
         }
@@ -303,21 +298,11 @@ function Content(props) {
 
                 if (!(reason.indexOf(origReason[i]) === origReason[i])) {
                     //update
-
-                    console.log('update reason')
-                    console.log(origReason[i])
-
                     await reasonService.updateReason(origReason[i])
                 }
-
             } else {
                 // delete
-
-                console.log('delete reason')
-                console.log(origReason[i])
-
                 await reasonService.deleteReason(origReason[i])
-
             }
         }
     }
@@ -332,7 +317,35 @@ function Content(props) {
 
         if (props.action == 'edit') {
 
-            //Update
+            /*
+            try {
+                //Update
+
+                //operation
+                const result1 = await operationService.update({
+                    id: props.id,
+                    operation_name: operation.operation_name,
+                    operation_place: operation.operation_place,
+                    operation_planned_date: operation.operation_planned_date,
+                    lead_officer_id: operation.lead_officer_id
+
+                })
+
+                if (result1) {
+
+                    // officer operation
+                    await updateOfficerOperation();
+                    // resource operation
+                    await updateResourceOperation();
+                    // reasons
+                    await updateReasons()
+                }else{
+                    console.log('b')
+                }
+            } catch (error) {
+                console.log(error)
+            }*/
+
             await operationService.update({
                 id: props.id,
                 operation_name: operation.operation_name,
@@ -341,23 +354,23 @@ function Content(props) {
                 lead_officer_id: operation.lead_officer_id
 
             }).then((result) => {
-
+                // officer operation
                 updateOfficerOperation().then((result) => {
-
+                    // resource operation
                     updateResourceOperation().then((result) => {
-
+                        // reasons
                         updateReasons().then((result) => {
-
+                            //console.log(' --- finish')
+                            //console.log(result.data)
                             //console.log('done! ')
-                            navigate('/operation');
+                            //navigate('/operation');
                         });
-
                     });
                 });
-
             }).catch((error) => {
                 console.log(error)
             });
+
         }
     }
 
