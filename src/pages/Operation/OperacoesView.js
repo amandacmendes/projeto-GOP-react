@@ -110,9 +110,6 @@ function Content(props) {
             fetchOperation(props.id);
             fetchSelectedOfficers(props.id);
             fetchSelectedResources(props.id);
-
-            console.log('reason: ')
-            console.log(reason)
         }
     }
 
@@ -171,31 +168,23 @@ function Content(props) {
     //Handle add button on reason
     function handleAddReasonClick() {
         const newReasonArr = [...reason, { id: null, description: '', reasontype_id: 1, operation_id: props.id }];
-        console.log('click +');
-        console.log(newReasonArr);
         setReason(newReasonArr);
     }
     //Handle delete button on reason items
     function handleMinusReasonClick(index) {
         const newReasonArr = [...reason.slice(0, index), ...reason.slice(index + 1)];
-        console.log('click -');
-        console.log(newReasonArr);
         setReason(newReasonArr);
     }
     // Handle reasontype change
     function handleReasonTypeChange(e, index) {
         const newReasonArr = [...reason];
         newReasonArr[index].reasontype_id = parseInt(e.target.value); // Assuming the reasontype_id is an integer
-        console.log('reasontype change: ');
-        console.log(newReasonArr);
         setReason(newReasonArr);
     }
     // Handle reason description change
     function handleReasonDescriptionChange(e, index) {
         const newReasonArr = [...reason];
         newReasonArr[index].description = e.target.value;
-        console.log('reasondescription change: ');
-        console.log(newReasonArr);
         setReason(newReasonArr);
     }
 
@@ -321,35 +310,6 @@ function Content(props) {
 
         if (props.action == 'edit') {
 
-            /*
-            try {
-                //Update
-
-                //operation
-                const result1 = await operationService.update({
-                    id: props.id,
-                    operation_name: operation.operation_name,
-                    operation_place: operation.operation_place,
-                    operation_planned_date: operation.operation_planned_date,
-                    lead_officer_id: operation.lead_officer_id
-
-                })
-
-                if (result1) {
-
-                    // officer operation
-                    await updateOfficerOperation();
-                    // resource operation
-                    await updateResourceOperation();
-                    // reasons
-                    await updateReasons()
-                }else{
-                    console.log('b')
-                }
-            } catch (error) {
-                console.log(error)
-            }*/
-
             await operationService.update({
                 id: props.id,
                 operation_name: operation.operation_name,
@@ -364,10 +324,7 @@ function Content(props) {
                     updateResourceOperation().then((result) => {
                         // reasons
                         updateReasons().then((result) => {
-                            //console.log(' --- finish')
-                            //console.log(result.data)
-                            //console.log('done! ')
-                            //navigate('/operation');
+                            navigate('/operation');
                         });
                     });
                 });
