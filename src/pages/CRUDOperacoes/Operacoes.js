@@ -71,19 +71,6 @@ function TableOperacoes(props) {
         getOperations();
     }
 
-    const handleDelete = (dataId) => {
-        console.log("---", dataId)
-        axios.delete(`https://64aff008c60b8f941af4e53d.mockapi.io/crud/fakeData/${dataId}`
-        ).then(function (response) {
-            console.log(response);
-            setResponse(response.statusText);
-            refreshTable();
-        }).catch(function (error) {
-            console.log(error);
-            setResponse(error.message);
-        });
-    }
-
     async function handleEditOperation(id) {
         try {
             navigate(`${id}/edit`)

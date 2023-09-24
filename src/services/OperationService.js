@@ -82,8 +82,9 @@ class OperationService {
     }
 
     async deleteCascade(data) {
-        //officeroperation
         const id = data.id
+
+        //officeroperation
         await api.delete(`/officeroperation/operation/${id}`, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
@@ -101,16 +102,21 @@ class OperationService {
                 }
             }).then(async () => {
 
-                //operation
-                this.deleteOperation({ id: id })
+                //reason
+                await api.delete(`/reason/operation/${id}`, {
+                    headers: {
+                        Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                        'Content-Type': 'application/json',
+                        Accept: "*/*"
+                    }
+                }).then(async () => {
+                    //operation
+                    this.deleteOperation({ id: id })
+                })
             })
-
         })
-
-
-
-
     }
+
 }
 
 export default OperationService;

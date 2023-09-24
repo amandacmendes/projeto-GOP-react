@@ -162,8 +162,6 @@ function Content(props) {
 
     useEffect(() => {
         loadInfo()
-        //handleAddReasonClick();
-        //handleMinusReasonClick();
     }, []);
 
     //Handle add button on reason
@@ -350,8 +348,8 @@ function Content(props) {
 
                         updateReasons().then((result) => {
 
-                            console.log('done! ')
-                            //navigate('/operation');
+                            //console.log('done! ')
+                            navigate('/operation');
                         });
 
                     });
@@ -525,24 +523,6 @@ function Content(props) {
                                             </option>
                                         )))
                                         }
-                                        {/*(props.isDisabled) ?
-                                            (reasontypes.filter((r) => r.id == reasonItem.reasontype_id)
-                                                .map((type) => (
-                                                    <option key={type.id} value={type.id}>
-                                                        {type.description}
-                                                    </option>
-                                                )))
-                                            :
-                                            (reasontypes.map((reasontype) => (
-                                                <option
-                                                    key={reasontype.id}
-                                                    value={reasontype.id}
-                                                    selected={reasontype.id == reasonItem.reasontype_id ? true : ''}
-                                                >
-                                                    {reasontype.description}
-                                                </option>
-                                            )))
-                                        */}
                                     </Form.Select>
                                 </Col>
 
@@ -563,150 +543,12 @@ function Content(props) {
                                 </Col>
                             </Row>
                         ))}
-
-
-                        {/*reason.map((reasonItem) => (
-                            <Row className="mb-2" key={reasonItem.id}>
-
-                                <Col className="col-4">
-
-                                    <Form.Select
-                                        disabled={props.isDisabled}
-                                        value={reasonItem.reasonTypeId}
-                                        id={`reason-reasontype-${reason}`}
-                                        onChange={(e) => { console.log(e.target.value) }}
-                                    >
-                                        {(props.isDisabled) ?
-
-                                            (reasontypes.filter((r) => r.id == reasonItem.reasontype_id)
-                                                .map((type) => (
-                                                    <option key={type.id} value={type.id}>
-                                                        {type.description}
-                                                    </option>
-                                                )))
-
-                                            :
-
-                                            (reasontypes.map((reasontype) => (
-                                                <option key={reasontype.id} value={reasontype.id}>
-                                                    {reasontype.description}
-                                                </option>
-                                            )))
-                                        }
-                                    </Form.Select>
-
-
-                                </Col>
-
-
-                                <Col className="d-flex flex-row">
-                                    <Form.Control
-                                        type="text"
-                                        value={reasonItem.description}
-                                        disabled={props.isDisabled}
-                                    />
-
-                                    <Button
-                                        variant="outline-danger"
-                                        className="ms-2"
-                                        onClick={handleMinusReasonClick}
-                                        disabled={props.isDisabled}
-                                    >
-                                        <span class="material-symbols-outlined">
-                                            remove
-                                        </span>
-                                    </Button>
-                                </Col>
-                            </Row>
-                        ))
-                        */}
-
-                    </Form.Group>
-
-                </Card.Body>
-            </Card>
-
-
-
-
-
-
-            {/*
-            <h3>Motivação</h3>
-            <Card className="my-3" hidden>
-                <Card.Body>
-                    <Form.Group className="pb-2">
-                        <Row className="mb-2">
-                            <Col className="col-4">
-                                <Form.Label controlId="form-label-reason">Objeto de trabalho policial</Form.Label>
-                            </Col>
-                            <Col>
-                                <Form.Label controlId="form-label-reason">Descrição</Form.Label>
-                            </Col>
-                            <Col className="d-flex flex-row-reverse">
-                                <Button
-                                    onClick={handleAddReasonClick}
-                                    disabled={props.isDisabled}
-                                >
-                                    Adicionar
-                                </Button>
-                            </Col>
-                        </Row>
-
-                        {reason.map((reasonItem) => (
-                            <Row className="mb-2" key={reasonItem.id}>
-                                <Col className="col-4">
-
-                                    <Form.Select
-                                        disabled={props.isDisabled}
-                                        value={reasonItem.reasonTypeId || ''}
-                                    >
-
-                                        {(props.isDisabled) ? (reasontypes.filter((r) => r.id == reasonItem.reasontype_id)
-                                            .map((type) => (
-                                                <option key={type.id} value={type.id}>
-                                                    {type.description}
-                                                </option>
-                                            ))) :
-                                            (reasontypes.map((reasontype) => (
-                                                <option key={reasontype.id} value={reasontype.id}>
-                                                    {reasontype.description}
-                                                </option>
-                                            )))
-                                        }
-                                    </Form.Select>
-
-
-                                </Col>
-                                <Col className="d-flex flex-row">
-                                    <Form.Control
-                                        type="text"
-                                        value={reasonItem.description}
-                                        disabled={props.isDisabled}
-                                    />
-
-                                    <Button
-                                        variant="outline-danger"
-                                        className="ms-2"
-                                        onClick={handleMinusReasonClick}
-                                        disabled={props.isDisabled}
-                                    >
-                                        <span class="material-symbols-outlined">
-                                            remove
-                                        </span>
-                                    </Button>
-                                </Col>
-                            </Row>
-                        ))}
                     </Form.Group>
                 </Card.Body>
             </Card>
-            */}
-
             <Button variant="primary" type="submit" hidden={props.isDisabled}>
                 {props.action == 'edit' ? 'Registrar Edições' : 'Cadastrar'}
             </Button>
         </Form >
     </>
 }
-

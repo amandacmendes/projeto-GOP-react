@@ -55,17 +55,12 @@ function Content(props) {
     const [errorMessage, setErrorMessage] = useState();
 
     const [officers, setOfficers] = useState([]);
+    const [resources, setResources] = useState([]);
 
     const [reason, setReason] = useState([]);
     const [reasontypes, setReasonTypes] = useState([]);
-    const [resources, setResources] = useState([]);
 
 
-
-    const [reasonsObj, setReasonsObj] = useState({ index: 1, description: '', reasontype_id: 0 });
-
-
-    const [reasonSize, setReasonSize] = useState(1);
 
     const operationService = new OperationService();
     const reasonService = new ReasonService();
@@ -111,7 +106,7 @@ function Content(props) {
         //for View and Edit - load operation from db
         if (!!props.id) {
             //fetchOperation(props.id);
-            
+
             console.log('reason: ')
             console.log(reason)
         }
@@ -119,7 +114,7 @@ function Content(props) {
 
     // If new
     function initializeReason() {
-        const initialReason = [{ id: null, description: '', reasontype_id: reasontypes[0]?.id || null }];
+        const initialReason = [{ id: null, description: '', reasontype_id: 1, operation_id: null }];
         setReason(initialReason);
     }
 
@@ -150,15 +145,35 @@ function Content(props) {
         initializeReason();
     }, []);
 
+    //Handle add button on reason
     function handleAddReasonClick() {
-        setReasonSize(reasonSize + 1)
-        //setReasonsObj(...reasonsObj, { index: reasonsObj.length+1, description: '', reasontype_id: 0 })
+        const newReasonArr = [...reason, { id: null, description: '', reasontype_id: 1, operation_id: props.id }];
+        console.log('click +');
+        console.log(newReasonArr);
+        setReason(newReasonArr);
     }
+    //Handle delete button on reason items
     function handleMinusReasonClick(index) {
-        
+        const newReasonArr = [...reason.slice(0, index), ...reason.slice(index + 1)];
+        console.log('click -');
+        console.log(newReasonArr);
+        setReason(newReasonArr);
     }
-    const handleReasonInput = (e) => {
-        //setReason(e.target.value)
+    // Handle reasontype change
+    function handleReasonTypeChange(e, index) {
+        const newReasonArr = [...reason];
+        newReasonArr[index].reasontype_id = parseInt(e.target.value); // Assuming the reasontype_id is an integer
+        console.log('reasontype change: ');
+        console.log(newReasonArr);
+        setReason(newReasonArr);
+    }
+    // Handle reason description change
+    function handleReasonDescriptionChange(e, index) {
+        const newReasonArr = [...reason];
+        newReasonArr[index].description = e.target.value;
+        console.log('reasondescription change: ');
+        console.log(newReasonArr);
+        setReason(newReasonArr);
     }
 
 
@@ -177,7 +192,6 @@ function Content(props) {
 
                 }).then((result) => {
                     //Create Officer_Operation
-                    //console.log("officer " + result)
 
                     data.officer_operation_officer_id.forEach(async of => {
 
@@ -185,7 +199,6 @@ function Content(props) {
                             officer_id: of,
                             operation_id: result.data.id
                         }).then((result) => {
-                            //console.log("officerop " + result)
 
                             //Create Resource_Operation
                             data.operation_resource_id.forEach(async res => {
@@ -195,14 +208,25 @@ function Content(props) {
                                     operation_id: result.data.operation_id
                                 }).then((result) => {
                                     console.log("resourceop " + result)
-                                    navigate('/operation')
-                                }).then((res) => {
+
+                                    const op_id = result.data.operation_id;
 
                                     //Create Reason
-                                    //console.log(data)
+                                    reason.forEach(async reasonItem => {
+                                        var reasonItemEdit = reasonItem;
+                                        reasonItemEdit.operation_id = op_id;
+                                        await reasonService.createReason(reasonItemEdit)
+                                            .then((r) => {
+                                                console.log(r.data)
+                                            });
+                                    });
 
-                                    navigate('/operation')
-                                }).catch((e) => console.log("err resourceop " + e))
+                                }).catch((e) =>
+                                    console.log("err resourceop " + e)
+                                ).finally((r) => {
+                                    console.log('done!!!!!')
+                                    //navigate('/operation')
+                                })
                             });
 
                         }).catch((e) => console.log(e))
@@ -383,41 +407,41 @@ function Content(props) {
                         </Row>
 
 
-                        {Array.from({ length: reasonSize }).map((_, index) => (
-                            <Row className="mb-2" key={index} >
+                        {reason.map((reasonItem, index) => (
+                            <Row className="mb-2" key={index}>
                                 <Col className="col-4">
-                                    <Form.Select disabled={props.isDisabled}  >
-                                        {reasontypes.map((reasontype) => (
+
+                                    <Form.Select
+                                        disabled={props.isDisabled}
+                                        value={reasonItem.reasonTypeId}
+                                        onChange={(e) => { handleReasonTypeChange(e, index) }}
+                                    >
+                                        {(reasontypes.map((reasontype) => (
                                             <option
                                                 key={reasontype.id}
-                                                id={'reasontypeid-' + index}
                                                 value={reasontype.id}
+                                                selected={reasontype.id == reasonItem.reasontype_id ? true : ''}
                                             >
                                                 {reasontype.description}
                                             </option>
-                                        ))
+                                        )))
                                         }
                                     </Form.Select>
                                 </Col>
+
                                 <Col className="d-flex flex-row">
                                     <Form.Control
-                                        key={index}
-                                        id={'reasonid-' + index}
-                                        type="text"
-                                        onChange={(e) => handleReasonInput(e)}
                                         disabled={props.isDisabled}
-                                    // {...register('reason')}
+                                        type="text"
+                                        value={reasonItem.description}
+                                        onChange={(e) => { handleReasonDescriptionChange(e, index) }}
                                     />
-
                                     <Button
+                                        disabled={props.isDisabled}
                                         variant="outline-danger"
                                         className="ms-2"
-                                        onClick={handleMinusReasonClick}
-                                        disabled={props.isDisabled}
-                                    >
-                                        <span class="material-symbols-outlined">
-                                            remove
-                                        </span>
+                                        onClick={() => handleMinusReasonClick(index)}>
+                                        <span className="material-symbols-outlined">remove</span>
                                     </Button>
                                 </Col>
                             </Row>
