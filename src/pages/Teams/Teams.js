@@ -57,7 +57,17 @@ function TableTeams(props) {
     async function getTeams() {
         try {
             const result = await teamsService.getTeamsWithOfficers();
-            setData(Array.from(result.values()))
+
+            const rawData = result;
+            const mappedResult = {};
+
+            rawData.forEach((item) => {
+                mappedResult[item.id] = item;
+            });
+
+            setData(mappedResult)
+
+            //setData(Array.from(result.values()))
         } catch (error) {
             console.log(error)
             navigate('/*');
@@ -198,17 +208,17 @@ function TableTeams(props) {
                 </tr>
             </thead>
             <tbody>
-                {data && data.length > 0 ? (
-                    data.map((data, index) => (
+                {data && Object.keys(data).length > 0 ? (
+                    Object.keys(data).map((id, index) => (
                         <TableContent
-                            key={data.id} // Add a unique key for each TableContent element
-                            id={data.id}
+                            key={data[id].id} // Add a unique key for each TableContent element
+                            id={data[id].id}
                             index={index}
-                            team_name={data.team_name}
-                            team_size={data.officers.length}
-                            viewOperation={async () => handleViewOperation(data.id)}
-                            editOperation={async () => handleEditOperation(data.id)}
-                            deleteOperation={async () => handleDeleteTeam(data.id)}
+                            team_name={data[id].team_name}
+                            team_size={data[id].officers.length}
+                            viewOperation={async () => handleViewOperation(data[id].id)}
+                            editOperation={async () => handleEditOperation(data[id].id)}
+                            deleteOperation={async () => handleDeleteTeam(data[id].id)}
                         />
                     ))
                 ) : (
