@@ -29,11 +29,11 @@ export function Resources() {
                             <InputGroup>
                                 <Form.Control type='text' placeholder='Digite o nome do recurso...'
                                     onChange={(e) => { handleSearch(e.target.value) }}></Form.Control>
-                                <InputGroup.Text id="basic-addon2">
+                                <Button id="basic-addon2">
                                     <span class="material-symbols-outlined">
                                         search
                                     </span>
-                                </InputGroup.Text>
+                                </Button>
                             </InputGroup>
                         </Form>
                         <Button onClick={handleNewTeamClick}>Registrar Novo Recurso</Button>

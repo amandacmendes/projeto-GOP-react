@@ -1,6 +1,6 @@
 import '../../css/style.css';
 import { ContentBase } from '../../components/ContentBase';
-import { Form, InputGroup, Modal, OverlayTrigger, Stack, Table, Tooltip } from 'react-bootstrap';
+import { Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table, Tooltip } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -16,6 +16,13 @@ export function Operacoes() {
         navigate('new');
     }
 
+    const [filter, setFilter] = useState();
+    const [searchbarValue, setSearchBarValue] = useState(null);
+
+    function search() {
+        setFilter(searchbarValue);
+    }
+
     return (
         <>
             <ContentBase />
@@ -23,19 +30,27 @@ export function Operacoes() {
                 <Stack gap={5}>
                     <h1>Operações Policiais</h1>
                     <div className='d-flex flex-row w-auto justify-content-between'>
-                        <Form className='w-50'>
+                        <span></span>
+                        <Form className='w-50' hidden disabled>
                             <InputGroup>
-                                <Form.Control type='text' placeholder='Pesquisar pelo nome da operação...' ></Form.Control>
-                                <InputGroup.Text id="basic-addon2">
+                                <Form.Control
+                                    type='text'
+                                    placeholder='Pesquisar pelo nome da operação...'
+                                    onChangeCapture={(e) => { setSearchBarValue(e.target.value) }}
+                                    value={searchbarValue}
+                                ></Form.Control>
+                                <Button
+                                    onClick={(e) => { search() }}
+                                >
                                     <span class="material-symbols-outlined">
                                         search
                                     </span>
-                                </InputGroup.Text>
+                                </Button>
                             </InputGroup>
                         </Form>
                         <Button onClick={handleNewOpClick}>Registrar Nova Operação</Button>
                     </div>
-                    <TableOperacoes searchbar="" />
+                    <TableOperacoes searchbar={filter} />
                 </Stack>
             </div>
         </>
@@ -48,9 +63,7 @@ function TableOperacoes(props) {
     const [response, setResponse] = useState('')
     const navigate = useNavigate();
 
-
     const operationService = new OperationService();
-    const auth = new AuthService();
 
     async function getOperations() {
         try {
@@ -66,6 +79,7 @@ function TableOperacoes(props) {
 
     useEffect(() => {
         getOperations();
+        console.log('-a-a-a')
     }, []);
 
     const refreshTable = () => {
@@ -93,7 +107,7 @@ function TableOperacoes(props) {
 
             operationService.deleteCascade({ id: id })
                 .then(() => {
-                    getOperations();
+                    refreshTable();
                 })
 
         } catch (error) {
@@ -101,12 +115,61 @@ function TableOperacoes(props) {
         }
     }
 
+
+
+    const popover = (
+        <Popover id="popover-basic">
+            <Popover.Header as="h3">Pesquisar por nome da operação</Popover.Header>
+            <Popover.Body>
+                <Form>
+                    <InputGroup>
+                        <Form.Control
+                            type="text"
+                            size='sm'
+                            placeholder="Insira o nome da operação"
+                        />
+                        <Button
+                            type='submit'
+                            variant='dark'
+                        >
+                            <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: '16px' }}
+                            > search
+                            </span>
+                        </Button>
+                    </InputGroup>
+                </Form>
+            </Popover.Body>
+        </Popover>
+    );
+
     return <>
         <Table striped bordered hover>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Nome da Operação</th>
+                    <th colSpan={2}>
+                        <div className='d-flex justify-content-between'>
+                            Nome da Operação
+
+                            <OverlayTrigger trigger="click" placement="top" overlay={popover}>
+
+                                <Button
+                                    variant='dark'
+                                    size='sm'
+                                    style={{ height: "20px", width: "20px", padding: "0px" }}
+                                >
+                                    <span
+                                        className="material-symbols-outlined"
+                                        style={{ fontSize: '16px' }}
+                                    > filter_alt
+                                    </span>
+                                </Button>
+                            </OverlayTrigger>
+
+                        </div>
+                    </th>
                     <th>Local da Operação</th>
                     <th>Data Prevista da Operação</th>
                     <th>Status</th>
@@ -140,7 +203,7 @@ function TableOperacoes(props) {
 function TableContent(props) {
     return <tr>
         <td>{props.keys}</td>
-        <td>{props.operation_name}</td>
+        <td colSpan={2}>{props.operation_name}</td>
         <td>{props.operation_place}</td>
         <td>{new Date(Date.parse(props.operation_date)).toLocaleDateString('pt-BR')}</td>
         <td colSpan={1} className='text-center'>
