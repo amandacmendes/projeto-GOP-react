@@ -1,5 +1,5 @@
 import '../../css/style.css';
-import { Button, Form, InputGroup, Modal, Stack, Table } from "react-bootstrap";
+import { Button, Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -115,13 +115,84 @@ function TableTeams(props) {
         }
     }
 
+
+    const [search, setSearch] = useState('')
+
+    const handleSearch = () => {
+        console.log(search)
+        console.log(data)
+
+        const filteredData = Object.keys(data).filter(key =>
+            data[key].team_name.toLowerCase().includes(search.toLowerCase())
+        );
+
+        console.log(filteredData.map(key => data[key]));
+        setData(filteredData.map(key => data[key]))
+
+    }
+
+    const clearFilter = () => {
+        setSearch('')
+        getTeams()
+    }
+
+    const popover = (
+        <Popover id="popover-basic">
+            <Popover.Header as="h3">Pesquisar por Equipe</Popover.Header>
+            <Popover.Body>
+                <InputGroup>
+                    <Form.Control
+                        type="text"
+                        size='sm'
+                        placeholder="Nome da equipe"
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value) }}
+                    />
+                    <Button
+                        type='submit'
+                        variant='dark'
+                        onClick={handleSearch}
+                    >
+                        <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: '16px' }}
+                        > search
+                        </span>
+                    </Button>
+                </InputGroup>
+                <div className='mt-2'>
+                    <a onClick={clearFilter}>Limpar filtro</a>
+                </div >
+            </Popover.Body>
+        </Popover>
+    );
+
     return <>
 
         <Table striped bordered hover>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Nome da Equipe</th>
+                    <th>
+                        <div className='d-flex justify-content-between'>
+
+                            Nome da Equipe
+                            <OverlayTrigger trigger="click" placement="top" overlay={popover}>
+                                <Button
+                                    variant='dark'
+                                    size='sm'
+                                    style={{ height: "20px", width: "20px", padding: "0px" }}
+                                >
+                                    <span
+                                        className="material-symbols-outlined"
+                                        style={{ fontSize: '16px' }}
+                                    > filter_alt
+                                    </span>
+                                </Button>
+                            </OverlayTrigger>
+                        </div>
+
+                    </th>
                     <th>Quantidade Efetivos</th>
                     <th>Ações</th>
                 </tr>
