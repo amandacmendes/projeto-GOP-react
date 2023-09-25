@@ -76,7 +76,8 @@ function Content(props) {
         // for New Operation - load officers, resources and reason types
         await officerService.getOfficersWithTeams()
             .then((result) => {
-                setOfficers(result)
+                const filteredData = result.filter(item => item.status !== 'INACTIVE');
+                setOfficers(filteredData)
             })
             .catch((error) => {
                 console.log(error)
