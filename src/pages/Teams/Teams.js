@@ -26,17 +26,7 @@ export function Teams() {
                 <Stack gap={5}>
                     <h1>Equipes</h1>
                     <div className='d-flex flex-row w-auto justify-content-between'>
-                        <Form className='w-50'>
-                            <InputGroup>
-                                <Form.Control type='text' placeholder='Digite o nome da equipe...'
-                                    onChange={(e) => { handleSearch(e.target.value) }}></Form.Control>
-                                <Button id="basic-addon2">
-                                    <span class="material-symbols-outlined">
-                                        search
-                                    </span>
-                                </Button>
-                            </InputGroup>
-                        </Form>
+                        <span></span>
                         <Button onClick={handleNewTeamClick}>Registrar Nova Equipe</Button>
                     </div>
                     <TableTeams searchbar="" />
