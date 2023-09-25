@@ -26,6 +26,19 @@ class OperationService {
         return result;
     }
 
+    //routes.get('/operation/leadofficer/:id', authMiddleware, operationController.getByLeadOfficerId);
+
+    async getOperationByLeadOfficerId(data) {
+
+        const result = await axios.get(`http://localhost:8080/operation/leadofficer/${data.id}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
 
     async createOperation(data) {
         const result = await api.post('/operation', {

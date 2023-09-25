@@ -7,6 +7,9 @@ import TeamsService from '../../services/TeamsService';
 import OfficerService from '../../services/OfficerService';
 import { useForm } from 'react-hook-form';
 import BottomAlert from '../../components/BottomAlert';
+import OfficerOperationService from '../../services/OfficerOperationService';
+import { StatusTagOfficer } from '../../components/StatusTagOfficer';
+import OperationService from '../../services/OperationService';
 
 export function Officers() {
 
@@ -70,10 +73,12 @@ export function Officers() {
         }
     }
 
+    const officerOperationService = new OfficerOperationService();
+    const operationService = new OperationService();
+
     async function handleDelete(data) {
         try {
             // NEEDSALERT NEEDS ALERT delete
-
             console.log(data)
 
             if (data.id > 0) {
@@ -82,14 +87,40 @@ export function Officers() {
                     .then((result) => {
                         console.log(result)
                     });;
-                await officerService.deleteOfficer(data.id)
-                    .then((result) => {
-                        console.log(result)
-                        getOfficers();
-                    });
+
+                const isLeadOfficer = await operationService.getOperationByLeadOfficerId(data);
+                console.log(isLeadOfficer.status)
+
+                if (isLeadOfficer.status == 200) {
+                    // officer is lead_officer somewhere, so just change status to inactive
+
+                    var updated = { ...data, status: 'INACTIVE' };
+                    console.log(updated);
+
+
+                    await officerService.updateOfficer(updated)
+                        .then((result) => {
+                            console.log('aaa')
+                            console.log(result)
+                            getOfficers();
+                            //"{\"name\":\"HIGOR HENRIQUE\",\"team_id\":1}"
+
+                        });
+
+                } else {
+
+                    await officerService.deleteOfficer(data.id)
+                        .then((result) => {
+                            console.log(result)
+                            getOfficers();
+                        });
+                }
             }
+
         } catch (error) {
+
             console.error(error);
+
         }
     }
 
@@ -190,6 +221,7 @@ export function Officers() {
                                         id={data[id].id}
                                         team_name={data[id].team ? data[id].team.team_name : ''}
                                         name={data[id].name}
+                                        status={data[id].status}
                                         editOperation={async () => handleEdit(data[id])}
                                         deleteOperation={async () => handleDelete(data[id])}
                                     />
@@ -240,17 +272,28 @@ function TableContent(props) {
             <td>{props.id}</td>
             <td>{props.name}</td>
             <td>{props.team_name}</td>
+            <td>
+                <StatusTagOfficer status={props.status} />
+            </td>
             <td colSpan={1}>
                 <div>
 
-                    <Button variant="outline-primary" size='sm'
-                        onClick={props.editOperation}>
+                    <Button
+                        variant="outline-primary"
+                        size='sm'
+                        onClick={props.editOperation}
+                        disabled={props.status == 'ACTIVE' ? false : true}
+                    >
                         <span className="material-symbols-outlined">
                             edit
                         </span>
                     </Button>{' '}
-                    <Button variant="outline-danger" size='sm'
-                        onClick={props.deleteOperation}>
+                    <Button
+                        variant="outline-danger"
+                        size='sm'
+                        onClick={props.deleteOperation}
+                        disabled={props.status == 'ACTIVE' ? false : true}
+                    >
                         <span className="material-symbols-outlined">
                             delete
                         </span>

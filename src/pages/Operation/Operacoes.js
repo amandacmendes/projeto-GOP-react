@@ -179,7 +179,8 @@ function TableOperacoes(props) {
                 {data && data.length > 0
                     ? data.map((data, index) => (
                         <TableContent
-                            keys={index}
+                            keys={data.id}
+                            index={data.index}
                             operation_name={data.operation_name}
                             operation_place={data.operation_place}
                             operation_date={data.operation_date ? data.operation_date : data.operation_planned_date}

@@ -114,7 +114,8 @@ class OfficerService {
     async updateOfficer(data) {
         const result = await api.put(`/officer/${data.id}`, {
             name: data.name,
-            team_id: data.team_id
+            team_id: data.team_id,
+            status: data.status
         }, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
