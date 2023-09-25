@@ -195,7 +195,7 @@ function TableOperacoes(props) {
                     </Button>
                 </InputGroup>
                 <div className='mt-2'>
-                    <a onClick={clearFilter}>Limpar filtro</a>
+                    <a href="#" class="text-primary" onClick={clearFilter}>Limpar filtro</a>
                 </div >
             </Popover.Body>
         </Popover>
