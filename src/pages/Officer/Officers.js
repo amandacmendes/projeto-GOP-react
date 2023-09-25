@@ -10,7 +10,13 @@ import { useForm } from 'react-hook-form';
 export function Officers() {
 
     function handleNewOfficer() {
-
+        try {
+            setOfficer({ id: null })
+            setShowModalOfficer(true)
+            setModalAction('new')
+        } catch (error) {
+            console.error(error);
+        }
     }
 
 
