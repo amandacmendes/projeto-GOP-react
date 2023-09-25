@@ -35,7 +35,7 @@ setAlert({ show: true, variant: 'success', message: result.data.message });
 
 3 - Then render it 
 
-<CustomAlert
+<BottomAlert
 show={alert.show}
 variant={alert.variant}
 message={alert.message}

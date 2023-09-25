@@ -154,7 +154,6 @@ function TableOperacoes(props) {
                             Nome da Operação
 
                             <OverlayTrigger trigger="click" placement="top" overlay={popover}>
-
                                 <Button
                                     variant='dark'
                                     size='sm'
