@@ -2,6 +2,18 @@ import { api } from "./api";
 
 class OfficerService {
 
+    async getById(officer) {
+        
+        const result = await api.get(`/officer/${officer.id}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
+
     async getOfficers() {
         const result = await api.get('/officer', {
             headers: {

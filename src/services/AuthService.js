@@ -16,6 +16,8 @@ class AuthService {
                 }).then((response) => {
                     const data = response.data;
                     sessionStorage.setItem('token', data.accessToken);
+                    sessionStorage.setItem('id', data.id);
+
                     resolve();
                 }).catch((error) => {
                     console.log(error)

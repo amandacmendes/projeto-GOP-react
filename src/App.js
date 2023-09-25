@@ -14,6 +14,7 @@ import { Resources } from './pages/Resources/Resources';
 import { ResourcesNew } from './pages/Resources/ResourcesNew';
 import { TeamsNew } from './pages/Teams/TeamsNew';
 import { Officers } from './pages/Officer/Officers';
+import { Profile } from './pages/Profile/Profile';
 
 //import { Teams } from './pages/Teams/Teams';
 //import { TeamsView } from './pages/Teams/TeamsView';
@@ -52,7 +53,7 @@ function App() {
                     
           <Route path='/officer' element={isAuthenticated ? <Officers /> : <Navigate to="/login" />}></Route>
 
-          {/* escrever paths pra =>  /profile */}
+          <Route path='/profile' element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}></Route>
 
         </Routes>
       </Router>
