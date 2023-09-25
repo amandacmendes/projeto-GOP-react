@@ -117,7 +117,6 @@ export function Officers() {
         <Popover id="popover-basic">
             <Popover.Header as="h3">Pesquisar por nome o policial</Popover.Header>
             <Popover.Body>
-
                 <InputGroup>
                     <Form.Control
                         type="text"
@@ -137,12 +136,10 @@ export function Officers() {
                         > search
                         </span>
                     </Button>
-                    <span>
-                        <a onClick={clearFilter}>Limpar filtro</a>
-
-                    </span>
-
                 </InputGroup>
+                <div className='mt-2'>
+                    <a onClick={clearFilter}>Limpar filtro</a>
+                </div >
             </Popover.Body>
         </Popover>
     );
@@ -163,21 +160,23 @@ export function Officers() {
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Nome
-
-                                    <OverlayTrigger trigger="click" placement="top" overlay={popover}>
-                                        <Button
-                                            variant='dark'
-                                            size='sm'
-                                            style={{ height: "20px", width: "20px", padding: "0px" }}
-                                        >
-                                            <span
-                                                className="material-symbols-outlined"
-                                                style={{ fontSize: '16px' }}
-                                            > filter_alt
-                                            </span>
-                                        </Button>
-                                    </OverlayTrigger>
+                                <th>
+                                    <div className='d-flex justify-content-between'>
+                                        Nome
+                                        <OverlayTrigger trigger="click" placement="top" overlay={popover}>
+                                            <Button
+                                                variant='dark'
+                                                size='sm'
+                                                style={{ height: "20px", width: "20px", padding: "0px" }}
+                                            >
+                                                <span
+                                                    className="material-symbols-outlined"
+                                                    style={{ fontSize: '16px' }}
+                                                > filter_alt
+                                                </span>
+                                            </Button>
+                                        </OverlayTrigger>
+                                    </div>
                                 </th>
                                 <th>Equipe</th>
                                 <th>Ações</th>
