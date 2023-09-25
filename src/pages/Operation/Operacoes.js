@@ -152,7 +152,7 @@ function TableOperacoes(props) {
                         <Form.Control
                             type="text"
                             size='sm'
-                            placeholder="Insira o nome da operação"
+                            placeholder="Informe o nome da operação"
                             value={search}
                             onChange={(e) => { setSearch(e.target.value) }}
                         />
