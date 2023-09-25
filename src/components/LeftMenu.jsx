@@ -33,14 +33,19 @@ export function LeftMenu() {
             </a>
             <br />
 
+            <a className="menu-item" href="/officer">
+                Policiais
+            </a>
             <a className="menu-item" href="/team">
                 Equipes Policiais
             </a>
             <a className="menu-item" href="/resources">
                 Viaturas e outros Recursos 
             </a>
+            
+            <br />            
             <a className="menu-item" href="/profile">
-                Perfil
+                Meu Perfil
             </a>
             <a className="menu-item" onClick={handleLogout}>
                 Sair do sistema
