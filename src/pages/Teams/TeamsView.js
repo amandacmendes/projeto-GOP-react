@@ -4,7 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TeamsService from "../../services/TeamsService";
 import OfficerService from "../../services/OfficerService";
-import { useForm } from "react-hook-form";
+import { useForm } from 'react-hook-form';
+
 
 export function TeamsView(props) {
 
@@ -16,7 +17,6 @@ export function TeamsView(props) {
     if (props.pagetitle) {
         pagetitle = props.pagetitle;
     }
-
     if (params.action === 'view') {
         pagetitle = 'Visualizar Equipe'
         isDisabled = true;
@@ -47,6 +47,8 @@ export function TeamsView(props) {
 function Content(props) {
 
     const navigate = useNavigate();
+    const { handleSubmit, register, formState: { errors } } = useForm();
+
 
     const [teamName, setTeamName] = useState('');
     const [selectedOfficers, setSelectedOfficers] = useState([]);
@@ -55,7 +57,6 @@ function Content(props) {
     const teamService = new TeamsService();
     const officerService = new OfficerService();
 
-    //Fetch all officers
     async function fetchAllOfficers() {
         await officerService.getOfficers()
             .then((result) => {
@@ -63,43 +64,130 @@ function Content(props) {
             })
             .catch((error) => {
                 console.log(error)
-            });
+            })
+
+        if (!!props.id) {
+            await teamService.getTeamsWithOfficers()
+                .then((data) => {
+                    data.forEach((d) => {
+                        if (d.id == props.id) {
+                            setTeamName(d.team_name)
+
+                            var selOfficers = d.officers.reduce((acc, officer) => {
+                                acc[officer.id] = officer;
+                                return acc;
+                            }, {})
+
+                            setSelectedOfficers(selOfficers)
+                        }
+                    })
+
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+        }
     }
 
-
     // Handle checkbox changes
-    const handleCheckboxChange = (officer) => {
-        const updatedOfficers = selectedOfficers.includes(officer)
-            ? selectedOfficers.filter((id) => id !== officer.id)
-            : [...selectedOfficers, officer];
+    const handleCheckboxChange = (e, officer) => {
 
-        setSelectedOfficers(updatedOfficers);
+        if (!selectedOfficers.hasOwnProperty(e.target.value)) {
+            //include officer in selectedOfficers list
+            setSelectedOfficers({
+                ...selectedOfficers,
+                [e.target.value]: officer,
+            });
+            console.log(selectedOfficers)
+
+        } else {
+            //exclude officer from selectedOfficers list 
+            const updatedOfficers = { ...selectedOfficers };
+            delete updatedOfficers[e.target.value];
+            setSelectedOfficers(updatedOfficers);
+            console.log(selectedOfficers)
+        }
+
     };
 
     // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const onSubmit = async (e) => {
+        //e.preventDefault();
 
-        // Here, you can handle creating the team with the selected officers and teamName
-        console.log('Team Name:', teamName);
-        
-        console.log('Selected Officers:', selectedOfficers);
-
-        await teamService.create(teamName, selectedOfficers)
+        // Update team
+        await teamService.update({ id: props.id, team_name: teamName })
             .then((result) => {
-                console.log('Team Created! ' + result)
+                console.log('Team Updated! ')
             }).catch((error) => {
                 console.log(error)
             });
+
+        // Bulk Update Officers List
+        // NEEDS_ALERT : Isto irá retirar policiais de outro time. Deseja continuar? 
+        const selectedOfficersNewTeamId = { ...selectedOfficers };
+
+        //origOfficers = officers.reduce    - const origOfficers = { ...officers };
+        const origOfficers = officers.reduce((acc, officer) => {
+            acc[officer.id] = officer;
+            return acc;
+        }, {})
+
+        var allOfficersUpdateObj = { ...selectedOfficersNewTeamId };
+
+        console.log("-----")
+        console.log(origOfficers)
+        console.log("-----")
+        console.log("-----")
+        console.log(selectedOfficers)
+        console.log("-----")
+
+        // Sets this team_id in all selected officers 
+        Object.keys(selectedOfficersNewTeamId).forEach((officerId) => {
+            selectedOfficersNewTeamId[officerId].team_id = props.id;
+        });
+
+        //If any originalOfficer is not in selected officers BUT origOfficer.team_id == props.id, update with ''
+        Object.keys(origOfficers).forEach((officerId) => {
+
+            console.log(origOfficers[officerId].id + " original: (officer_name:" + origOfficers[officerId].name + "team_id " + origOfficers[officerId].team_id)
+
+            if (selectedOfficersNewTeamId[officerId]) {
+                console.log(selectedOfficersNewTeamId[officerId].id + " selected w new team id: (officer_name:" + selectedOfficersNewTeamId[officerId].name + "team_id " + origOfficers[officerId].team_id)
+            } else {
+                console.log(" not exists in selectedOfficersNewTeamId")
+
+                if (origOfficers[officerId].team_id == props.id) {
+                    console.log("but its id is " + origOfficers[officerId].team_id)
+                    console.log("So it should be set to '' ")
+                    origOfficers[officerId].team_id = null;
+                    allOfficersUpdateObj[officerId] = origOfficers[officerId]; // Add the officer to allOfficersUpdateObj
+                }
+            }
+        });
+
+        console.log("All Officers to Update: ")
+        console.log(allOfficersUpdateObj)
+
+        await officerService.bulkUpdateOfficer(Object.values(allOfficersUpdateObj))
+            .then((result) => {
+                console.log('All officers Updated! ')
+            }).catch((error) => {
+                console.log(error)
+            });
+
     };
 
     useEffect(() => {
-        fetchAllOfficers()
+        fetchAllOfficers();
+        console.log('selectedOfficers: ')
+        console.log(selectedOfficers)
+        console.log('officers: ')
+        console.log(officers)
     }, []);
 
     return (
 
-        <Form className="w-100" noValidate onSubmit={handleSubmit} >
+        <Form className="w-100" noValidate onSubmit={handleSubmit(onSubmit)} >
             <Card className="mb-3">
                 <Card.Body>
                     <Form.Group className="pb-2">
@@ -121,19 +209,24 @@ function Content(props) {
                             {officers.map((officer) => (
                                 <ListGroup.Item key={officer.id}>
                                     <Form.Check
-                                        type="checkbox"
+                                        id={officer.id}
+                                        key={officer.id}
+                                        type={"checkbox"}
                                         value={officer.id}
-                                        checked={selectedOfficers.includes(officer)}
-                                        onChange={() => handleCheckboxChange(officer)}
+                                        checked={selectedOfficers.hasOwnProperty(officer.id)}
+                                        onChange={(e) => handleCheckboxChange(e, officer)}
                                         disabled={props.isDisabled}
                                         label={officer.name}
+                                        //{...register('team_officers')}
                                     />
                                 </ListGroup.Item>
                             ))}
                         </ListGroup>
                     </Form.Group>
 
-                    <Button variant="primary" type="submit">Cadastrar</Button>
+                    <Button variant="primary" type="submit" hidden={props.isDisabled}>
+                        {props.action == 'edit' ? 'Registrar Edições' : 'Cadastrar'}
+                    </Button>
                 </Card.Body>
             </Card>
         </Form>

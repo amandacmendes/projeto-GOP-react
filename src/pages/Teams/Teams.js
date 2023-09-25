@@ -4,12 +4,12 @@ import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import TeamsService from '../../services/TeamsService';
+import OfficerService from '../../services/OfficerService';
 
 export function Teams() {
 
+    const [search, setSearch] = useState('');
     const navigate = useNavigate();
-
-    const [search, setSearch] = useState();
 
     function handleNewTeamClick() {
         navigate('new');
@@ -30,11 +30,11 @@ export function Teams() {
                             <InputGroup>
                                 <Form.Control type='text' placeholder='Digite o nome da equipe...'
                                     onChange={(e) => { handleSearch(e.target.value) }}></Form.Control>
-                                <InputGroup.Text id="basic-addon2">
+                                <Button id="basic-addon2">
                                     <span class="material-symbols-outlined">
                                         search
                                     </span>
-                                </InputGroup.Text>
+                                </Button>
                             </InputGroup>
                         </Form>
                         <Button onClick={handleNewTeamClick}>Registrar Nova Equipe</Button>
@@ -51,17 +51,13 @@ function TableTeams(props) {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
 
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-    const [confirm, setConfirm] = useState(false);
-
     const teamsService = new TeamsService();
+    const officerService = new OfficerService();
 
     async function getTeams() {
         try {
             const result = await teamsService.getTeamsWithOfficers();
-            setData(result)
+            setData(Array.from(result.values()))
         } catch (error) {
             console.log(error)
             navigate('/*');
@@ -90,11 +86,29 @@ function TableTeams(props) {
 
     async function handleDeleteTeam(id) {
         try {
-            console.log('----' + id)
-            await teamsService.deleteTeam(id)
-                .then((data) => {
-                    console.log(data)
+
+            const officers = data.filter((thisTeam) => thisTeam.id == id)[0].officers
+            console.log(officers)
+
+            const updatedOfficers = officers.map(officer => ({
+                ...officer,
+                team_id: null
+            }));
+
+            // Bulk Update: 
+            const updatePromises = updatedOfficers.map((officer) => officerService.updateOfficer(officer));
+
+            Promise.all(updatePromises)
+                .then((result) => {
+                    console.log('All officers updated successfully.');
+                    teamsService.delete(id);
+                    return result;
                 })
+                .catch((error) => {
+                    console.error(`Error updating officers: ${error}`);
+                });
+
+            getTeams();
 
         } catch (error) {
             console.error(error);
@@ -102,21 +116,6 @@ function TableTeams(props) {
     }
 
     return <>
-
-        <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-                <Modal.Title>Deletar equipe </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>Tem certeza de que deseja deletar esta equipe?</Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Cancelar
-                </Button>
-                <Button variant="danger" onClick={handleDeleteTeam}>
-                    Deletar
-                </Button>
-            </Modal.Footer>
-        </Modal>
 
         <Table striped bordered hover>
             <thead>
@@ -128,30 +127,34 @@ function TableTeams(props) {
                 </tr>
             </thead>
             <tbody>
-
-                {data && data.length > 0
-                    ? data.map((data, index) => (
+                {data && data.length > 0 ? (
+                    data.map((data, index) => (
                         <TableContent
-                            keys={index}
+                            key={data.id} // Add a unique key for each TableContent element
+                            id={data.id}
+                            index={index}
                             team_name={data.team_name}
                             team_size={data.officers.length}
-                            viewOperation={async () =>
-                                handleViewOperation(data.id)}
+                            viewOperation={async () => handleViewOperation(data.id)}
                             editOperation={async () => handleEditOperation(data.id)}
                             deleteOperation={async () => handleDeleteTeam(data.id)}
                         />
                     ))
-                    : <p className="text-center">Não existe nenhuma equipe cadastrada!</p>
-                }
-
+                ) : (
+                    <tr>
+                        <td colSpan="5" className="text-center">
+                            Não existe nenhuma equipe cadastrada!
+                        </td>
+                    </tr>
+                )}
             </tbody>
         </Table>
     </>
 }
 
 function TableContent(props) {
-    return <tr>
-        <td>{props.keys}</td>
+    return <tr key={props.id}>
+        <td>{props.index}</td>
         <td>{props.team_name}</td>
         <td>{props.team_size}</td>
         <td>
