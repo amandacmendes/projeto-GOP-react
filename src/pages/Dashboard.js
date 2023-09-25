@@ -104,8 +104,8 @@ function OperationsByMonth() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="number_operation_per_month" fill="#007bff" />
-                <Bar dataKey="number_finished_operations_per_month" fill="#2e5575" />
+                <Bar dataKey="number_operation_per_month" stackId='a' fill="#007bff" />
+                <Bar dataKey="number_finished_operations_per_month" stackId='a' fill="#2e5575" />
             </BarChart>
         </ResponsiveContainer>
     </div>);
