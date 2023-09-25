@@ -83,6 +83,7 @@ function OperationsByMonth() {
                 }));
 
                 setData(operationsForChart);
+                console.log(operationsForChart)
             } catch (error) {
                 console.error(error);
             }
@@ -94,7 +95,10 @@ function OperationsByMonth() {
 
     return (<div>
 
-        <h2 className='py-2'>Operations by Month</h2>
+        <div className='py-2 text-center'>
+            <h2>Produtividade Mensal </h2>
+            <h4 >Operações Abertas e Finalizadas por Mês</h4>
+        </div>
 
         <ResponsiveContainer width="100%" height={300}>
             <BarChart
