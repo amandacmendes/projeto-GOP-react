@@ -87,6 +87,18 @@ class OfficerService {
         return result;
     }
 
+    async deleteOfficerOperationByOfficerId(data) {
+        const oid = data.id;
+        const result = await api.delete(`/officeroperation/officer/${oid}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
+
     async updateOfficer(data) {
         const result = await api.put(`/officer/${data.id}`, {
             name: data.name,

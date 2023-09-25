@@ -49,8 +49,7 @@ function App() {
           <Route path='/resources' element={isAuthenticated ? <Resources /> : <Navigate to="/login" />}></Route>
           <Route path='/resources/new' element={isAuthenticated ? <ResourcesNew pagetitle="Novo Recurso" /> : <Navigate to="/login" />}></Route>
           <Route path='/resources/:id/:action' useParams={['id', 'action']} element={isAuthenticated ? <ResourcesNew /> : <Navigate to="/login" />}></Route>
-          
-          
+                    
           <Route path='/officer' element={isAuthenticated ? <Officers /> : <Navigate to="/login" />}></Route>
 
           {/* escrever paths pra =>  /profile */}

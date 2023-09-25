@@ -5,71 +5,35 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import TeamsService from '../../services/TeamsService';
 import OfficerService from '../../services/OfficerService';
+import { useForm } from 'react-hook-form';
 
 export function Officers() {
 
-    const [search, setSearch] = useState('');
-    const navigate = useNavigate();
+    function handleNewOfficer() {
 
-    function handleNewTeamClick() {
-        navigate('new');
     }
 
-    function handleSearch(e) {
-        setSearch(e);
-    }
-
-    return (
-        <>
-            <ContentBase />
-            <div className='container'>
-                <Stack gap={5}>
-                    <h1>Policiais</h1>
-                    <div className='d-flex flex-row w-auto justify-content-between'>
-                        <Form className='w-50'>
-                            <InputGroup>
-                                <Form.Control
-                                    type='text'
-                                    placeholder='Digite o nome do policial...'
-                                    onChange={(e) => { handleSearch(e.target.value) }}
-                                    value={this.state.search}
-                                ></Form.Control>
-                                <Button id="basic-addon2">
-                                    <span class="material-symbols-outlined">
-                                        search
-                                    </span>
-                                </Button>
-                            </InputGroup>
-                        </Form>
-                        <Button onClick={handleNewTeamClick}>Registrar Novo Policial</Button>
-                    </div>
-                    <TableOfficers searchbar="" />
-                </Stack>
-            </div>
-        </>
-    );
-}
-
-function TableOfficers(props) {
 
     const navigate = useNavigate();
+
     const [data, setData] = useState([]);
 
-    const teamsService = new TeamsService();
+    const [showModalOfficer, setShowModalOfficer] = useState(false);
+
+    const [officer, setOfficer] = useState([])
+    const [modalAction, setModalAction] = useState('');
+
     const officerService = new OfficerService();
 
     async function getOfficers() {
         try {
             await officerService.getOfficersWithTeams()
                 .then((result) => {
-
                     const mappedResult = {};
                     result.forEach((item) => {
                         mappedResult[item.id] = item;
                     });
-
                     setData(mappedResult)
-                    console.log(mappedResult)
                 });
         } catch (error) {
             console.log(error)
@@ -81,110 +45,217 @@ function TableOfficers(props) {
         getOfficers();
     }, []);
 
-    async function handleEditOperation(id) {
+    async function handleEdit(data) {
         try {
-            navigate(`${id}/edit`)
+            setOfficer(data)
+            setShowModalOfficer(true)
+            setModalAction('edit')
         } catch (error) {
             console.error(error);
         }
     }
 
-    async function handleViewOperation(id) {
-        try {
-            navigate(`${id}/view`)
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    async function handleDeleteTeam(id) {
+    async function handleDelete(data) {
         try {
 
-            const officers = data.filter((thisTeam) => thisTeam.id == id)[0].officers
-            console.log(officers)
+            // NEEDSALERT NEEDS ALERT delete
 
-            const updatedOfficers = officers.map(officer => ({
-                ...officer,
-                team_id: null
-            }));
+            console.log(data)
 
-            // Bulk Update: 
-            const updatePromises = updatedOfficers.map((officer) => officerService.updateOfficer(officer));
+            if (data.id > 0) {
 
-            Promise.all(updatePromises)
-                .then((result) => {
-                    console.log('All officers updated successfully.');
-                    teamsService.delete(id);
-                    return result;
-                })
-                .catch((error) => {
-                    console.error(`Error updating officers: ${error}`);
-                });
+                await officerService.deleteOfficerOperationByOfficerId(data)
+                    .then((result) => {
+                        console.log(result)
+                        getOfficers();
+                    });;
 
-            getOfficers();
+                await officerService.deleteOfficer(data.id)
+                    .then((result) => {
+                        console.log(result)
+                        getOfficers();
+                    });
+            }
 
         } catch (error) {
             console.error(error);
         }
     }
 
-    return <>
+    return (
+        <>
+            <ContentBase />
+            <div className='container'>
+                <Stack gap={5}>
+                    <div className='d-flex flex-row w-auto justify-content-between'>
+                        <h1>Policiais</h1>
+                        <div>
+                            <Button onClick={handleNewOfficer}>Registrar Novo Policial</Button>
+                        </div>
+                    </div>
 
-        <Table striped bordered hover>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nome </th>
-                    <th>Equipe</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {Object.keys(data).length > 0 ? (
-                    Object.keys(data).map((id) => (
-                        <TableContent
-                            key={id}
-                            id={data[id].id}
-                            team_name={data[id].team ? data[id].team.team_name : ''}
-                            name={data[id].name}
-                            viewOperation={async () => handleViewOperation(data.id)}
-                            editOperation={async () => handleEditOperation(data.id)}
-                            deleteOperation={async () => handleDeleteTeam(data.id)}
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nome </th>
+                                <th>Equipe</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.keys(data).length > 0 ? (
+                                Object.keys(data).map((id) => (
+                                    <TableContent
+                                        key={id}
+                                        id={data[id].id}
+                                        team_name={data[id].team ? data[id].team.team_name : ''}
+                                        name={data[id].name}
+                                        editOperation={async () => handleEdit(data[id])}
+                                        deleteOperation={async () => handleDelete(data[id])}
+                                    />
+
+
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center">
+                                        Não existe nenhum policial cadastrado!
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </Table>
+                    {(showModalOfficer) ?
+                        <ModalOfficer
+                            officer={officer}
+                            action={modalAction}
+                            showModal={showModalOfficer}
+                            setShowModal={setShowModalOfficer}
                         />
-                    ))
-                ) : (
-                    <tr>
-                        <td colSpan="5" className="text-center">
-                            Não existe nenhum policial cadastrado!
-                        </td>
-                    </tr>
-                )}
-            </tbody>
-        </Table>
-    </>
+                        : ''
+                    }
+                </Stack>
+            </div>
+        </>
+    );
 }
 
 function TableContent(props) {
-    return <tr key={props.id}>
-        <td>{props.id}</td>
-        <td>{props.name}</td>
-        <td>{props.team_name}</td>
-        <td colSpan={1}>
-            <div>
+    return (
+        <tr key={props.id}>
+            <td>{props.id}</td>
+            <td>{props.name}</td>
+            <td>{props.team_name}</td>
+            <td colSpan={1}>
+                <div>
 
-                <Button variant="outline-primary" size='sm'
-                    onClick={props.editOperation}>
-                    <span class="material-symbols-outlined">
-                        edit
-                    </span>
-                </Button>{' '}
-                <Button variant="outline-danger" size='sm'
-                    onClick={props.deleteOperation}>
-                    <span class="material-symbols-outlined">
-                        delete
-                    </span>
-                </Button>{' '}
-            </div>
-        </td>
-    </tr>
+                    <Button variant="outline-primary" size='sm'
+                        onClick={props.editOperation}>
+                        <span class="material-symbols-outlined">
+                            edit
+                        </span>
+                    </Button>{' '}
+                    <Button variant="outline-danger" size='sm'
+                        onClick={props.deleteOperation}>
+                        <span class="material-symbols-outlined">
+                            delete
+                        </span>
+                    </Button>{' '}
+                </div>
+            </td>
+        </tr>
+    )
+}
+
+function ModalOfficer(props) {
+
+    const [officer, setOfficer] = useState({ id: null, name: '', team_id: null })
+    const [team, setTeam] = useState([]);
+
+    const { showModal, setShowModal, action } = props;
+
+    const { handleSubmit, register, formState: { errors } } = useForm();
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const teamService = new TeamsService();
+
+    function loadData() {
+
+        const team = teamService.getAllTeams()
+            .then((result) => {
+                setTeam(result.data)
+            })
+
+        if (props.officer.id > 0) {
+            console.log('LOAD DATA')
+            console.log(props.officer)
+            setOfficer({ id: props.officer.id, name: props.officer.name, team_id: props.officer.team_id })
+        }
+    }
+
+    const onSubmit = (data) => {
+        try {
+
+        } catch (error) {
+
+        }
+    }
+
+    return (
+        <>
+            <Modal show={showModal} onHide={() => setShowModal(false)} >
+                <Form onSubmit={handleSubmit(onSubmit)}>
+                    <Modal.Header>
+                        <Modal.Title>{(action === 'edit') ? 'Editar Policial' : 'Cadastrar Policial'}</Modal.Title>
+                    </Modal.Header>
+
+                    <Modal.Body>
+
+                        <Form.Group>
+                            <Form.Label>Nome do Policial</Form.Label>
+                            <Form.Control
+                                type='text'
+                                className="mb-3"
+                                required={true}
+                                {...register('name')}
+                                value={officer.name}
+                            />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Equipe</Form.Label>
+                            <Form.Select
+                                {...register('team_id')}
+                                onChange={(e) => { setOfficer({ ...officer, team_id: e.target.value }) }}
+                            >
+                                <option>Selecione uma equipe</option>
+                                {team.map((teamItem) => (
+                                    <option
+                                        selected={(teamItem.id == officer.team_id ? true : false)}
+                                        key={teamItem.id}
+                                        value={teamItem.id}
+                                    >
+                                        {teamItem.team_name}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        <Button variant="primary" type="submit">
+                            Salvar
+                        </Button>
+                        <Button variant="secondary" onClick={() => setShowModal(false)}>
+                            Fechar
+                        </Button>
+                    </Modal.Footer>
+
+                </Form>
+            </Modal>
+        </>
+    )
 }
