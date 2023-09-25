@@ -94,30 +94,38 @@ function TableTeams(props) {
         }
     }
 
-    async function handleDeleteTeam(id) {
+    async function handleDeleteTeam(data) {
         try {
+            const id = data.id;
 
-            const officers = data.filter((thisTeam) => thisTeam.id == id)[0].officers
-            console.log(officers)
+            // Update Officers to team_id = null
+            const officers = data.officers
 
-            const updatedOfficers = officers.map(officer => ({
-                ...officer,
-                team_id: null
-            }));
+            if (officers.length > 0) {
 
-            // Bulk Update: 
-            const updatePromises = updatedOfficers.map((officer) => officerService.updateOfficer(officer));
+                const updatedOfficers = officers.map(officer => ({
+                    ...officer,
+                    team_id: null
+                }));
 
-            Promise.all(updatePromises)
-                .then((result) => {
-                    console.log('All officers updated successfully.');
-                    teamsService.delete(id);
-                    return result;
-                })
-                .catch((error) => {
-                    console.error(`Error updating officers: ${error}`);
-                });
+                // Bulk Update Officers: 
+                const updatePromises = updatedOfficers.map((officer) => officerService.updateOfficer(officer));
 
+                await Promise.all(updatePromises)
+                    .then((result) => {
+                        console.log(result)
+                    })
+                    .catch((error) => {
+                        console.error(`Error updating officers: ${error}`);
+                    });
+
+            }
+
+            // Delete team 
+            await teamsService.delete(id);
+
+            setTeamToDelete([]);
+            setShowDeleteModal(false)
             getTeams();
 
         } catch (error) {
@@ -171,11 +179,15 @@ function TableTeams(props) {
                     </Button>
                 </InputGroup>
                 <div className='mt-2'>
-                    <a onClick={clearFilter}>Limpar filtro</a>
+                    <a href="#" class="text-primary" onClick={clearFilter}>Limpar filtro</a>
                 </div >
             </Popover.Body>
         </Popover>
     );
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [teamToDelete, setTeamToDelete] = useState([]);
+
 
     return <>
 
@@ -218,7 +230,11 @@ function TableTeams(props) {
                             team_size={data[id].officers.length}
                             viewOperation={async () => handleViewOperation(data[id].id)}
                             editOperation={async () => handleEditOperation(data[id].id)}
-                            deleteOperation={async () => handleDeleteTeam(data[id].id)}
+                            deleteOperation={() => {
+
+                                setShowDeleteModal(true);
+                                setTeamToDelete(data[id])
+                            }}
                         />
                     ))
                 ) : (
@@ -230,6 +246,25 @@ function TableTeams(props) {
                 )}
             </tbody>
         </Table>
+        <Modal show={showDeleteModal} >
+            <Modal.Header>
+                <Modal.Title>Excluir equipe {teamToDelete.team_name}?</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>Deseja mesmo excluir esta equipe?</p>
+                <p>Esta ação não poderá ser desfeita.</p>
+                <p className='text-danger'>Obs.: A exclusão do registro de equipe não ocasiona a exclusão dos policiais nela.</p>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="danger" onClick={() => handleDeleteTeam(teamToDelete)}>
+                    Excluir
+                </Button>
+                <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                    Fechar
+                </Button>
+            </Modal.Footer>
+
+        </Modal>
     </>
 }
 
