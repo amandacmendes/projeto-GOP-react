@@ -1,6 +1,6 @@
 import '../../css/style.css';
 import { ContentBase } from '../../components/ContentBase';
-import { Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table, Tooltip } from 'react-bootstrap';
+import { Form, InputGroup, Modal, ModalBody, OverlayTrigger, Popover, Stack, Table, Tooltip } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -8,6 +8,9 @@ import OperationService from '../../services/OperationService';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
 import { StatusTag } from '../../components/StatusTag';
+import OfficerOperationService from '../../services/OfficerOperationService';
+import ResourceOperationService from '../../services/ResourceOperationService';
+import ReasonService from '../../services/ReasonService';
 
 export function Operacoes() {
     const navigate = useNavigate();
@@ -88,12 +91,7 @@ function TableOperacoes(props) {
 
     useEffect(() => {
         getOperations();
-        console.log('-a-a-a')
     }, []);
-
-    const refreshTable = () => {
-        getOperations();
-    }
 
     async function handleEditOperation(id) {
         try {
@@ -111,14 +109,42 @@ function TableOperacoes(props) {
         }
     }
 
-    async function handleDeleteOperation(id) {
+    const officerOperationService = new OfficerOperationService();
+    const resourceOperationService = new ResourceOperationService();
+    const reasonService = new ReasonService();
+
+    async function handleDeleteOperation(data) {
         try {
 
-            operationService.deleteCascade({ id: id })
-                .then(() => {
-                    getOperations();
-                })
+            //delete officer operation ok
 
+            const ofOp = await officerOperationService.getByOperationId({ operation_id: data.id })
+
+            if (ofOp.data.length > 0) {
+                await officerOperationService.deleteByOperationId({ operation_id: data.id })
+            }
+
+            // delete resource operation
+            const resOp = await resourceOperationService.getAllByOperationId({ operation_id: data.id });
+            if (resOp.data.length > 0) {
+                await resourceOperationService.deleteByOperationId({ operation_id: data.id })
+            }
+
+            //delete reason        
+            const reasonOp = await reasonService.getReasonfromOperation(data.id)
+            if (reasonOp.data.length > 0) {
+                reasonOp.data.forEach(async (reason) => {
+                    await reasonService.deleteReason(reason);
+                });
+            }
+
+            // delete operation
+            await operationService.deleteOperation(data);
+
+            //Finished! 
+            setOperationToDelete([]);
+            setShowDeleteModal(false)
+            getOperations();
         } catch (error) {
             console.error(error);
         }
@@ -148,32 +174,35 @@ function TableOperacoes(props) {
         <Popover id="popover-basic">
             <Popover.Header as="h3">Pesquisar por nome da operação</Popover.Header>
             <Popover.Body>
-                    <InputGroup>
-                        <Form.Control
-                            type="text"
-                            size='sm'
-                            placeholder="Informe o nome da operação"
-                            value={search}
-                            onChange={(e) => { setSearch(e.target.value) }}
-                        />
-                        <Button
-                            type='submit'
-                            variant='dark'
-                            onClick={handleSearch}
-                        >
-                            <span
-                                className="material-symbols-outlined"
-                                style={{ fontSize: '16px' }}
-                            > search
-                            </span>
-                        </Button>
-                    </InputGroup>
+                <InputGroup>
+                    <Form.Control
+                        type="text"
+                        size='sm'
+                        placeholder="Informe o nome da operação"
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value) }}
+                    />
+                    <Button
+                        type='submit'
+                        variant='dark'
+                        onClick={handleSearch}
+                    >
+                        <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: '16px' }}
+                        > search
+                        </span>
+                    </Button>
+                </InputGroup>
                 <div className='mt-2'>
                     <a onClick={clearFilter}>Limpar filtro</a>
                 </div >
             </Popover.Body>
         </Popover>
     );
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [operationToDelete, setOperationToDelete] = useState([]);
 
     return <>
         <Table striped bordered hover>
@@ -220,7 +249,12 @@ function TableOperacoes(props) {
                             viewOperation={async () =>
                                 handleViewOperation(data[id].id)}
                             editOperation={async () => handleEditOperation(data[id].id)}
-                            deleteOperation={async () => handleDeleteOperation(data[id].id)}
+                            //deleteOperation={async () => handleDeleteOperation(data[id].id)}
+                            deleteOperation={() => {
+                                setShowDeleteModal(true);
+                                setOperationToDelete(data[id])
+                            }
+                            }
                         />
                     )))
                     : (
@@ -234,6 +268,24 @@ function TableOperacoes(props) {
 
             </tbody>
         </Table>
+        <Modal show={showDeleteModal} >
+            <Modal.Header>
+                <Modal.Title>Excluir operação {operationToDelete.operation_name}?</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>Deseja mesmo excluir esta operação?</p>
+                <p>Esta ação não poderá ser desfeita.</p>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="danger" onClick={() => handleDeleteOperation(operationToDelete)}>
+                    Excluir
+                </Button>
+                <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                    Fechar
+                </Button>
+            </Modal.Footer>
+
+        </Modal>
     </>
 }
 
