@@ -146,7 +146,7 @@ export function Officers() {
 
     const popover = (
         <Popover id="popover-basic">
-            <Popover.Header as="h3">Pesquisar por nome o policial</Popover.Header>
+            <Popover.Header as="h3">Pesquisar por nome</Popover.Header>
             <Popover.Body>
                 <InputGroup>
                     <Form.Control
