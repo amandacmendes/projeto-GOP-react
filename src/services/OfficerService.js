@@ -148,7 +148,7 @@ class OfficerService {
         // Use Promise.all to execute all the update promises in parallel
         Promise.all(updatePromises)
             .then((result) => {
-                console.log('All officers updated successfully.');
+                //console.log('All officers updated successfully.');
                 return result;
             })
             .catch((error) => {
