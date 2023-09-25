@@ -215,9 +215,10 @@ export function Officers() {
                         </thead>
                         <tbody>
                             {Object.keys(data).length > 0 ? (
-                                Object.keys(data).map((id) => (
+                                Object.keys(data).map((id, index) => (
                                     <TableContent
                                         key={id}
+                                        index={index+1}
                                         id={data[id].id}
                                         team_name={data[id].team ? data[id].team.team_name : ''}
                                         name={data[id].name}
@@ -269,7 +270,7 @@ export function Officers() {
 function TableContent(props) {
     return (
         <tr key={props.id}>
-            <td>{props.id}</td>
+            <td>{props.index}</td>
             <td>{props.name}</td>
             <td>{props.team_name}</td>
             <td>

@@ -68,17 +68,8 @@ function TableOperacoes(props) {
     async function getOperations() {
         try {
             const result = await operationService.getOperations();
-
-            const rawData = result.data;
-            const mappedResult = {};
-            rawData.forEach((item) => {
-                mappedResult[item.id] = item;
-            });
-
-            setData(mappedResult)
-
-            //console.log(result)
-            //setData(result.data)
+            console.log(result)
+            setData(result.data)
 
         } catch (error) {
             console.error(error);
@@ -116,7 +107,7 @@ function TableOperacoes(props) {
 
             operationService.deleteCascade({ id: id })
                 .then(() => {
-                    getOperations();
+                    refreshTable();
                 })
 
         } catch (error) {
@@ -124,42 +115,22 @@ function TableOperacoes(props) {
         }
     }
 
-    const [search, setSearch] = useState('')
 
-    const handleSearch = () => {
-        console.log(search)
-        console.log(data)
-
-        const filteredData = Object.keys(data).filter(key =>
-            data[key].operation_name.toLowerCase().includes(search.toLowerCase())
-        );
-
-        console.log(filteredData.map(key => data[key]));
-        setData(filteredData.map(key => data[key]))
-
-    }
-
-    const clearFilter = () => {
-        setSearch('')
-        getOperations()
-    }
 
     const popover = (
         <Popover id="popover-basic">
             <Popover.Header as="h3">Pesquisar por nome da operação</Popover.Header>
             <Popover.Body>
+                <Form>
                     <InputGroup>
                         <Form.Control
                             type="text"
                             size='sm'
                             placeholder="Insira o nome da operação"
-                            value={search}
-                            onChange={(e) => { setSearch(e.target.value) }}
                         />
                         <Button
                             type='submit'
                             variant='dark'
-                            onClick={handleSearch}
                         >
                             <span
                                 className="material-symbols-outlined"
@@ -168,9 +139,7 @@ function TableOperacoes(props) {
                             </span>
                         </Button>
                     </InputGroup>
-                <div className='mt-2'>
-                    <a onClick={clearFilter}>Limpar filtro</a>
-                </div >
+                </Form>
             </Popover.Body>
         </Popover>
     );
@@ -207,29 +176,23 @@ function TableOperacoes(props) {
                 </tr>
             </thead>
             <tbody>
-                {Object.keys(data).length > 0 ? (
-                    Object.keys(data).map((id, index) => (
+                {data && data.length > 0
+                    ? data.map((data, index) => (
                         <TableContent
-                            keys={data[id].id}
-                            index={index + 1}
-                            operation_name={data[id].operation_name}
-                            operation_place={data[id].operation_place}
-                            operation_date={data[id].operation_date ? data[id].operation_date : data[id].operation_planned_date}
-                            status={data[id].status}
-                            id={data[id].id}
+                            keys={data.id}
+                            index={data.index}
+                            operation_name={data.operation_name}
+                            operation_place={data.operation_place}
+                            operation_date={data.operation_date ? data.operation_date : data.operation_planned_date}
+                            status={data.status}
+                            id={data.id}
                             viewOperation={async () =>
-                                handleViewOperation(data[id].id)}
-                            editOperation={async () => handleEditOperation(data[id].id)}
-                            deleteOperation={async () => handleDeleteOperation(data[id].id)}
+                                handleViewOperation(data.id)}
+                            editOperation={async () => handleEditOperation(data.id)}
+                            deleteOperation={async () => handleDeleteOperation(data.id)}
                         />
-                    )))
-                    : (
-                        <tr>
-                            <td colSpan="7" className="text-center">
-                                Não existe nenhuma operação cadastrada!
-                            </td>
-                        </tr>
-                    )
+                    ))
+                    : <p className="text-center">Não existe nenhuma operação cadastrada!</p>
                 }
 
             </tbody>
@@ -239,7 +202,7 @@ function TableOperacoes(props) {
 
 function TableContent(props) {
     return <tr>
-        <td>{props.index}</td>
+        <td>{props.keys}</td>
         <td colSpan={2}>{props.operation_name}</td>
         <td>{props.operation_place}</td>
         <td>{new Date(Date.parse(props.operation_date)).toLocaleDateString('pt-BR')}</td>
