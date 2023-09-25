@@ -19,10 +19,10 @@ export function StatusTag(props) {
     const operationService = new OperationService();
 
     if (status == 'OPENED') {
-        type = 'secondary'
+        type = 'primary'
         text = 'Aberta'
     } else if (status == 'TRIGGERED') {
-        type = 'primary'
+        type = 'warning'
         text = 'Deflagrada - Preencher Relatório'
     } else if (status == 'FINISHED') {
         type = 'success'
@@ -33,7 +33,6 @@ export function StatusTag(props) {
     }
 
     function openModal(e) {
-        console.log(id)
         setShowModal(true)
     }
 
@@ -75,14 +74,15 @@ export function StatusTag(props) {
         <>
             {status != 'TRIGGERED'
                 ?
-                <Badge bg={type} onClick={(e) => { openModal(e) }}>{text}</Badge>
+                <Badge bg={type}>{text}</Badge>
                 : <>
                     <Button
+                        style={{ paddingLeft: 0, paddingRight: 0 }}
                         size="sm"
                         variant={type}
                         onClick={(e) => { openModal(e) }}
                     >
-                        {text}
+                        <b>{text}</b>
                     </Button>
                     <Modal show={showModal} >
                         <Form onSubmit={handleSubmit(onSubmit)}>
