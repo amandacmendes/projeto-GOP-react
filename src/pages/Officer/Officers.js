@@ -132,6 +132,7 @@ export function Officers() {
                             action={modalAction}
                             showModal={showModalOfficer}
                             setShowModal={setShowModalOfficer}
+                            getOfficers={getOfficers}
                         />
                         : ''
                     }
@@ -192,8 +193,6 @@ function ModalOfficer(props) {
             })
 
         if (props.officer.id > 0) {
-            console.log('LOAD DATA')
-            console.log(props.officer)
             setOfficer({ id: props.officer.id, name: props.officer.name, team_id: props.officer.team_id })
         }
     }
@@ -207,13 +206,23 @@ function ModalOfficer(props) {
 
                 await officerService.updateOfficer(officer)
                     .then((result) => { console.log(result) })
-                    setShowModal(false);
+
+                setShowModal(false);
+                props.setShowModal(false);
+                props.getOfficers(); // Call the function to reload data
+
 
             } else if (props.action == 'new') {
 
                 await officerService.createOfficer(officer)
                     .then((result) => { console.log(result) })
+                props.setShowModal(false);
+                props.getOfficers(); // Call the function to reload data
+
             }
+
+            props.setShowModal(false);
+            props.getOfficers(); // Call the function to reload data
 
         } catch (error) {
 
@@ -222,7 +231,10 @@ function ModalOfficer(props) {
 
     return (
         <>
-            <Modal show={showModal} onHide={() => setShowModal(false)} >
+            <Modal show={showModal} onHide={() => {
+                props.setShowModal(false);
+                props.getOfficers(); // Call the function to reload data
+            }} >
                 <Form onSubmit={handleSubmit(onSubmit)}>
                     <Modal.Header>
                         <Modal.Title>{(action === 'edit') ? 'Editar Policial' : 'Cadastrar Policial'}</Modal.Title>
