@@ -104,11 +104,13 @@ function Content(props) {
                     arrOfficer = [...arrOfficer, { id: officer_id, team_id: result.data.id }]
                 });
 
-                officerService.bulkUpdateOfficer(arrOfficer).then((result) => {
-                    console.log(result)
-                }).catch((error) => {
-                    console.log(error)
-                });
+                officerService.bulkUpdateOfficer(arrOfficer)
+                    .then((result) => {
+                        console.log(result)
+                        navigate('/team')
+                    }).catch((error) => {
+                        console.log(error)
+                    });
             }).catch((error) => {
                 console.log(error)
             })
