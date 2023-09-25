@@ -1,24 +1,21 @@
 import '../../css/style.css';
-import { Button, Form, InputGroup, Modal, Stack, Table } from "react-bootstrap";
+import { Alert, Button, Form, InputGroup, Modal, NavLink, OverlayTrigger, Popover, Stack, Table } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import TeamsService from '../../services/TeamsService';
 import OfficerService from '../../services/OfficerService';
 import { useForm } from 'react-hook-form';
+import BottomAlert from '../../components/BottomAlert';
 
 export function Officers() {
 
-    function handleNewOfficer() {
-        try {
-            setOfficer({ id: null })
-            setShowModalOfficer(true)
-            setModalAction('new')
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    const [alert, setAlert] = useState({ show: false, variant: 'primary', message: null });
 
+    const handleAlertClose = () => {
+        const updatedAlert = { ...alert, show: false };
+        setAlert(updatedAlert);
+    };
 
     const navigate = useNavigate();
 
@@ -39,10 +36,12 @@ export function Officers() {
                     result.forEach((item) => {
                         mappedResult[item.id] = item;
                     });
+
                     setData(mappedResult)
+
                 });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             navigate('/*');
         }
     }
@@ -51,6 +50,16 @@ export function Officers() {
         getOfficers();
     }, []);
 
+    function handleNewOfficer() {
+        try {
+            setOfficer({ id: null })
+            setShowModalOfficer(true)
+            setModalAction('new')
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
     async function handleEdit(data) {
         try {
             setOfficer(data)
@@ -63,7 +72,6 @@ export function Officers() {
 
     async function handleDelete(data) {
         try {
-
             // NEEDSALERT NEEDS ALERT delete
 
             console.log(data)
@@ -73,20 +81,71 @@ export function Officers() {
                 await officerService.deleteOfficerOperationByOfficerId(data)
                     .then((result) => {
                         console.log(result)
-                        getOfficers();
                     });;
-
                 await officerService.deleteOfficer(data.id)
                     .then((result) => {
                         console.log(result)
                         getOfficers();
                     });
             }
-
         } catch (error) {
             console.error(error);
         }
     }
+
+    const [search, setSearch] = useState('')
+
+    const handleSearch = () => {
+        console.log(search)
+        console.log(data)
+
+        const filteredData = Object.keys(data).filter(key =>
+            data[key].name.toLowerCase().includes(search.toLowerCase())
+        );
+
+        console.log(filteredData.map(key => data[key]));
+        setData(filteredData.map(key => data[key]))
+
+    }
+
+    const clearFilter = () => {
+        setSearch('')
+        getOfficers()
+    }
+
+    const popover = (
+        <Popover id="popover-basic">
+            <Popover.Header as="h3">Pesquisar por nome o policial</Popover.Header>
+            <Popover.Body>
+
+                <InputGroup>
+                    <Form.Control
+                        type="text"
+                        size='sm'
+                        placeholder="Nome do policial"
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value) }}
+                    />
+                    <Button
+                        type='submit'
+                        variant='dark'
+                        onClick={handleSearch}
+                    >
+                        <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: '16px' }}
+                        > search
+                        </span>
+                    </Button>
+                    <span>
+                        <a onClick={clearFilter}>Limpar filtro</a>
+
+                    </span>
+
+                </InputGroup>
+            </Popover.Body>
+        </Popover>
+    );
 
     return (
         <>
@@ -104,7 +163,22 @@ export function Officers() {
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Nome </th>
+                                <th>Nome
+
+                                    <OverlayTrigger trigger="click" placement="top" overlay={popover}>
+                                        <Button
+                                            variant='dark'
+                                            size='sm'
+                                            style={{ height: "20px", width: "20px", padding: "0px" }}
+                                        >
+                                            <span
+                                                className="material-symbols-outlined"
+                                                style={{ fontSize: '16px' }}
+                                            > filter_alt
+                                            </span>
+                                        </Button>
+                                    </OverlayTrigger>
+                                </th>
                                 <th>Equipe</th>
                                 <th>Ações</th>
                             </tr>
@@ -139,11 +213,24 @@ export function Officers() {
                             showModal={showModalOfficer}
                             setShowModal={setShowModalOfficer}
                             getOfficers={getOfficers}
+                            setAlert={setAlert} // Pass the function here
                         />
                         : ''
                     }
                 </Stack>
             </div>
+            {alert.message && (
+                <div style={{ position: "absolute", bottom: 0, right: 0, zIndex: 999 }}>
+                    <Alert
+                        variant={alert.variant}
+                        onClose={handleAlertClose}
+                        dismissible
+                    >
+                        <p>{alert.message}</p>
+                    </Alert>
+                </div>
+            )}
+
         </>
     );
 }
@@ -177,9 +264,9 @@ function TableContent(props) {
 
 function ModalOfficer(props) {
 
+
     const [officer, setOfficer] = useState({ id: null, name: '', team_id: null })
     const [team, setTeam] = useState([]);
-
     const { showModal, setShowModal, action } = props;
 
     const { handleSubmit, register, formState: { errors } } = useForm();
@@ -203,6 +290,7 @@ function ModalOfficer(props) {
         }
     }
 
+
     const onSubmit = async (data) => {
         try {
 
@@ -211,17 +299,22 @@ function ModalOfficer(props) {
             if (props.action == 'edit') {
 
                 await officerService.updateOfficer(officer)
-                    .then((result) => { console.log(result) })
+                    .then((result) => {
+                        console.log(result);
+                        props.setAlert({ show: true, variant: 'success', message: result.data.message });
+                    })
 
                 setShowModal(false);
                 props.setShowModal(false);
                 props.getOfficers(); // Call the function to reload data
 
-
             } else if (props.action == 'new') {
 
                 await officerService.createOfficer(officer)
-                    .then((result) => { console.log(result) })
+                    .then((result) => {
+                        console.log(result);
+                        props.setAlert({ show: true, variant: 'success', message: result.data.message });
+                    })
                 props.setShowModal(false);
                 props.getOfficers(); // Call the function to reload data
 
@@ -290,6 +383,7 @@ function ModalOfficer(props) {
 
                 </Form>
             </Modal>
+
         </>
     )
 }
