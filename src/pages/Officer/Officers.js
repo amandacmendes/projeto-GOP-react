@@ -152,13 +152,13 @@ function TableContent(props) {
 
                     <Button variant="outline-primary" size='sm'
                         onClick={props.editOperation}>
-                        <span class="material-symbols-outlined">
+                        <span className="material-symbols-outlined">
                             edit
                         </span>
                     </Button>{' '}
                     <Button variant="outline-danger" size='sm'
                         onClick={props.deleteOperation}>
-                        <span class="material-symbols-outlined">
+                        <span className="material-symbols-outlined">
                             delete
                         </span>
                     </Button>{' '}
@@ -182,6 +182,7 @@ function ModalOfficer(props) {
     }, []);
 
     const teamService = new TeamsService();
+    const officerService = new OfficerService();
 
     function loadData() {
 
@@ -197,8 +198,22 @@ function ModalOfficer(props) {
         }
     }
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         try {
+
+            setOfficer({ ...officer, name: data.name, team_id: data.team_id })
+
+            if (props.action == 'edit') {
+
+                await officerService.updateOfficer(officer)
+                    .then((result) => { console.log(result) })
+                    setShowModal(false);
+
+            } else if (props.action == 'new') {
+
+                await officerService.createOfficer(officer)
+                    .then((result) => { console.log(result) })
+            }
 
         } catch (error) {
 
@@ -223,6 +238,7 @@ function ModalOfficer(props) {
                                 required={true}
                                 {...register('name')}
                                 value={officer.name}
+                                onChange={(e) => { setOfficer({ ...officer, name: e.target.value }) }}
                             />
                         </Form.Group>
                         <Form.Group>
