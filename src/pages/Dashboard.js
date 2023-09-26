@@ -8,6 +8,7 @@ import { Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 import OperationService from '../services/OperationService';
 import { render } from '@testing-library/react';
+import OperationStatusCards from '../components/OperationStatusCards';
 
 export function Dashboard() {
 
@@ -32,7 +33,7 @@ export function Dashboard() {
                 <h1>Dashboard</h1>
                 <div className='py-5 '>
                     <ResponsiveContainer width="100%" height="100%" >
-                        <OperationsByMonth></OperationsByMonth>
+                        <Charts></Charts>
                     </ResponsiveContainer>
 
                 </div>
@@ -41,9 +42,11 @@ export function Dashboard() {
     );
 }
 
-function OperationsByMonth() {
+function Charts() {
 
     const [data, setData] = useState({ month: '', number_operation_per_month: 0, number_finished_operations_per_month: 0 });
+
+    const [fetchedOperations, setFetchedOperations] = useState([]);
 
     const operationService = new OperationService();
 
@@ -52,6 +55,7 @@ function OperationsByMonth() {
             try {
                 const op = await operationService.getOperations();
                 const operations = op.data;
+                setFetchedOperations(op.data)
 
                 const operationsByMonth = {};
 
@@ -83,27 +87,33 @@ function OperationsByMonth() {
                 }));
 
                 setData(operationsForChart);
-                console.log(operationsForChart)
             } catch (error) {
                 console.error(error);
             }
         }
 
         fetchData();
-    }, []); // Empty dependency array means this effect runs only once on component mount
+    }, []);
 
 
     return (<div>
 
+        <div className='pb-4 '>
+            <div className='pb-3 text-center'>
+                <h2>Status das Operações </h2>
+            </div>
+            <div>
+                <OperationStatusCards operations={fetchedOperations} />
+            </div>
+        </div>
+        <hr />
         <div className='py-2 text-center'>
             <h2>Produtividade Mensal </h2>
             <h4 >Operações Abertas e Finalizadas por Mês</h4>
         </div>
 
-        <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-                data={data}
-            >
+        <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={data}            >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -114,7 +124,7 @@ function OperationsByMonth() {
             </BarChart>
         </ResponsiveContainer>
     </div>);
-
 }
+
 
 
