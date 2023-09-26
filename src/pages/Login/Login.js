@@ -38,7 +38,7 @@ export function Login() {
         <>
             <Row className='mh-100'>
                 <Col className='d-flex d-none d-md-block grey-bg align-items-center justify-content-center'>
-                    <div className='d-flex align-items-center justify-content-center'>
+                    <div className='d-flex h-100 align-items-center justify-content-center'>
                         <Image src={mainlogo} alt='logo'></Image>
                     </div>
                 </Col>
