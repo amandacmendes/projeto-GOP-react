@@ -16,8 +16,6 @@ import { TeamsNew } from './pages/Teams/TeamsNew';
 import { Officers } from './pages/Officer/Officers';
 import { Profile } from './pages/Profile/Profile';
 
-//import { Teams } from './pages/Teams/Teams';
-//import { TeamsView } from './pages/Teams/TeamsView';
 
 function App() {
   const isAuthenticated = AuthService.isAuthenticated();
@@ -27,15 +25,16 @@ function App() {
 
       <Router>
         <Routes>
-          <Route path='/' element={<Navigate to="/login" />}></Route>
-          <Route path='/login' Component={Login}></Route>
-          <Route path='/logout' Component={Login}></Route>
-          <Route path='/signup' element={<Cadastro />}></Route>
 
-          <Route path='/*' Component={ErrorPage}></Route>
+          <Route path='/' element={<Navigate to="/login" />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/logout' element={<Login />} />
+          <Route path='/signup' element={<Cadastro />} />
 
-          <Route path='/mainpage' element={isAuthenticated ? <MainPage /> : <Navigate to="/login" />}></Route>
-          <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}></Route>
+          <Route path='/*' element={<ErrorPage />} />
+
+          <Route path='/mainpage' element={isAuthenticated ? <MainPage /> : <Navigate to="/login" />} />
+          <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
 
 
           <Route path='/operation' element={isAuthenticated ? <Operacoes /> : <Navigate to="/login" />}></Route>
@@ -50,7 +49,7 @@ function App() {
           <Route path='/resources' element={isAuthenticated ? <Resources /> : <Navigate to="/login" />}></Route>
           <Route path='/resources/new' element={isAuthenticated ? <ResourcesNew pagetitle="Novo Recurso" /> : <Navigate to="/login" />}></Route>
           <Route path='/resources/:id/:action' useParams={['id', 'action']} element={isAuthenticated ? <ResourcesNew /> : <Navigate to="/login" />}></Route>
-                    
+
           <Route path='/officer' element={isAuthenticated ? <Officers /> : <Navigate to="/login" />}></Route>
 
           <Route path='/profile' element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}></Route>

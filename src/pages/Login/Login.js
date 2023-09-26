@@ -21,11 +21,14 @@ export function Login() {
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
+
         e.preventDefault();
+        console.log('aaa')
         try {
             await AuthService.login(email, password);
-            navigate('/mainpage'); 
+            navigate('/mainpage');
         } catch (error) {
+            console.log(error)
             setError(error.message);
         }
     };
@@ -45,6 +48,7 @@ export function Login() {
                 <Col className='align-self-center p-3'>
                     <Stack gap={4}>
                         <h1 className='text-center'>Login</h1>
+
                         <form onSubmit={handleLogin}>
                             <div className="form-group mb-3">
                                 <label for="email">Nome de usuário:</label>
@@ -68,8 +72,9 @@ export function Login() {
                                 </button>
                             </div>
                         </form>
+                        
                         <div className="d-grid text-center">
-                            ou
+                            <p>ou</p>
                             <button type="button" className="btn btn-secondary"
                                 onClick={handleSignupClick}>Cadastre-se
                             </button>
