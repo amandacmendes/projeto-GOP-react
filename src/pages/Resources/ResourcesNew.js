@@ -89,7 +89,7 @@ function Content(props) {
     const onSubmit = async (data) => {
         try {
 
-            console.log(' submit --- - -' + data + data.description + data.resourcetype_id+props.pageAction)
+            console.log(' submit --- - -' + data + data.description + data.resourcetype_id + props.pageAction)
 
             if (props.pageAction == 'new') {
 
@@ -137,7 +137,7 @@ function Content(props) {
                             disabled={props.isDisabled}
                             value={resource.description}
                             {...register('description')}
-                            onChange={(e)=> setResource({...resource, description: e.target.value})}
+                            onChange={(e) => setResource({ ...resource, description: e.target.value })}
                         ></Form.Control>
                     </Form.Group>
 
@@ -146,10 +146,15 @@ function Content(props) {
                         <Form.Select
                             disabled={props.isDisabled}
                             {...register('resourcetype_id')}
+                            onChange={(e) => setResource({ ...resource, resourcetype_id: e.target.value })}
                         >
                             <option>--</option>
                             {resourceTypes.map((type) => (
-                                <option key={type.id} value={type.id}>
+                                <option
+                                    selected={(type.id == resource.resourcetype_id ? true : false)}
+                                    key={type.id}
+                                    value={type.id}
+                                >
                                     {type.description}
                                 </option>
                             ))}
