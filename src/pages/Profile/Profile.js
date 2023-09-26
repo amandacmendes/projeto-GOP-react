@@ -1,6 +1,6 @@
 import '../../css/style.css';
 import { ContentBase } from '../../components/ContentBase';
-import { Button, Card, Form, Stack } from 'react-bootstrap';
+import { Button, Card, Form, Modal, Stack } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import OfficerService from '../../services/OfficerService';
@@ -8,6 +8,7 @@ import UserService from '../../services/UserService';
 import TeamsService from '../../services/TeamsService';
 import AuthService from '../../services/AuthService';
 import BottomAlert from '../../components/BottomAlert';
+import { useNavigate } from 'react-router-dom';
 
 export function Profile() {
     const { handleSubmit, register, formState: { errors } } = useForm();
@@ -17,6 +18,9 @@ export function Profile() {
     const [team, setTeam] = useState([]);
 
     const [alert, setAlert] = useState();
+
+    const navigate = useNavigate();
+
 
     const handleAlertClose = () => {
         const updatedAlert = { ...alert, show: false };
@@ -44,12 +48,14 @@ export function Profile() {
                 userResult.password = '';
                 setUser(userResult)
 
-                if (result.data.officer_id > 0) {
+                if (userResult.officer_id > 0) {
                     const officerResult = await officerService.getById({ id: result.data.officer_id });
                     setOfficer(officerResult.data);
 
-                    const teamResult = await teamService.getById({ id: officerResult.data.team_id });
-                    setTeam(teamResult.data)
+                    if (userResult.team_id) {
+                        const teamResult = await teamService.getById({ id: officerResult.data.team_id });
+                        setTeam(teamResult.data)
+                    }
                 }
             });
     }
@@ -72,14 +78,44 @@ export function Profile() {
         }
     }
 
+    async function onDelete() {
+        try {
+
+            console.log(officer)
+            console.log(user)
+
+            var updateOfficer = officer;
+            updateOfficer.status = "INACTIVE"
+            setOfficer(updateOfficer)
+
+            await officerService.updateOfficer(officer);
+            await userService.delete(user);
+
+            AuthService.logout();
+            navigate('/login')
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     const editClick = () => {
         setDisabled(false)
+    }
+
+
+    const deleteButtonClick = () => {
+        setShowDeleteModal(true)
     }
 
     const goBackClick = () => {
         setDisabled(true)
         loadData();
     }
+
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [operationToDelete, setOperationToDelete] = useState([]);
 
     return (
         <>
@@ -143,7 +179,7 @@ export function Profile() {
                                         <Button variant="primary" onClick={editClick} hidden={!(disabled)}>
                                             Editar informações
                                         </Button>
-                                        <Button variant="danger" hidden={!(disabled)}>
+                                        <Button variant="danger" onClick={deleteButtonClick} hidden={!(disabled)}>
                                             Excluir conta
                                         </Button>
                                         <Button variant="success" type='submit' hidden={(disabled)}>
@@ -161,6 +197,27 @@ export function Profile() {
                     </Card>
                 </Stack>
             </div>
+
+            <Modal show={showDeleteModal} >
+                <Modal.Header>
+                    <Modal.Title>Excluir conta ?</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <b>
+                        <p>Deseja mesmo excluir sua conta?</p>
+                        <p className='text-danger'>Esta ação é definitiva e não poderá ser desfeita.</p>
+                    </b>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={() => onDelete()}>
+                        Sim, excluir conta
+                    </Button>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancelar
+                    </Button>
+                </Modal.Footer>
+
+            </Modal>
 
             {alert &&
                 <BottomAlert

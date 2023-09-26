@@ -70,6 +70,7 @@ class AuthService {
     static logout() {
         // Desautentica o usuário
         sessionStorage.removeItem('token');
+        sessionStorage.removeItem('id');
     }
 
 }
