@@ -1,4 +1,4 @@
-import { Button, Form, InputGroup, OverlayTrigger, Popover, Stack, Table } from "react-bootstrap";
+import { Button, Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -80,12 +80,17 @@ function TableResources(props) {
         }
     }
 
-    async function handleDelete(id) {
+    async function handleDelete(data) {
         try {
-            console.log('----' + id)
+            const id = data.id
+
             await resourceService.deleteResource({ id: id })
                 .then((data) => {
-                    console.log(data)
+                    console.log(data);
+
+                    setResourceToDelete([]);
+                    setShowDeleteModal(false)
+                    getResources();
                 })
 
         } catch (error) {
@@ -144,6 +149,9 @@ function TableResources(props) {
         </Popover>
     );
 
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [resourceToDelete, setResourceToDelete] = useState([]);
+
     return <>
 
         <Table striped bordered hover>
@@ -185,7 +193,11 @@ function TableResources(props) {
                                 resourcetype={matchingResourceType ? matchingResourceType.description : data[id].resourcetype_id}
                                 viewOperation={async () => handleView(data[id].id)}
                                 editOperation={async () => handleEdit(data[id].id)}
-                                deleteOperation={async () => handleDelete(data[id].id)}
+                                deleteOperation={() => {
+                                    setShowDeleteModal(true);
+                                    setResourceToDelete(data[id])
+                                }}
+                            //deleteOperation={async () => handleDelete(data[id].id)}
                             />
                         );
                     }))
@@ -200,6 +212,24 @@ function TableResources(props) {
 
             </tbody>
         </Table>
+        <Modal show={showDeleteModal} >
+            <Modal.Header>
+                <Modal.Title>Excluir recurso {resourceToDelete.description}?</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>Deseja mesmo excluir este recurso?</p>
+                <p>Esta ação não poderá ser desfeita.</p>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="danger" onClick={() => handleDelete(resourceToDelete)}>
+                    Excluir
+                </Button>
+                <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                    Fechar
+                </Button>
+            </Modal.Footer>
+
+        </Modal>
     </>
 }
 
