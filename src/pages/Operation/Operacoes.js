@@ -45,7 +45,7 @@ export function Operacoes() {
                                 <Button
                                     onClick={(e) => { search() }}
                                 >
-                                    <span class="material-symbols-outlined">
+                                    <span className="material-symbols-outlined">
                                         search
                                     </span>
                                 </Button>
@@ -195,7 +195,7 @@ function TableOperacoes(props) {
                     </Button>
                 </InputGroup>
                 <div className='mt-2'>
-                    <a href="#" class="text-primary" onClick={clearFilter}>Limpar filtro</a>
+                    <a href="#" className="text-primary" onClick={clearFilter}>Limpar filtro</a>
                 </div >
             </Popover.Body>
         </Popover>
@@ -312,7 +312,7 @@ function TableContent(props) {
                 >
                     <Button variant="outline-success" size='sm'
                         onClick={props.viewOperation}>
-                        <span class="material-symbols-outlined">
+                        <span className="material-symbols-outlined">
                             visibility
                         </span>
                     </Button>
@@ -335,7 +335,7 @@ function TableContent(props) {
                             onClick={props.editOperation}
                             disabled={(props.status == 'OPENED') ? false : true}
                         >
-                            <span class="material-symbols-outlined">
+                            <span className="material-symbols-outlined">
                                 edit
                             </span>
                         </Button>
@@ -359,7 +359,7 @@ function TableContent(props) {
                             onClick={props.deleteOperation}
                             disabled={(props.status == 'FINISHED') ? true : false}
                         >
-                            <span class="material-symbols-outlined">
+                            <span className="material-symbols-outlined">
                                 delete
                             </span>
                         </Button>

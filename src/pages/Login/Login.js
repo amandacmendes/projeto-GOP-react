@@ -46,14 +46,14 @@ export function Login() {
                     <Stack gap={4}>
                         <h1 className='text-center'>Login</h1>
                         <form onSubmit={handleLogin}>
-                            <div class="form-group mb-3">
+                            <div className="form-group mb-3">
                                 <label for="email">Nome de usuário:</label>
-                                <input type="text" class="form-control" id="email" name="email"
+                                <input type="text" className="form-control" id="email" name="email"
                                     value={email} onChange={(e) => setEmail(e.target.value)} required />
                             </div>
-                            <div class="form-group mb-4">
+                            <div className="form-group mb-4">
                                 <label for="password">Senha:</label>
-                                <input type="password" class="form-control" id="password" name="password"
+                                <input type="password" className="form-control" id="password" name="password"
                                     value={password} onChange={(e) => setPassword(e.target.value)} required />
                             </div>
 
@@ -63,14 +63,14 @@ export function Login() {
                                 </Alert>
                             }
                             <div className="d-grid text-center">
-                                <button type="submit" class="btn btn-success">
+                                <button type="submit" className="btn btn-success">
                                     Entrar
                                 </button>
                             </div>
                         </form>
                         <div className="d-grid text-center">
                             ou
-                            <button type="button" class="btn btn-secondary"
+                            <button type="button" className="btn btn-secondary"
                                 onClick={handleSignupClick}>Cadastre-se
                             </button>
                         </div>

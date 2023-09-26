@@ -30,7 +30,7 @@ export function Resources() {
                                 <Form.Control type='text' placeholder='Digite o nome do recurso...'
                                     onChange={(e) => { handleSearch(e.target.value) }}></Form.Control>
                                 <Button id="basic-addon2">
-                                    <span class="material-symbols-outlined">
+                                    <span className="material-symbols-outlined">
                                         search
                                     </span>
                                 </Button>
@@ -153,19 +153,19 @@ function TableContent(props) {
             <div>
                 <Button variant="outline-success" size='sm'
                     onClick={props.viewOperation}>
-                    <span class="material-symbols-outlined">
+                    <span className="material-symbols-outlined">
                         pageview
                     </span>
                 </Button>{' '}
                 <Button variant="outline-primary" size='sm'
                     onClick={props.editOperation}>
-                    <span class="material-symbols-outlined">
+                    <span className="material-symbols-outlined">
                         edit
                     </span>
                 </Button>{' '}
                 <Button variant="outline-danger" size='sm'
                     onClick={props.deleteOperation}>
-                    <span class="material-symbols-outlined">
+                    <span className="material-symbols-outlined">
                         delete
                     </span>
                 </Button>{' '}

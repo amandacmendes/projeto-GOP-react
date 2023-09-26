@@ -169,7 +169,7 @@ function TableTeams(props) {
                     </Button>
                 </InputGroup>
                 <div className='mt-2'>
-                    <a href="#" class="text-primary" onClick={clearFilter}>Limpar filtro</a>
+                    <a href="#" className="text-primary" onClick={clearFilter}>Limpar filtro</a>
                 </div >
             </Popover.Body>
         </Popover>
@@ -267,19 +267,19 @@ function TableContent(props) {
             <div>
                 <Button variant="outline-success" size='sm'
                     onClick={props.viewOperation}>
-                    <span class="material-symbols-outlined">
+                    <span className="material-symbols-outlined">
                         pageview
                     </span>
                 </Button>{' '}
                 <Button variant="outline-primary" size='sm'
                     onClick={props.editOperation}>
-                    <span class="material-symbols-outlined">
+                    <span className="material-symbols-outlined">
                         edit
                     </span>
                 </Button>{' '}
                 <Button variant="outline-danger" size='sm'
                     onClick={props.deleteOperation}>
-                    <span class="material-symbols-outlined">
+                    <span className="material-symbols-outlined">
                         delete
                     </span>
                 </Button>{' '}
