@@ -1,4 +1,4 @@
-import { Button, Form, InputGroup, Popover, Stack, Table } from "react-bootstrap";
+import { Button, Form, InputGroup, OverlayTrigger, Popover, Stack, Table } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -100,7 +100,7 @@ function TableResources(props) {
         console.log(data)
 
         const filteredData = Object.keys(data).filter(key =>
-            data[key].name.toLowerCase().includes(search.toLowerCase())
+            data[key].description.toLowerCase().includes(search.toLowerCase())
         );
 
         console.log(filteredData.map(key => data[key]));
@@ -150,7 +150,24 @@ function TableResources(props) {
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Descrição Recurso</th>
+                    <th>
+                        <div className='d-flex justify-content-between'>
+                            Descrição Recurso
+                            <OverlayTrigger trigger="click" placement="top" overlay={popover}>
+                                <Button
+                                    variant='dark'
+                                    size='sm'
+                                    style={{ height: "20px", width: "20px", padding: "0px" }}
+                                >
+                                    <span
+                                        className="material-symbols-outlined"
+                                        style={{ fontSize: '16px' }}
+                                    > filter_alt
+                                    </span>
+                                </Button>
+                            </OverlayTrigger>
+                        </div>
+                    </th>
                     <th>Tipo Recurso</th>
                     <th>Ações</th>
                 </tr>
@@ -163,7 +180,7 @@ function TableResources(props) {
                             <TableContent
                                 key={id}
                                 id={id}
-                                index={index+1}
+                                index={index + 1}
                                 description={data[id].description}
                                 resourcetype={matchingResourceType ? matchingResourceType.description : data[id].resourcetype_id}
                                 viewOperation={async () => handleView(data[id].id)}
