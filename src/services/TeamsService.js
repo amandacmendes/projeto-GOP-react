@@ -78,6 +78,20 @@ class TeamsService {
         return result;
     }
 
+    
+    async getById(data) {
+
+        const id = data.id;
+        const result = await api.get(`/team/${id}`, {
+            headers: {
+                Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        });
+        return result;
+    }
+
     async getTeamsWithOfficers() {
         try {
 

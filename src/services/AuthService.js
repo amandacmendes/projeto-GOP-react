@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { api } from './api';
 
 class AuthService {
 
@@ -6,18 +7,38 @@ class AuthService {
         return !!sessionStorage.getItem('token');
     }
 
+    static async validate(email, password) {
+
+
+        const result = await api.post('/signin', {
+            email,
+            password
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: "*/*"
+            }
+        })/*
+        .catch((error) => {
+            console.log(error)
+            return error.response.data.error;
+        });*/
+
+        return result;
+
+    }
+
     static login(email, password) {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
 
-                axios.post('http://localhost:8080/signin', {
+                api.post('/signin', {
                     email,
                     password
                 }).then((response) => {
                     const data = response.data;
                     sessionStorage.setItem('token', data.accessToken);
                     sessionStorage.setItem('id', data.id);
-
                     resolve();
                 }).catch((error) => {
                     console.log(error)
@@ -32,7 +53,7 @@ class AuthService {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 const create = (data) => {
-                    axios.post('http://localhost:8080/signup', {
+                    api.post('/signup', {
                         email,
                         password
                     }).then(function (response) {

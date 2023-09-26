@@ -5,12 +5,25 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import OfficerService from '../../services/OfficerService';
 import UserService from '../../services/UserService';
+import TeamsService from '../../services/TeamsService';
+import AuthService from '../../services/AuthService';
+import BottomAlert from '../../components/BottomAlert';
 
 export function Profile() {
     const { handleSubmit, register, formState: { errors } } = useForm();
 
     const [user, setUser] = useState([]);
     const [officer, setOfficer] = useState([]);
+    const [team, setTeam] = useState([]);
+
+    const [alert, setAlert] = useState();
+
+    const handleAlertClose = () => {
+        const updatedAlert = { ...alert, show: false };
+        setAlert(updatedAlert);
+    };
+
+    const [disabled, setDisabled] = useState(true);
 
     useEffect(() => {
         loadData();
@@ -18,6 +31,7 @@ export function Profile() {
 
     const officerService = new OfficerService();
     const userService = new UserService();
+    const teamService = new TeamsService();
 
     async function loadData() {
 
@@ -26,18 +40,47 @@ export function Profile() {
         await userService.getUser({ id: user_id })
             .then(async (result) => {
 
-                setUser(result.data)
+                var userResult = result.data;
+                userResult.password = '';
+                setUser(userResult)
 
                 if (result.data.officer_id > 0) {
-                    const officer = await officerService.getById({ id: result.data.officer_id });
-                    setOfficer(officer);
+                    const officerResult = await officerService.getById({ id: result.data.officer_id });
+                    setOfficer(officerResult.data);
+
+                    const teamResult = await teamService.getById({ id: officerResult.data.team_id });
+                    setTeam(teamResult.data)
                 }
             });
     }
 
     const onSubmit = async (data) => {
-        console.log(data)
+        try {
+
+            console.log(officer)
+            console.log(user)
+
+            await officerService.updateOfficer(officer);
+            await userService.update(user);
+
+            setDisabled(true)
+            loadData();
+            setAlert({ show: true, variant: 'success', message: 'Alterações realizadas com sucesso' });
+
+        } catch (error) {
+            console.log(error)
+        }
     }
+
+    const editClick = () => {
+        setDisabled(false)
+    }
+
+    const goBackClick = () => {
+        setDisabled(true)
+        loadData();
+    }
+
     return (
         <>
             <ContentBase />
@@ -50,24 +93,66 @@ export function Profile() {
                                 <Form.Group>
                                     <Form.Label>Nome do Policial</Form.Label>
                                     <Form.Control
+                                        disabled={disabled}
                                         type='text'
                                         className="mb-3"
                                         required={true}
                                         {...register('name')}
-                                        value={user.name}
-                                        onChange={(e) => { setUser({ ...user, name: e.target.value }) }}
+                                        value={officer.name}
+                                        onChange={(e) => { setOfficer({ ...officer, name: e.target.value }) }}
+                                    />
+                                </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>E-mail</Form.Label>
+                                    <Form.Control
+                                        disabled={disabled}
+                                        type='text'
+                                        className="mb-3"
+                                        required={true}
+                                        {...register('email')}
+                                        value={user.email}
+                                        onChange={(e) => { setUser({ ...user, email: e.target.value }) }}
+                                    />
+                                </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>Senha</Form.Label>
+                                    <Form.Control
+                                        disabled={disabled}
+                                        type='password'
+                                        className="mb-3"
+                                        required={true}
+                                        {...register('password')}
+                                        value={(disabled) ? "*******" : user.password}
+                                        onChange={(e) => { setUser({ ...user, password: e.target.value }) }}
+                                    />
+                                </Form.Group>
+                                <Form.Group className='pb-3'>
+                                    <Form.Label>Equipe</Form.Label>
+                                    <Form.Control
+                                        {...register('team_id')}
+                                        onChange={(e) => { setOfficer({ ...officer, team_id: e.target.value }) }}
+                                        value={team.team_name}
+                                        key={team.id}
+                                        disabled
                                     />
                                 </Form.Group>
 
 
-                                <div className='d-flex flex-column'>
-
-                                    <Button variant="primary">
-                                        Editar informações
-                                    </Button>
-                                    <Button variant="danger" >
-                                        Excluir conta
-                                    </Button>
+                                <div className='pt-5 d-flex flex-column'>
+                                    <Stack gap={3}>
+                                        <Button variant="primary" onClick={editClick} hidden={!(disabled)}>
+                                            Editar informações
+                                        </Button>
+                                        <Button variant="danger" hidden={!(disabled)}>
+                                            Excluir conta
+                                        </Button>
+                                        <Button variant="success" type='submit' hidden={(disabled)}>
+                                            Salvar informações
+                                        </Button>
+                                        <Button variant="secondary" onClick={goBackClick} hidden={(disabled)}>
+                                            Cancelar
+                                        </Button>
+                                    </Stack>
                                 </div>
 
                             </Form>
@@ -76,6 +161,16 @@ export function Profile() {
                     </Card>
                 </Stack>
             </div>
+
+            {alert &&
+                <BottomAlert
+                    show={alert.show}
+                    variant={alert.variant}
+                    message={alert.message}
+                    onClose={handleAlertClose}
+                />
+            }
+
         </>
     );
 }
