@@ -51,7 +51,7 @@ export function Login() {
 
                         <form onSubmit={handleLogin}>
                             <div className="form-group mb-3">
-                                <label for="email">Nome de usuário:</label>
+                                <label for="email">E-mail:</label>
                                 <input type="text" className="form-control" id="email" name="email"
                                     value={email} onChange={(e) => setEmail(e.target.value)} required />
                             </div>
