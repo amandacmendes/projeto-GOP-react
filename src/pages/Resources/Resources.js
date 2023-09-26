@@ -1,4 +1,4 @@
-import { Button, Form, InputGroup, Stack, Table } from "react-bootstrap";
+import { Button, Form, InputGroup, Popover, Stack, Table } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -8,14 +8,8 @@ export function Resources() {
 
     const navigate = useNavigate();
 
-    const [search, setSearch] = useState();
-
     function handleNewTeamClick() {
         navigate('new');
-    }
-
-    function handleSearch(e) {
-        setSearch(e);
     }
 
     return (
@@ -25,17 +19,7 @@ export function Resources() {
                 <Stack gap={5}>
                     <h1>Recursos - Viaturas</h1>
                     <div className='d-flex flex-row w-auto justify-content-between'>
-                        <Form className='w-50'>
-                            <InputGroup>
-                                <Form.Control type='text' placeholder='Digite o nome do recurso...'
-                                    onChange={(e) => { handleSearch(e.target.value) }}></Form.Control>
-                                <Button id="basic-addon2">
-                                    <span className="material-symbols-outlined">
-                                        search
-                                    </span>
-                                </Button>
-                            </InputGroup>
-                        </Form>
+                        <span></span>
                         <Button onClick={handleNewTeamClick}>Registrar Novo Recurso</Button>
                     </div>
                     <TableResources searchbar="" />
@@ -54,8 +38,18 @@ function TableResources(props) {
 
     async function getResources() {
         try {
-            const resourceData = await resourceService.getResources();
-            setData(resourceData.data)
+
+            await resourceService.getResources()
+                .then((result) => {
+                    const rawData = result.data
+                    const mappedResult = {};
+                    rawData.forEach((item) => {
+                        mappedResult[item.id] = item;
+                    });
+
+                    setData(mappedResult)
+                    console.log(mappedResult)
+                });
 
             const resourceTypeData = await resourceService.getResourceTypes();
             setResourceTypes(resourceTypeData.data)
@@ -99,6 +93,57 @@ function TableResources(props) {
         }
     }
 
+    const [search, setSearch] = useState('')
+
+    const handleSearch = () => {
+        console.log(search)
+        console.log(data)
+
+        const filteredData = Object.keys(data).filter(key =>
+            data[key].name.toLowerCase().includes(search.toLowerCase())
+        );
+
+        console.log(filteredData.map(key => data[key]));
+        setData(filteredData.map(key => data[key]))
+
+    }
+
+    const clearFilter = () => {
+        setSearch('')
+        getResources()
+    }
+
+    const popover = (
+        <Popover id="popover-basic">
+            <Popover.Header as="h3">Pesquisar Recurso</Popover.Header>
+            <Popover.Body>
+                <InputGroup>
+                    <Form.Control
+                        type="text"
+                        size='sm'
+                        placeholder="Descrição do recurso"
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value) }}
+                    />
+                    <Button
+                        type='submit'
+                        variant='dark'
+                        onClick={handleSearch}
+                    >
+                        <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: '16px' }}
+                        > search
+                        </span>
+                    </Button>
+                </InputGroup>
+                <div className='mt-2'>
+                    <a href="#" className="text-primary" onClick={clearFilter}>Limpar filtro</a>
+                </div >
+            </Popover.Body>
+        </Popover>
+    );
+
     return <>
 
         <Table striped bordered hover>
@@ -111,24 +156,22 @@ function TableResources(props) {
                 </tr>
             </thead>
             <tbody>
-
-                {data && data.length > 0
-                    ? (
-                        data.map((dataItem, index) => {
-                            const matchingResourceType = resourcetypes.find((type) => type.id == dataItem.resourcetype_id);
-
-                            return (
-                                <TableContent
-                                    key={index}
-                                    id={dataItem.id}
-                                    description={dataItem.description}
-                                    resourcetype={matchingResourceType ? matchingResourceType.description : dataItem.resourcetype_id}
-                                    viewOperation={async () => handleView(dataItem.id)}
-                                    editOperation={async () => handleEdit(dataItem.id)}
-                                    deleteOperation={async () => handleDelete(dataItem.id)}
-                                />
-                            );
-                        }))
+                {Object.keys(data).length > 0 ? (
+                    Object.keys(data).map((id, index) => {
+                        const matchingResourceType = resourcetypes.find((type) => type.id == data[id].resourcetype_id);
+                        return (
+                            <TableContent
+                                key={id}
+                                id={id}
+                                index={index+1}
+                                description={data[id].description}
+                                resourcetype={matchingResourceType ? matchingResourceType.description : data[id].resourcetype_id}
+                                viewOperation={async () => handleView(data[id].id)}
+                                editOperation={async () => handleEdit(data[id].id)}
+                                deleteOperation={async () => handleDelete(data[id].id)}
+                            />
+                        );
+                    }))
                     : (
                         <tr>
                             <td colSpan="5" className="text-center">
@@ -146,7 +189,7 @@ function TableResources(props) {
 
 function TableContent(props) {
     return <tr>
-        <td>{props.keys}</td>
+        <td>{props.index}</td>
         <td>{props.description}</td>
         <td>{props.resourcetype}</td>
         <td>
