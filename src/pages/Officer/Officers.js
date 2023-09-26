@@ -103,7 +103,6 @@ export function Officers() {
                             console.log('aaa')
                             console.log(result)
                             getOfficers();
-                            //"{\"name\":\"HIGOR HENRIQUE\",\"team_id\":1}"
 
                         });
 
