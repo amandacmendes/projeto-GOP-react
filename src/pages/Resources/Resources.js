@@ -17,7 +17,7 @@ export function Resources() {
             <ContentBase />
             <div className='container'>
                 <Stack gap={5}>
-                    <h1>Recursos - Viaturas</h1>
+                    <h1>Viaturas e outros Recursos</h1>
                     <div className='d-flex flex-row w-auto justify-content-between'>
                         <span></span>
                         <Button onClick={handleNewTeamClick}>Registrar Novo Recurso</Button>
@@ -48,7 +48,6 @@ function TableResources(props) {
                     });
 
                     setData(mappedResult)
-                    console.log(mappedResult)
                 });
 
             const resourceTypeData = await resourceService.getResourceTypes();
