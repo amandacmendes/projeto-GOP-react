@@ -11,7 +11,7 @@ export function StatusTagOfficer(props) {
         type = 'success'
         text = 'Ativo'
     } else if (status == 'INACTIVE') {
-        type = 'danger'
+        type = 'secondary'
         text = 'Inativo'
     } else {
         type = 'secondary'
