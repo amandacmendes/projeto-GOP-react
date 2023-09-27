@@ -116,35 +116,44 @@ function TableOperacoes(props) {
     async function handleDeleteOperation(data) {
         try {
 
-            //delete officer operation ok
+            if (data.status == 'OPENED') {
+                //delete officer operation ok
+                const ofOp = await officerOperationService.getByOperationId({ operation_id: data.id })
 
-            const ofOp = await officerOperationService.getByOperationId({ operation_id: data.id })
+                if (ofOp.data.length > 0) {
+                    await officerOperationService.deleteByOperationId({ operation_id: data.id })
+                }
 
-            if (ofOp.data.length > 0) {
-                await officerOperationService.deleteByOperationId({ operation_id: data.id })
+                // delete resource operation
+                const resOp = await resourceOperationService.getAllByOperationId({ operation_id: data.id });
+                if (resOp.data.length > 0) {
+                    await resourceOperationService.deleteByOperationId({ operation_id: data.id })
+                }
+
+                //delete reason        
+                const reasonOp = await reasonService.getReasonfromOperation(data.id)
+                if (reasonOp.data.length > 0) {
+                    reasonOp.data.forEach(async (reason) => {
+                        await reasonService.deleteReason(reason);
+                    });
+                }
+
+                // delete operation
+                await operationService.deleteOperation(data);
+            } else if (data.status == 'TRIGGERED') {
+                // update status canceled
+                const updatedOperation = { ...data, status: "CANCELED" }
+                console.log("update status canceled")
+                console.log(updatedOperation)
+                await operationService.update(updatedOperation);
             }
 
-            // delete resource operation
-            const resOp = await resourceOperationService.getAllByOperationId({ operation_id: data.id });
-            if (resOp.data.length > 0) {
-                await resourceOperationService.deleteByOperationId({ operation_id: data.id })
-            }
-
-            //delete reason        
-            const reasonOp = await reasonService.getReasonfromOperation(data.id)
-            if (reasonOp.data.length > 0) {
-                reasonOp.data.forEach(async (reason) => {
-                    await reasonService.deleteReason(reason);
-                });
-            }
-
-            // delete operation
-            await operationService.deleteOperation(data);
 
             //Finished! 
             setOperationToDelete([]);
             setShowDeleteModal(false)
             getOperations();
+
         } catch (error) {
             console.error(error);
         }
@@ -249,7 +258,6 @@ function TableOperacoes(props) {
                             viewOperation={async () =>
                                 handleViewOperation(data[id].id)}
                             editOperation={async () => handleEditOperation(data[id].id)}
-                            //deleteOperation={async () => handleDeleteOperation(data[id].id)}
                             deleteOperation={() => {
                                 setShowDeleteModal(true);
                                 setOperationToDelete(data[id])
@@ -324,7 +332,8 @@ function TableContent(props) {
                     delay={{ show: 200, hide: 200 }}
                     overlay={
                         <Tooltip>
-                            {(props.status == 'OPENED') ? 'Editar operação' : 'Não é possivel editar operações já deflagradas.'}
+                            {(props.status == 'OPENED') ? 'Editar operação' : ' Não é possivel editar esta operação.'
+                            }
                         </Tooltip>
                     }
                 >
@@ -346,18 +355,14 @@ function TableContent(props) {
                 <OverlayTrigger
                     placement="top"
                     delay={{ show: 200, hide: 200 }}
-                    overlay={
-                        <Tooltip>
-                            {(props.status == 'FINISHED') ? 'Não é possivel excluir operações já concluidas.' : 'Excluir operação'}
-                        </Tooltip>
-                    }
+                    overlay={<Tooltip>{getTooltipContent(props.status)}</Tooltip>}
                 >
                     <span className="d-inline-block">
                         <Button
-                            variant={(props.status == 'FINISHED') ? 'outline-secondary' : 'outline-danger'}
+                            variant={(props.status == 'FINISHED' || props.status == 'CANCELED') ? 'outline-secondary' : 'outline-danger'}
                             size='sm'
                             onClick={props.deleteOperation}
-                            disabled={(props.status == 'FINISHED') ? true : false}
+                            disabled={(props.status == 'FINISHED' || props.status == 'CANCELED') ? true : false}
                         >
                             <span className="material-symbols-outlined">
                                 delete
@@ -370,4 +375,18 @@ function TableContent(props) {
             </div>
         </td>
     </tr >
+}
+
+function getTooltipContent(status) {
+
+    switch (status) {
+        case "FINISHED":
+            return 'Não é possível excluir operações já concluídas';
+        case "CANCELED":
+            return 'Não é possível excluir operações canceladas';
+        case "TRIGGERED":
+            return 'Cancelar Operação';
+        default:
+            return 'Excluir Operação';
+    }
 }
