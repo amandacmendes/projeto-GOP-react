@@ -83,20 +83,18 @@ export function Officers() {
 
             if (data.id > 0) {
 
-                await officerService.deleteOfficerOperationByOfficerId(data)
-                    .then((result) => {
-                        console.log(result)
-                    });;
-
                 const isLeadOfficer = await operationService.getOperationByLeadOfficerId(data);
-                console.log(isLeadOfficer.status)
+                console.log(isLeadOfficer.data.length)
 
-                if (isLeadOfficer.status == 200) {
+                const isInOperation = await officerOperationService.getByOfficerId({ officer_id: data.id });
+                console.log(isInOperation.data.length)
+
+                if (isLeadOfficer.data.length > 0 || isInOperation.data.length > 0) {
                     // officer is lead_officer somewhere, so just change status to inactive
+                    // OR officer is in operation, so change status to inactive
 
                     var updated = { ...data, status: 'INACTIVE' };
-                    console.log(updated);
-
+                    console.log("update " + updated);
 
                     await officerService.updateOfficer(updated)
                         .then((result) => {
@@ -107,7 +105,7 @@ export function Officers() {
                         });
 
                 } else {
-
+                    // officer is not in any operations, so it's okay to delete it 
                     await officerService.deleteOfficer(data.id)
                         .then((result) => {
                             console.log(result)
@@ -174,6 +172,9 @@ export function Officers() {
         </Popover>
     );
 
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [officerToDelete, setOfficerToDelete] = useState([]);
+
     return (
         <>
             <ContentBase />
@@ -217,16 +218,18 @@ export function Officers() {
                                 Object.keys(data).map((id, index) => (
                                     <TableContent
                                         key={id}
-                                        index={index+1}
+                                        index={index + 1}
                                         id={data[id].id}
                                         team_name={data[id].team ? data[id].team.team_name : ''}
                                         name={data[id].name}
                                         status={data[id].status}
-                                        editOperation={async () => handleEdit(data[id])}
-                                        deleteOperation={async () => handleDelete(data[id])}
+                                        editOfficer={async () => handleEdit(data[id])}
+                                        //deleteOperation={async () => handleDelete(data[id])}
+                                        deleteOfficer={() => {
+                                            setShowDeleteModal(true);
+                                            setOfficerToDelete(data[id])
+                                        }}
                                     />
-
-
                                 ))
                             ) : (
                                 <tr>
@@ -262,6 +265,26 @@ export function Officers() {
                 </div>
             )}
 
+
+            <Modal show={showDeleteModal} >
+                <Modal.Header>
+                    <Modal.Title>Excluir policial {officerToDelete.description}?</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Deseja mesmo excluir este policial?</p>
+                    <p>Esta ação não poderá ser desfeita.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={() => handleDelete(officerToDelete)}>
+                        Excluir
+                    </Button>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Fechar
+                    </Button>
+                </Modal.Footer>
+
+            </Modal>
+
         </>
     );
 }
@@ -281,7 +304,7 @@ function TableContent(props) {
                     <Button
                         variant="outline-primary"
                         size='sm'
-                        onClick={props.editOperation}
+                        onClick={props.editOfficer}
                         disabled={props.status == 'ACTIVE' ? false : true}
                     >
                         <span className="material-symbols-outlined">
@@ -291,7 +314,7 @@ function TableContent(props) {
                     <Button
                         variant="outline-danger"
                         size='sm'
-                        onClick={props.deleteOperation}
+                        onClick={props.deleteOfficer}
                         disabled={props.status == 'ACTIVE' ? false : true}
                     >
                         <span className="material-symbols-outlined">
