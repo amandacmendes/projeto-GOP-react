@@ -63,7 +63,8 @@ function Content(props) {
         await officerService.getOfficers()
             .then((result) => {
                 console.log(result.data)
-                setOfficers(result.data)
+                const filteredData = result.data.filter(item => item.status !== 'INACTIVE');
+                setOfficers(filteredData)
             })
             .catch((error) => {
                 console.log(error)
