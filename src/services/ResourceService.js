@@ -82,7 +82,8 @@ class ResourceService {
         const id = data.id;
         const result = await api.put(`/resource/${id}`, {
             description: data.description,
-            resourcetype_id: data.resourcetype_id
+            resourcetype_id: data.resourcetype_id,
+            status: data.status
         }, {
             headers: {
                 Authorization: 'Bearer ' + sessionStorage.getItem('token'),
