@@ -3,6 +3,8 @@ import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import ResourceService from "../../services/ResourceService";
+import ResourceOperationService from "../../services/ResourceOperationService";
+import { StatusTagOfficer } from "../../components/StatusTagOfficer";
 
 export function Resources() {
 
@@ -35,6 +37,7 @@ function TableResources(props) {
     const [resourcetypes, setResourceTypes] = useState([]);
 
     const resourceService = new ResourceService();
+    const resourceOperationService = new ResourceOperationService();
 
     async function getResources() {
         try {
@@ -83,15 +86,25 @@ function TableResources(props) {
         try {
             const id = data.id
 
-            await resourceService.deleteResource({ id: id })
-                .then((data) => {
-                    console.log(data);
+            // search resource_operation where resource_id = id
+            const existsResourceOperation = await resourceOperationService.getAllByResourceId({ resource_id: id })
 
-                    setResourceToDelete([]);
-                    setShowDeleteModal(false)
-                    getResources();
-                })
+            if (existsResourceOperation) {
+                // if exists, set resource.status = 'INACTIVE'
+                var updatedService = data;
+                updatedService.status = 'INACTIVE';
+                await resourceService.updateResource(updatedService);
+            } else {
+                // if doesnt exists, deleteResource
+                await resourceService.deleteResource({ id: id })
+                    .then((data) => {
+                        console.log(data);
 
+                        setResourceToDelete([]);
+                        setShowDeleteModal(false)
+                        getResources();
+                    })
+            }
         } catch (error) {
             console.error(error);
         }
@@ -176,6 +189,7 @@ function TableResources(props) {
                         </div>
                     </th>
                     <th>Tipo Recurso</th>
+                    <th>Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -189,6 +203,7 @@ function TableResources(props) {
                                 id={id}
                                 index={index + 1}
                                 description={data[id].description}
+                                status={data[id].status}
                                 resourcetype={matchingResourceType ? matchingResourceType.description : data[id].resourcetype_id}
                                 viewOperation={async () => handleView(data[id].id)}
                                 editOperation={async () => handleEdit(data[id].id)}
@@ -196,14 +211,13 @@ function TableResources(props) {
                                     setShowDeleteModal(true);
                                     setResourceToDelete(data[id])
                                 }}
-                            //deleteOperation={async () => handleDelete(data[id].id)}
                             />
                         );
                     }))
                     : (
                         <tr>
                             <td colSpan="5" className="text-center">
-                                Não existe nenhuma equipe cadastrada!
+                                Não existe nenhum recurso cadastrado!
                             </td>
                         </tr>
                     )
@@ -238,6 +252,9 @@ function TableContent(props) {
         <td>{props.index}</td>
         <td>{props.description}</td>
         <td>{props.resourcetype}</td>
+        <td>
+            <StatusTagOfficer status={props.status} />
+        </td>
         <td>
             <div>
                 <Button variant="outline-success" size='sm'
