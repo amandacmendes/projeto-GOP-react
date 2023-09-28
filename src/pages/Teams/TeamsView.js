@@ -60,8 +60,26 @@ function Content(props) {
     async function fetchAllOfficers() {
         await officerService.getOfficers()
             .then((result) => {
-                const filteredData = result.data.filter(item => item.status !== 'INACTIVE');
-                setOfficers(filteredData)
+                var data = result.data
+
+                if (props.action == 'edit') {
+                    data = result.data.filter(item => item.status !== 'INACTIVE');
+                }
+
+                data.sort((a, b) => {
+                    const nameA = a.name.toUpperCase(); // Convert to uppercase for case-insensitive sorting
+                    const nameB = b.name.toUpperCase();
+
+                    if (nameA < nameB) {
+                        return -1;
+                    }
+                    if (nameA > nameB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                setOfficers(data)
             })
             .catch((error) => {
                 console.log(error)
@@ -99,14 +117,12 @@ function Content(props) {
                 ...selectedOfficers,
                 [e.target.value]: officer,
             });
-            console.log(selectedOfficers)
 
         } else {
             //exclude officer from selectedOfficers list 
             const updatedOfficers = { ...selectedOfficers };
             delete updatedOfficers[e.target.value];
             setSelectedOfficers(updatedOfficers);
-            console.log(selectedOfficers)
         }
 
     };
@@ -118,7 +134,7 @@ function Content(props) {
         // Update team
         await teamService.update({ id: props.id, team_name: teamName })
             .then((result) => {
-                console.log('Team Updated! ')
+                console.log("Team updated")
             }).catch((error) => {
                 console.log(error)
             });
@@ -135,13 +151,6 @@ function Content(props) {
 
         var allOfficersUpdateObj = { ...selectedOfficersNewTeamId };
 
-        console.log("-----")
-        console.log(origOfficers)
-        console.log("-----")
-        console.log("-----")
-        console.log(selectedOfficers)
-        console.log("-----")
-
         // Sets this team_id in all selected officers 
         Object.keys(selectedOfficersNewTeamId).forEach((officerId) => {
             selectedOfficersNewTeamId[officerId].team_id = props.id;
@@ -150,40 +159,26 @@ function Content(props) {
         //If any originalOfficer is not in selected officers BUT origOfficer.team_id == props.id, update with ''
         Object.keys(origOfficers).forEach((officerId) => {
 
-            console.log(origOfficers[officerId].id + " original: (officer_name:" + origOfficers[officerId].name + "team_id " + origOfficers[officerId].team_id)
-
-            if (selectedOfficersNewTeamId[officerId]) {
-                console.log(selectedOfficersNewTeamId[officerId].id + " selected w new team id: (officer_name:" + selectedOfficersNewTeamId[officerId].name + "team_id " + origOfficers[officerId].team_id)
-            } else {
-                console.log(" not exists in selectedOfficersNewTeamId")
+            if (!selectedOfficersNewTeamId[officerId]) {
 
                 if (origOfficers[officerId].team_id == props.id) {
-                    console.log("but its id is " + origOfficers[officerId].team_id)
-                    console.log("So it should be set to '' ")
                     origOfficers[officerId].team_id = null;
                     allOfficersUpdateObj[officerId] = origOfficers[officerId]; // Add the officer to allOfficersUpdateObj
                 }
             }
         });
 
-        console.log("All Officers to Update: ")
-        console.log(allOfficersUpdateObj)
-
         await officerService.bulkUpdateOfficer(Object.values(allOfficersUpdateObj))
             .then((result) => {
                 console.log('All officers Updated! ')
+                navigate('/team');
             }).catch((error) => {
                 console.log(error)
             });
-
     };
 
     useEffect(() => {
         fetchAllOfficers();
-        console.log('selectedOfficers: ')
-        console.log(selectedOfficers)
-        console.log('officers: ')
-        console.log(officers)
     }, []);
 
     return (
@@ -217,8 +212,7 @@ function Content(props) {
                                         checked={selectedOfficers.hasOwnProperty(officer.id)}
                                         onChange={(e) => handleCheckboxChange(e, officer)}
                                         disabled={props.isDisabled}
-                                        label={officer.name}
-                                        //{...register('team_officers')}
+                                        label={officer.status != 'INACTIVE' ? officer.name : `${officer.name} - INATIVO`}
                                     />
                                 </ListGroup.Item>
                             ))}
