@@ -101,7 +101,7 @@ export function Officers() {
                             console.log('aaa')
                             console.log(result)
                             getOfficers();
-
+                            //setShowModal(false);
                         });
 
                 } else {
@@ -110,8 +110,12 @@ export function Officers() {
                         .then((result) => {
                             console.log(result)
                             getOfficers();
+                            //setShowModal(false);
                         });
                 }
+                // Close the delete confirmation modal
+                setShowDeleteModal(false);
+
             }
 
         } catch (error) {
