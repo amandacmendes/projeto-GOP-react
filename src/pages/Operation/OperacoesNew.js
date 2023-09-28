@@ -355,7 +355,7 @@ function Content(props) {
                     </ListGroup>
                     <br />
 
-                    <Form.Label>Viaturas</Form.Label>
+                    <Form.Label>Viaturas e outros Recursos</Form.Label>
                     <ListGroup >
                         {resources.map((resource) => (
                             <ListGroup.Item>
