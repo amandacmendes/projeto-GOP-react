@@ -85,10 +85,10 @@ function Content(props) {
 
                 var data = result;
 
-                if (props.action == 'edit') {
-                    const filteredData = result.filter(item => item.status !== 'INACTIVE');
-                    data = filteredData;
-                }
+                //if (props.action == 'edit') {
+                const filteredData = result.filter(item => item.status !== 'INACTIVE');
+                data = filteredData;
+                //}
 
                 data.sort((a, b) => {
                     const nameA = a.name.toUpperCase(); // Convert to uppercase for case-insensitive sorting
@@ -138,10 +138,10 @@ function Content(props) {
 
                 var data = result.data;
 
-                if (props.action == 'edit') {
-                    const filteredData = result.data.filter(item => item.status !== 'INACTIVE');
-                    data = filteredData;
-                }
+                //if (props.action == 'edit') {
+                const filteredData = result.data.filter(item => item.status !== 'INACTIVE');
+                data = filteredData;
+                //}
 
                 data.sort((a, b) => {
                     const descriptionA = a.description.toUpperCase(); // Convert to uppercase for case-insensitive sorting
