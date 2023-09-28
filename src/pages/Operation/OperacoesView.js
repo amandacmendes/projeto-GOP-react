@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Card, Col, Form, ListGroup, Overlay, OverlayTrigger, Row, Stack, Tooltip } from "react-bootstrap";
+import { Alert, Button, Card, Col, Form, InputGroup, ListGroup, Overlay, OverlayTrigger, Row, Stack, Tooltip } from "react-bootstrap";
 import { ContentBase } from "../../components/ContentBase";
 import OperationService from '../../services/OperationService';
 import { useNavigate, useParams } from "react-router-dom";
@@ -89,7 +89,7 @@ function Content(props) {
                     const filteredData = result.filter(item => item.status !== 'INACTIVE');
                     data = filteredData;
                 }
-                
+
                 data.sort((a, b) => {
                     const nameA = a.name.toUpperCase(); // Convert to uppercase for case-insensitive sorting
                     const nameB = b.name.toUpperCase();
@@ -553,10 +553,6 @@ function Content(props) {
                 </Card.Body>
             </Card>
 
-
-
-
-
             <h3>Motivação</h3>
 
             <Card className="my-3">
@@ -623,6 +619,66 @@ function Content(props) {
                 </Card.Body>
             </Card>
 
+            {operation.operation_results_report &&
+                <span>
+                    <h3>Resultados</h3>
+                    <Card className="my-3">
+                        <Card.Body>
+
+                            <Form>
+                                <Form.Group>
+                                    <Form.Label>Data de Realização</Form.Label>
+                                    <Form.Control
+                                        disabled
+                                        type='number'
+                                        className="mb-3"
+                                        value={operation.date}
+                                    />
+                                </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>Ocorrencia de Prisões</Form.Label>
+                                    <Form.Control
+                                        disabled
+                                        type='number'
+                                        className="mb-3"
+                                        value={operation.operation_results_arrests}
+                                    />
+                                </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>Ocorrencia de Apreensões</Form.Label>
+                                    <Form.Control
+                                        disabled
+                                        type='number'
+                                        className="mb-3"
+                                        value={operation.operation_results_seizures}
+                                    />
+                                </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>Ocorrencia de Fatalidades</Form.Label>
+                                    <Form.Control
+                                        disabled
+                                        type='number'
+                                        className="mb-3"
+                                        value={operation.operation_results_deaths}
+                                    />
+                                </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>Relatório</Form.Label>
+                                    <Form.Control
+                                        disabled
+                                        type='text' as="textarea"
+                                        rows={20}
+                                        className="mb-3"
+                                        value={operation.operation_results_report}
+                                    />
+                                </Form.Group>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+                </span>
+            }
+
+
             <div className="mt-4 my-3 d-flex flex-row justify-content-between">
                 <Button variant="secondary" type="button" onClick={goBack}>
                     Voltar a Página Anterior
@@ -633,5 +689,15 @@ function Content(props) {
                 </Button>
             </div>
         </Form >
+    </>
+}
+
+function Report(props) {
+
+    const operation = props.operation;
+
+
+    return <>
+        {operation.operation_name}
     </>
 }
