@@ -49,15 +49,20 @@ function TableTeams(props) {
             const result = await teamsService.getTeamsWithOfficers();
 
             const rawData = result;
+            
+            console.log('raw data')
+            console.log(rawData)
+
             const mappedResult = {};
 
             rawData.forEach((item) => {
                 mappedResult[item.id] = item;
             });
 
+            console.log('mapped res')
+            console.log(mappedResult)
             setData(mappedResult)
 
-            //setData(Array.from(result.values()))
         } catch (error) {
             console.log(error)
             navigate('/*');
