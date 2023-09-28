@@ -82,8 +82,28 @@ function Content(props) {
         // for New Operation - load officers, resources and reason types
         await officerService.getOfficersWithTeams()
             .then((result) => {
-                const filteredData = result.filter(item => item.status !== 'INACTIVE');
-                setOfficers(filteredData)
+
+                var data = result;
+
+                if (props.action == 'edit') {
+                    const filteredData = result.filter(item => item.status !== 'INACTIVE');
+                    data = filteredData;
+                }
+                
+                data.sort((a, b) => {
+                    const nameA = a.name.toUpperCase(); // Convert to uppercase for case-insensitive sorting
+                    const nameB = b.name.toUpperCase();
+
+                    if (nameA < nameB) {
+                        return -1;
+                    }
+                    if (nameA > nameB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                setOfficers(data)
             })
             .catch((error) => {
                 console.log(error)
@@ -92,7 +112,21 @@ function Content(props) {
 
         await reasonService.getReasonTypes()
             .then((result) => {
-                setReasonTypes(result.data)
+                var data = result.data;
+                data.sort((a, b) => {
+                    const descriptionA = a.description.toUpperCase(); // Convert to uppercase for case-insensitive sorting
+                    const descriptionB = b.description.toUpperCase();
+
+                    if (descriptionA < descriptionB) {
+                        return -1;
+                    }
+                    if (descriptionA > descriptionB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                setReasonTypes(data)
             })
             .catch((error) => {
                 console.log(error)
@@ -101,7 +135,28 @@ function Content(props) {
 
         await resourceService.getResources()
             .then((result) => {
-                setResources(result.data)
+
+                var data = result.data;
+
+                if (props.action == 'edit') {
+                    const filteredData = result.data.filter(item => item.status !== 'INACTIVE');
+                    data = filteredData;
+                }
+
+                data.sort((a, b) => {
+                    const descriptionA = a.description.toUpperCase(); // Convert to uppercase for case-insensitive sorting
+                    const descriptionB = b.description.toUpperCase();
+
+                    if (descriptionA < descriptionB) {
+                        return -1;
+                    }
+                    if (descriptionA > descriptionB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                setResources(data)
             })
             .catch((error) => {
                 console.log(error)

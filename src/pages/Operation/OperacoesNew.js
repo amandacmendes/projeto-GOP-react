@@ -77,7 +77,22 @@ function Content(props) {
         await officerService.getOfficersWithTeams()
             .then((result) => {
                 const filteredData = result.filter(item => item.status !== 'INACTIVE');
-                setOfficers(filteredData)
+
+                var data = filteredData;
+                data.sort((a, b) => {
+                    const nameA = a.name.toUpperCase(); // Convert to uppercase for case-insensitive sorting
+                    const nameB = b.name.toUpperCase();
+
+                    if (nameA < nameB) {
+                        return -1;
+                    }
+                    if (nameA > nameB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                setOfficers(data)
             })
             .catch((error) => {
                 console.log(error)
@@ -86,8 +101,21 @@ function Content(props) {
 
         await reasonService.getReasonTypes()
             .then((result) => {
-                console.log(result.data)
-                setReasonTypes(result.data)
+                var data = result.data;
+                data.sort((a, b) => {
+                    const descriptionA = a.description.toUpperCase(); // Convert to uppercase for case-insensitive sorting
+                    const descriptionB = b.description.toUpperCase();
+
+                    if (descriptionA < descriptionB) {
+                        return -1;
+                    }
+                    if (descriptionA > descriptionB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                setReasonTypes(data)
             })
             .catch((error) => {
                 console.log(error)
@@ -96,8 +124,25 @@ function Content(props) {
 
         await resourceService.getResources()
             .then((result) => {
-                console.log(result.data)
-                setResources(result.data)
+
+                const filteredData = result.data.filter(item => item.status !== 'INACTIVE');
+                var data = filteredData;
+
+                data.sort((a, b) => {
+                    const descriptionA = a.description.toUpperCase(); // Convert to uppercase for case-insensitive sorting
+                    const descriptionB = b.description.toUpperCase();
+
+                    if (descriptionA < descriptionB) {
+                        return -1;
+                    }
+                    if (descriptionA > descriptionB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                setResources(data)
+
             })
             .catch((error) => {
                 console.log(error)
