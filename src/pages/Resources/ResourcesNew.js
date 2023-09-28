@@ -89,7 +89,8 @@ function Content(props) {
     const onSubmit = async (data) => {
         try {
 
-            console.log(' submit --- - -' + data + data.description + data.resourcetype_id + props.pageAction)
+            console.log(' submit --- - -' + data + data.description + " - " + data.resourcetype_id + props.pageAction)
+            console.log(resource);
 
             if (props.pageAction == 'new') {
 
@@ -109,8 +110,11 @@ function Content(props) {
                 //Update 
                 await resourceService.updateResource({
                     id: props.id,
-                    description: data.description,
-                    resourcetype_id: data.resourcetype_id
+                    description: resource.description,
+                    resourcetype_id: resource.resourcetype_id
+                    //id: props.id,
+                    //description: data.description,
+                    //resourcetype_id: data.resourcetype_id
                 }).then((result) => {
                     console.log(result)
                 }).then((data) => {
