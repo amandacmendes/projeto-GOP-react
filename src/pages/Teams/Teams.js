@@ -47,11 +47,7 @@ function TableTeams(props) {
     async function getTeams() {
         try {
             const result = await teamsService.getTeamsWithOfficers();
-
             const rawData = result;
-            
-            console.log('raw data')
-            console.log(rawData)
 
             const mappedResult = {};
 
@@ -59,10 +55,7 @@ function TableTeams(props) {
                 mappedResult[item.id] = item;
             });
 
-            console.log('mapped res')
-            console.log(mappedResult)
-            setData(mappedResult)
-
+            setData(mappedResult);
         } catch (error) {
             console.log(error)
             navigate('/*');
