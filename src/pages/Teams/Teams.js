@@ -266,7 +266,7 @@ function TableContent(props) {
                 <Button variant="outline-success" size='sm'
                     onClick={props.viewOperation}>
                     <span className="material-symbols-outlined">
-                        pageview
+                        visibility
                     </span>
                 </Button>{' '}
                 <Button variant="outline-primary" size='sm'
