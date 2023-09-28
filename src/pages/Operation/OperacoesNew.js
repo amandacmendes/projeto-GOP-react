@@ -262,11 +262,21 @@ function Content(props) {
                 console.log(reasonResult.data);
             }
 
-            console.log("All operations completed successfully.");
-            navigate('/operation');
+            navigate('/operation', {
+                state: {
+                    alertVariant: 'success',
+                    alertMessage: 'Operação criada com sucesso!'
+                }
+            })
 
         } catch (error) {
             console.log(error)
+            navigate('/operation', {
+                state: {
+                    alertVariant: 'danger',
+                    alertMessage: (error.response.data.error)
+                }
+            })
         }
     }
 

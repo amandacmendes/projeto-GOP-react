@@ -386,12 +386,23 @@ function Content(props) {
                     updateResourceOperation().then((result) => {
                         // reasons
                         updateReasons().then((result) => {
-                            navigate('/operation');
+                            navigate('/operation', {
+                                state: {
+                                    alertVariant: 'success',
+                                    alertMessage: 'Operação atualizada com sucesso!'
+                                }
+                            })
                         });
                     });
                 });
             }).catch((error) => {
                 console.log(error)
+                navigate('/operation', {
+                    state: {
+                        alertVariant: 'danger',
+                        alertMessage: (error.response.data.error)
+                    }
+                })
             });
 
         }
@@ -400,13 +411,27 @@ function Content(props) {
     function goBack() {
         navigate('/operation');
     }
+
     function changeStatus() {
         // Throw status change Alert NEEDSALERT NEEDS ALERT
         operationService.update({ id: props.id, status: 'TRIGGERED' })
             .then((result) => {
-                navigate('/operation')
+                navigate('/operation', {
+                    state: {
+                        alertVariant: 'success',
+                        alertMessage: 'Status atualizado para Deflagrado!'
+                    }
+                });
             })
-            .catch((error) => { console.log(error) })
+            .catch((error) => {
+                console.log(error);
+                navigate('/operation', {
+                    state: {
+                        alertVariant: 'danger',
+                        alertMessage: (error.response.data.error)
+                    }
+                });
+            })
 
     }
 

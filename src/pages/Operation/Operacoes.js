@@ -1,30 +1,45 @@
 import '../../css/style.css';
 import { ContentBase } from '../../components/ContentBase';
-import { Form, InputGroup, Modal, ModalBody, OverlayTrigger, Popover, Stack, Table, Tooltip } from 'react-bootstrap';
+import { Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table, Tooltip } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import OperationService from '../../services/OperationService';
-import { useNavigate } from 'react-router-dom';
-import AuthService from '../../services/AuthService';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { StatusTag } from '../../components/StatusTag';
 import OfficerOperationService from '../../services/OfficerOperationService';
 import ResourceOperationService from '../../services/ResourceOperationService';
 import ReasonService from '../../services/ReasonService';
+import BottomAlert from '../../components/BottomAlert';
 
 export function Operacoes() {
     const navigate = useNavigate();
+    const location = useLocation();
 
     function handleNewOpClick() {
         navigate('new');
     }
 
-    const [filter, setFilter] = useState();
-    const [searchbarValue, setSearchBarValue] = useState(null);
+    useEffect(() => {
+        checkAlerts();
+    }, []);
 
-    function search() {
-        setFilter(searchbarValue);
+    const [alert, setAlert] = useState({ show: false, variant: 'primary', message: '' });
+
+    function checkAlerts() {
+
+        if (location.state?.alertMessage) {
+            setAlert({
+                show: true,
+                variant: location.state?.alertVariant,
+                message: location.state?.alertMessage
+            })
+        }
     }
+
+    const handleAlertClose = () => {
+        const updatedAlert = { ...alert, show: false, message: '' };
+        setAlert(updatedAlert);
+    };
 
     return (
         <>
@@ -34,27 +49,18 @@ export function Operacoes() {
                     <h1>Operações Policiais</h1>
                     <div className='d-flex flex-row w-auto justify-content-between'>
                         <span></span>
-                        <Form className='w-50' hidden disabled>
-                            <InputGroup>
-                                <Form.Control
-                                    type='text'
-                                    placeholder='Pesquisar pelo nome da operação...'
-                                    onChangeCapture={(e) => { setSearchBarValue(e.target.value) }}
-                                    value={searchbarValue}
-                                ></Form.Control>
-                                <Button
-                                    onClick={(e) => { search() }}
-                                >
-                                    <span className="material-symbols-outlined">
-                                        search
-                                    </span>
-                                </Button>
-                            </InputGroup>
-                        </Form>
                         <Button onClick={handleNewOpClick}>Registrar Nova Operação</Button>
                     </div>
-                    <TableOperacoes searchbar={filter} />
+                    <TableOperacoes />
                 </Stack>
+                {alert.show &&
+                    <BottomAlert
+                        show={alert.show}
+                        variant={alert.variant}
+                        message={alert.message}
+                        onClose={handleAlertClose}
+                    />
+                }
             </div>
         </>
     );
