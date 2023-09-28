@@ -35,6 +35,7 @@ function TableResources(props) {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [resourcetypes, setResourceTypes] = useState([]);
+    const [search, setSearch] = useState('')
 
     const resourceService = new ResourceService();
     const resourceOperationService = new ResourceOperationService();
@@ -89,7 +90,7 @@ function TableResources(props) {
             // search resource_operation where resource_id = id
             const existsResourceOperation = await resourceOperationService.getAllByResourceId({ resource_id: id })
 
-            if (existsResourceOperation) {
+            if (existsResourceOperation.data.length > 0) {
                 // if exists, set resource.status = 'INACTIVE'
                 var updatedService = data;
                 updatedService.status = 'INACTIVE';
@@ -110,7 +111,6 @@ function TableResources(props) {
         }
     }
 
-    const [search, setSearch] = useState('')
 
     const handleSearch = () => {
         console.log(search)
