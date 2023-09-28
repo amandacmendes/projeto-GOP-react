@@ -531,10 +531,7 @@ function Content(props) {
                 </Card.Body>
             </Card>
 
-
-
             <h3>Recursos</h3>
-
             <Card className="my-3">
                 <Card.Body>
 
@@ -655,9 +652,10 @@ function Content(props) {
                                     <Form.Label>Data de Realização</Form.Label>
                                     <Form.Control
                                         disabled
-                                        type='number'
+                                        type='date'
+                                        value={formatDate(operation.operation_date, 'yyyy-MM-dd')}
                                         className="mb-3"
-                                        value={operation.date}
+                                    //value={operation.date}
                                     />
                                 </Form.Group>
                                 <Form.Group>

@@ -222,12 +222,9 @@ function Content(props) {
         setReason(newReasonArr);
     }
 
-
     const onSubmit = async (data) => {
-
         try {
             console.log(' OPERACOES NEW - ' + data + data.lead_officer_id)
-
 
             // Create Operation
             const operationResult = await operationService.createOperation({
@@ -319,7 +316,7 @@ function Content(props) {
                         <Form.Control
                             type="date"
                             disabled={props.isDisabled}
-                            value={operation.operation_date}
+                            value={operation.operation_planned_date}
                             {...register('operation_planned_date')}
                         ></Form.Control>
                     </Form.Group>

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Alert, Button, Form, FormControl, Modal } from 'react-bootstrap';
+import { useState } from 'react';
+import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import Badge from 'react-bootstrap/Badge';
 import { useForm } from 'react-hook-form';
 import OperationService from '../services/OperationService';
+import { useNavigate } from 'react-router-dom';
 
 export function StatusTag(props) {
 
@@ -16,6 +17,8 @@ export function StatusTag(props) {
     const [alert, setAlert] = useState({ show: false, variant: 'primary', message: 'test' });
 
     const { handleSubmit, register, formState: { errors } } = useForm();
+
+    const navigate = useNavigate();
     const operationService = new OperationService();
 
     if (status == 'OPENED') {
@@ -41,6 +44,7 @@ export function StatusTag(props) {
             const operation = {
                 id: id,
                 status: 'FINISHED',
+                operation_date: data.operation_date,
                 operation_results_deaths: data.operation_results_deaths,
                 operation_results_arrests: data.operation_results_arrests,
                 operation_results_seizures: data.operation_results_seizures,
@@ -57,10 +61,22 @@ export function StatusTag(props) {
                         var alert = { show: true, variant: 'success', message: result.data.message }
                         setAlert(alert);
                         setShowModal(false);
+                        /*navigate('/operation', {
+                            state: {
+                                alertVariant: 'success',
+                                alertMessage: 'Operação concluida com sucesso!'
+                            }
+                        })*/
                     } else {
                         var alert = { show: true, variant: 'danger', message: result.data.message }
                         setAlert(alert);
                         setShowModal(false);
+                        /*navigate('/operation', {
+                            state: {
+                                alertVariant: 'success',
+                                alertMessage: (result.data.message)
+                            }
+                        })*/
                     }
                 });
 
@@ -83,14 +99,22 @@ export function StatusTag(props) {
                     >
                         <b>{text}</b>
                     </Button>
+
                     <Modal show={showModal} >
                         <Form onSubmit={handleSubmit(onSubmit)}>
                             <Modal.Header>
                                 <Modal.Title>Resultados da Operação - {operation_name}</Modal.Title>
                             </Modal.Header>
-
                             <Modal.Body>
-
+                                <Form.Group>
+                                    <Form.Label>Data de Realização da Operação</Form.Label>
+                                    <Form.Control
+                                        type='date'
+                                        className="mb-3"
+                                        required={true}
+                                        {...register('operation_date')}
+                                    />
+                                </Form.Group>
                                 <Form.Group>
                                     <Form.Label>Ocorrencia de Prisões</Form.Label>
                                     <Form.Control

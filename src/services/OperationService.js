@@ -45,7 +45,7 @@ class OperationService {
             operation_name: data.operation_name,
             operation_place: data.operation_place,
             operation_planned_date: new Date(data.operation_planned_date),
-            operation_date: data.operation_date,
+            operation_date: new Date(data.operation_date),
             lead_officer_id: data.lead_officer_id,
             status: "OPENED",
             operation_results_deaths: data.operation_results_deaths,
