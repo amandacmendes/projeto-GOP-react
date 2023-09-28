@@ -1,23 +1,41 @@
 import '../../css/style.css';
 import { Button, Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import TeamsService from '../../services/TeamsService';
 import OfficerService from '../../services/OfficerService';
+import BottomAlert from '../../components/BottomAlert';
 
 export function Teams() {
 
-    const [search, setSearch] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
 
     function handleNewTeamClick() {
         navigate('new');
     }
 
-    function handleSearch(e) {
-        setSearch(e);
+    useEffect(() => {
+        checkAlerts();
+    }, []);
+
+    const [alert, setAlert] = useState({ show: false, variant: 'primary', message: '' });
+
+    function checkAlerts() {
+        if (location.state?.alertMessage) {
+            setAlert({
+                show: true,
+                variant: location.state?.alertVariant,
+                message: location.state?.alertMessage
+            })
+        }
     }
+
+    const handleAlertClose = () => {
+        const updatedAlert = { ...alert, show: false, message: '' };
+        setAlert(updatedAlert);
+    };
 
     return (
         <>
@@ -31,6 +49,14 @@ export function Teams() {
                     </div>
                     <TableTeams searchbar="" />
                 </Stack>
+                {alert.show &&
+                    <BottomAlert
+                        show={alert.show}
+                        variant={alert.variant}
+                        message={alert.message}
+                        onClose={handleAlertClose}
+                    />
+                }
             </div>
         </>
     );

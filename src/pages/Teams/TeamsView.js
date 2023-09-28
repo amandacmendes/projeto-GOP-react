@@ -62,9 +62,9 @@ function Content(props) {
             .then((result) => {
                 var data = result.data
 
-                if (props.action == 'edit') {
-                    data = result.data.filter(item => item.status !== 'INACTIVE');
-                }
+                // if (props.action == 'edit') {
+                data = result.data.filter(item => item.status !== 'INACTIVE');
+                // }
 
                 data.sort((a, b) => {
                     const nameA = a.name.toUpperCase(); // Convert to uppercase for case-insensitive sorting
@@ -171,10 +171,19 @@ function Content(props) {
         await officerService.bulkUpdateOfficer(Object.values(allOfficersUpdateObj))
             .then((result) => {
                 console.log('All officers Updated! ')
-                navigate('/team');
+                navigate('/team', {
+                    state: {
+                        alertVariant: 'success',
+                        alertMessage: 'Equipe atualizada com sucesso!'
+                    }
+                })
+
             }).catch((error) => {
                 console.log(error)
             });
+
+
+
     };
 
     useEffect(() => {

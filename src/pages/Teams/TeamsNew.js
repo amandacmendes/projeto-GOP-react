@@ -93,7 +93,7 @@ function Content(props) {
 
         // Create team
         await teamService.create({ team_name: data.team_name })
-            .then((result) => {
+            .then(async (result) => {
 
                 // First check to see if there are any officers checked
                 if (data.team_officers) {
@@ -105,20 +105,31 @@ function Content(props) {
                         arrOfficer = [...arrOfficer, { id: officer_id, team_id: result.data.id }]
                     });
 
-                    officerService.bulkUpdateOfficer(arrOfficer)
+                    await officerService.bulkUpdateOfficer(arrOfficer)
                         .then((result) => {
                             console.log(result)
-                            navigate('/team')
+                            //navigate('/team')
                         }).catch((error) => {
                             console.log(error)
                         });
                 }
 
-                navigate('/team')
+                navigate('/team', {
+                    state: {
+                        alertVariant: 'success',
+                        alertMessage: 'Equipe criada com sucesso'
+                    }
+                })
 
             }).catch((error) => {
                 console.log(error)
-            })
+                navigate('/team', {
+                    state: {
+                        alertVariant: 'danger',
+                        alertMessage: (error.response.data.error)
+                    }
+                })
+            });
 
     };
 
