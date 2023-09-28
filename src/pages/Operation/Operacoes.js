@@ -310,7 +310,11 @@ function TableContent(props) {
         <td>{props.operation_place}</td>
         <td>{new Date(Date.parse(props.operation_date)).toLocaleDateString('pt-BR')}</td>
         <td colSpan={1} className='text-center'>
-            <StatusTag id={props.id} operation_name={props.operation_name} status={props.status} ></StatusTag>
+            <StatusTag
+                id={props.id}
+                operation_name={props.operation_name}
+                status={props.status}>
+            </StatusTag>
         </td>
         <td colSpan={1} className='text-center'>
             <div>
