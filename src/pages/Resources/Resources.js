@@ -1,18 +1,42 @@
 import { Button, Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table, Tooltip } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import ResourceService from "../../services/ResourceService";
 import ResourceOperationService from "../../services/ResourceOperationService";
 import { StatusTagOfficer } from "../../components/StatusTagOfficer";
+import BottomAlert from "../../components/BottomAlert";
 
 export function Resources() {
 
+    const location = useLocation();
     const navigate = useNavigate();
 
     function handleNewTeamClick() {
         navigate('new');
     }
+
+    useEffect(() => {
+        checkAlerts();
+    }, []);
+
+    const [alert, setAlert] = useState({ show: false, variant: 'primary', message: '' });
+
+    function checkAlerts() {
+
+        if (location.state?.alertMessage) {
+            setAlert({
+                show: true,
+                variant: location.state?.alertVariant,
+                message: location.state?.alertMessage
+            })
+        }
+    }
+
+    const handleAlertClose = () => {
+        const updatedAlert = { ...alert, show: false, message: '' };
+        setAlert(updatedAlert);
+    };
 
     return (
         <>
@@ -26,6 +50,14 @@ export function Resources() {
                     </div>
                     <TableResources searchbar="" />
                 </Stack>
+                {alert.show &&
+                    <BottomAlert
+                        show={alert.show}
+                        variant={alert.variant}
+                        message={alert.message}
+                        onClose={handleAlertClose}
+                    />
+                }
             </div>
         </>
     );

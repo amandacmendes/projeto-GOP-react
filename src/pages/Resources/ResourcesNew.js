@@ -26,7 +26,6 @@ export function ResourcesNew(props) {
         action = params.action;
     }
 
-
     if (pagetitle === '') {
         navigate('/*')
     }
@@ -64,6 +63,12 @@ function Content(props) {
             })
             .catch((error) => {
                 console.log(error)
+                navigate('/resources', {
+                    state: {
+                        alertVariant: 'danger',
+                        alertMessage: (error.response.data.error)
+                    }
+                })
             });
 
         //for View and Edit - load resource from db
@@ -82,6 +87,12 @@ function Content(props) {
             })
             .catch((error) => {
                 console.log(error)
+                navigate('/resources', {
+                    state: {
+                        alertVariant: 'danger',
+                        alertMessage: (error.response.data.error)
+                    }
+                })
             });
     }
 
@@ -101,9 +112,20 @@ function Content(props) {
                 }).then((result) => {
                     console.log(result)
                 }).then((data) => {
-                    navigate('/resources')
-                }).catch((e) => {
-                    console.log(e)
+                    navigate('/resources', {
+                        state: {
+                            alertVariant: 'success',
+                            alertMessage: 'Recurso criado com sucesso!'
+                        }
+                    })
+                }).catch((error) => {
+                    console.log(error)
+                    navigate('/resources', {
+                        state: {
+                            alertVariant: 'danger',
+                            alertMessage: (error.response.data.error)
+                        }
+                    })
                 });
             } else if (props.pageAction == 'edit') {
                 //Update 
@@ -113,15 +135,31 @@ function Content(props) {
                     resourcetype_id: resource.resourcetype_id
                 }).then((result) => {
                     console.log(result)
-                }).then((data) => {
-                    navigate('/resources')
-                }).catch((e) => {
-                    console.log(e)
+                    navigate('/resources', {
+                        state: {
+                            alertVariant: 'success',
+                            alertMessage: 'Recurso atualizado com sucesso!'
+                        }
+                    })
+                }).catch((error) => {
+                    console.log(error);
+                    navigate('/resources', {
+                        state: {
+                            alertVariant: 'danger',
+                            alertMessage: (error.response.data.error)
+                        }
+                    })
                 });
             }
 
         } catch (error) {
             console.log(error)
+            navigate('/resources', {
+                state: {
+                    alertVariant: 'danger',
+                    alertMessage: (error.response.data.error)
+                }
+            })
         }
     }
 
