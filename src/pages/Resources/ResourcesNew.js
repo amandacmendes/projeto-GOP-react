@@ -26,6 +26,7 @@ export function ResourcesNew(props) {
         action = params.action;
     }
 
+
     if (pagetitle === '') {
         navigate('/*')
     }
@@ -46,6 +47,7 @@ export function ResourcesNew(props) {
 
 function Content(props) {
 
+    let isDisabled = props.isDisabled;
     const navigate = useNavigate();
     const resourceService = new ResourceService();
     const { handleSubmit, register, formState: { errors } } = useForm();
@@ -58,7 +60,6 @@ function Content(props) {
         // for New Resource - load resource types
         await resourceService.getResourceTypes()
             .then((result) => {
-                console.log(result.data)
                 setResourceTypes(result.data)
             })
             .catch((error) => {
@@ -74,7 +75,9 @@ function Content(props) {
     async function fetchResource(id) {
         await resourceService.getResourceById({ id: id })
             .then((result) => {
-                console.log('re ' + result.data)
+                if (result.data.status != 'ACTIVE') {
+                    isDisabled = true;
+                }
                 setResource(result.data)
             })
             .catch((error) => {
@@ -88,9 +91,6 @@ function Content(props) {
 
     const onSubmit = async (data) => {
         try {
-
-            console.log(' submit --- - -' + data + data.description + " - " + data.resourcetype_id + props.pageAction)
-            console.log(resource);
 
             if (props.pageAction == 'new') {
 
@@ -106,15 +106,11 @@ function Content(props) {
                     console.log(e)
                 });
             } else if (props.pageAction == 'edit') {
-                console.log('update')
                 //Update 
                 await resourceService.updateResource({
                     id: props.id,
                     description: resource.description,
                     resourcetype_id: resource.resourcetype_id
-                    //id: props.id,
-                    //description: data.description,
-                    //resourcetype_id: data.resourcetype_id
                 }).then((result) => {
                     console.log(result)
                 }).then((data) => {
@@ -138,7 +134,7 @@ function Content(props) {
                         <Form.Label className="mb-2" controlId="form-input-resource-description">Descrição do Recurso</Form.Label>
                         <Form.Control
                             type="text"
-                            disabled={props.isDisabled}
+                            disabled={isDisabled}
                             value={resource.description}
                             {...register('description')}
                             onChange={(e) => setResource({ ...resource, description: e.target.value })}
@@ -148,7 +144,7 @@ function Content(props) {
                     <Form.Group className="pb-2">
                         <Form.Label className="mb-2" controlId="form-input-resourcetype-id">Tipo de Recurso</Form.Label>
                         <Form.Select
-                            disabled={props.isDisabled}
+                            disabled={isDisabled}
                             {...register('resourcetype_id')}
                             onChange={(e) => setResource({ ...resource, resourcetype_id: e.target.value })}
                         >
@@ -168,7 +164,7 @@ function Content(props) {
                 </Card.Body>
             </Card>
 
-            <Button className="my-3" type="submit" hidden={props.isDisabled}> {props.pageAction == 'new' ? 'Cadastrar' : 'Registrar Edições'} </Button>
+            <Button className="my-3" type="submit" hidden={isDisabled}> {props.pageAction == 'new' ? 'Cadastrar' : 'Registrar Edições'} </Button>
 
 
         </Form>

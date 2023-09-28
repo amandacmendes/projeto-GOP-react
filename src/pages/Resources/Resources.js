@@ -1,4 +1,4 @@
-import { Button, Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table } from "react-bootstrap";
+import { Button, Form, InputGroup, Modal, OverlayTrigger, Popover, Stack, Table, Tooltip } from "react-bootstrap";
 import { ContentBase } from '../../components/ContentBase';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -257,24 +257,71 @@ function TableContent(props) {
         </td>
         <td>
             <div>
-                <Button variant="outline-success" size='sm'
-                    onClick={props.viewOperation}>
-                    <span className="material-symbols-outlined">
-                        pageview
+                <OverlayTrigger
+                    placement="top"
+                    delay={{ show: 200, hide: 200 }}
+                    overlay={
+                        <Tooltip>
+                            Visualizar recurso
+                        </Tooltip>
+                    }
+                >
+                    <Button variant="outline-success" size='sm'
+                        onClick={props.viewOperation}>
+                        <span className="material-symbols-outlined">
+                            visibility
+                        </span>
+                    </Button>
+                </OverlayTrigger>
+                {' '}
+
+                <OverlayTrigger
+                    placement="top"
+                    delay={{ show: 200, hide: 200 }}
+                    overlay={
+                        <Tooltip>
+                            {(props.status == 'ACTIVE') ? 'Editar recurso' : ' Não é possivel editar este recurso.'
+                            }
+                        </Tooltip>
+                    }
+                >
+                    <span className="d-inline-block">
+                        <Button
+                            variant={(props.status == 'ACTIVE') ? 'outline-primary' : 'outline-secondary'}
+                            size='sm'
+                            disabled={(props.status == 'ACTIVE') ? false : true}
+                            onClick={props.editOperation}>
+                            <span className="material-symbols-outlined">
+                                edit
+                            </span>
+                        </Button>
                     </span>
-                </Button>{' '}
-                <Button variant="outline-primary" size='sm'
-                    onClick={props.editOperation}>
-                    <span className="material-symbols-outlined">
-                        edit
+                </OverlayTrigger>
+
+                {' '}
+                <OverlayTrigger
+                    placement="top"
+                    delay={{ show: 200, hide: 200 }}
+                    overlay={
+                        <Tooltip>
+                            {(props.status == 'ACTIVE') ? 'Excluir recurso' : ' Não é possivel excluir este recurso.'
+                            }
+                        </Tooltip>
+                    }
+                >
+                    <span className="d-inline-block">
+                        <Button
+                            variant={(props.status == 'ACTIVE') ? 'outline-danger' : 'outline-secondary'}
+                            size='sm'
+                            disabled={(props.status == 'ACTIVE') ? false : true}
+                            onClick={props.deleteOperation}>
+                            <span className="material-symbols-outlined">
+                                delete
+                            </span>
+                        </Button>
                     </span>
-                </Button>{' '}
-                <Button variant="outline-danger" size='sm'
-                    onClick={props.deleteOperation}>
-                    <span className="material-symbols-outlined">
-                        delete
-                    </span>
-                </Button>{' '}
+                </OverlayTrigger>
+                {' '}
             </div>
         </td>
     </tr>
