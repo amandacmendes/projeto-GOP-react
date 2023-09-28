@@ -95,23 +95,27 @@ function Content(props) {
         await teamService.create({ team_name: data.team_name })
             .then((result) => {
 
-                console.log(result)
+                // First check to see if there are any officers checked
+                if (data.team_officers) {
+                    // Update officers
+                    var arrOfficer = [];
 
-                // Update officers
-                var arrOfficer = [];
-
-                data.team_officers.forEach(officer_id => {
-                    console.log(officer_id)
-                    arrOfficer = [...arrOfficer, { id: officer_id, team_id: result.data.id }]
-                });
-
-                officerService.bulkUpdateOfficer(arrOfficer)
-                    .then((result) => {
-                        console.log(result)
-                        navigate('/team')
-                    }).catch((error) => {
-                        console.log(error)
+                    data.team_officers.forEach(officer_id => {
+                        console.log(officer_id)
+                        arrOfficer = [...arrOfficer, { id: officer_id, team_id: result.data.id }]
                     });
+
+                    officerService.bulkUpdateOfficer(arrOfficer)
+                        .then((result) => {
+                            console.log(result)
+                            navigate('/team')
+                        }).catch((error) => {
+                            console.log(error)
+                        });
+                }
+
+                navigate('/team')
+
             }).catch((error) => {
                 console.log(error)
             })
