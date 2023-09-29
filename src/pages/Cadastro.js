@@ -1,18 +1,16 @@
 import '../css/style.css';
 import mainlogo from '../img/Logo_GOP_1-removebg-preview.png';
 
+import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Stack from 'react-bootstrap/Stack';
 import Image from 'react-bootstrap/Image';
-
-import { useNavigate } from "react-router-dom";
-import { useState } from 'react';
-
-import UserService from '../services/UserService';
 import { Alert } from 'react-bootstrap';
+import UserService from '../services/UserService';
 
 export function Cadastro() {
 
@@ -55,13 +53,17 @@ function FormLogin() {
     const handleSignUp = async (e) => {
         e.preventDefault();
         try {
-            await UserService.create(email, password, name);
+            await UserService.create(email, password, name)
+                .then(() => {
 
-            setAlert('success')
-            setAlertMessage('Cadastro realizado com sucesso. Redirecionando para a página de login...');
-            setTimeout(3000);
+                    navigate('/', {
+                        state: {
+                            alertVariant: 'success',
+                            alertMessage: 'Cadastro realizado com sucesso'
+                        }
+                    });
+                });
 
-            navigate('/');
         } catch (error) {
             setAlert('danger')
             setAlertMessage(error.message);
