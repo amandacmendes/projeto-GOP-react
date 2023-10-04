@@ -69,10 +69,20 @@ export function Operacoes() {
 function TableOperacoes(props) {
 
     const [data, setData] = useState([]);
-    const [response, setResponse] = useState('')
+    const [alert, setAlert] = useState({ show: false, variant: 'primary', message: '' });
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [operationToDelete, setOperationToDelete] = useState([]);
+
+    const [search, setSearch] = useState('')
+
     const navigate = useNavigate();
 
     const operationService = new OperationService();
+
+    const officerOperationService = new OfficerOperationService();
+    const resourceOperationService = new ResourceOperationService();
+    const reasonService = new ReasonService();
 
     async function getOperations() {
         try {
@@ -85,9 +95,6 @@ function TableOperacoes(props) {
             });
 
             setData(mappedResult)
-
-            //console.log(result)
-            //setData(result.data)
 
         } catch (error) {
             console.error(error);
@@ -115,17 +122,12 @@ function TableOperacoes(props) {
         }
     }
 
-    const officerOperationService = new OfficerOperationService();
-    const resourceOperationService = new ResourceOperationService();
-    const reasonService = new ReasonService();
-
     async function handleDeleteOperation(data) {
         try {
 
             if (data.status == 'OPENED') {
                 //delete officer operation ok
                 const ofOp = await officerOperationService.getByOperationId({ operation_id: data.id })
-
                 if (ofOp.data.length > 0) {
                     await officerOperationService.deleteByOperationId({ operation_id: data.id })
                 }
@@ -145,27 +147,30 @@ function TableOperacoes(props) {
                 }
 
                 // delete operation
-                await operationService.deleteOperation(data);
+                await operationService.deleteOperation(data).then(() => {
+                    setAlert({ show: true, variant: 'success', message: 'Operação excluída com sucesso!' })
+                });
+
             } else if (data.status == 'TRIGGERED') {
                 // update status canceled
                 const updatedOperation = { ...data, status: "CANCELED" }
                 console.log("update status canceled")
                 console.log(updatedOperation)
-                await operationService.update(updatedOperation);
+                await operationService.update(updatedOperation).then(() => {
+                    setAlert({ show: true, variant: 'success', message: 'Operação cancelada.' })
+                });
             }
-
 
             //Finished! 
             setOperationToDelete([]);
             setShowDeleteModal(false)
-            getOperations();
+            await getOperations();
 
         } catch (error) {
             console.error(error);
         }
     }
 
-    const [search, setSearch] = useState('')
 
     const handleSearch = () => {
         console.log(search)
@@ -216,8 +221,10 @@ function TableOperacoes(props) {
         </Popover>
     );
 
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [operationToDelete, setOperationToDelete] = useState([]);
+    const handleAlertClose = () => {
+        const updatedAlert = { ...alert, show: false, message: '' };
+        setAlert(updatedAlert);
+    };
 
     return <>
         <Table striped bordered hover>
@@ -298,8 +305,16 @@ function TableOperacoes(props) {
                     Fechar
                 </Button>
             </Modal.Footer>
-
         </Modal>
+
+        {alert.show &&
+            <BottomAlert
+                show={alert.show}
+                variant={alert.variant}
+                message={alert.message}
+                onClose={handleAlertClose}
+            />
+        }
     </>
 }
 
