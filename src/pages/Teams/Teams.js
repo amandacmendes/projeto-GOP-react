@@ -66,10 +66,16 @@ function TableTeams(props) {
 
     const navigate = useNavigate();
     const [data, setData] = useState([]);
+    const [alert, setAlert] = useState({ show: false, variant: 'primary', message: '' });
 
     const teamsService = new TeamsService();
     const officerService = new OfficerService();
 
+    const handleAlertClose = () => {
+        const updatedAlert = { ...alert, show: false, message: '' };
+        setAlert(updatedAlert);
+    };
+    
     async function getTeams() {
         try {
             const result = await teamsService.getTeamsWithOfficers();
@@ -136,7 +142,9 @@ function TableTeams(props) {
             }
 
             // Delete team 
-            await teamsService.delete(id);
+            await teamsService.delete(id).then(() => {
+                setAlert({ show: true, variant: 'success', message: 'Equipe excluida com sucesso.' });
+            });
 
             setTeamToDelete([]);
             setShowDeleteModal(false)
@@ -144,6 +152,7 @@ function TableTeams(props) {
 
         } catch (error) {
             console.error(error);
+            setAlert({ show: true, variant: 'danger', message: error.response.data.error });
         }
     }
 
@@ -277,8 +286,15 @@ function TableTeams(props) {
                     Fechar
                 </Button>
             </Modal.Footer>
-
         </Modal>
+        {alert.show &&
+            <BottomAlert
+                show={alert.show}
+                variant={alert.variant}
+                message={alert.message}
+                onClose={handleAlertClose}
+            />
+        }
     </>
 }
 
