@@ -93,6 +93,8 @@ function Content(props) {
                 });
 
                 setOfficers(data)
+                console.log('officers');
+                console.log(data)
             })
             .catch((error) => {
                 console.log(error)
@@ -352,7 +354,7 @@ function Content(props) {
                                     type={"checkbox"}
                                     id={'officer-' + officer.id}
                                     key={officer.id}
-                                    label={officer.name}
+                                    label={officer.team_id ? (`${officer.team.team_name} - ${officer.name}`) : officer.name}
                                     value={officer.id}
                                     {...register('officer_operation_officer_id')}
                                 />
