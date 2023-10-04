@@ -581,7 +581,7 @@ function Content(props) {
                 <Card.Body>
                     <Form.Group className="pb-2">
                         <Row className="mb-2">
-                            <Col className="col-4">
+                            <Col className="col-6">
                                 <Form.Label controlId="form-label-reason">Objeto de trabalho policial</Form.Label>
                             </Col>
                             <Col>
@@ -600,7 +600,7 @@ function Content(props) {
 
                         {reason.map((reasonItem, index) => (
                             <Row className="mb-2" key={index}>
-                                <Col className="col-4">
+                                <Col className="col-6">
 
                                     <Form.Select
                                         disabled={isDisabledParam}
