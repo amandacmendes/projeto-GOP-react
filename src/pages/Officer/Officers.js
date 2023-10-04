@@ -26,10 +26,13 @@ export function Officers() {
 
     const [showModalOfficer, setShowModalOfficer] = useState(false);
 
-    const [officer, setOfficer] = useState([])
+    const [officer, setOfficer] = useState([]);
+    const [teams, setTeams] = useState([]);
+
     const [modalAction, setModalAction] = useState('');
 
     const officerService = new OfficerService();
+    const teamsService = new TeamsService();
 
     async function getOfficers() {
         try {
@@ -49,8 +52,28 @@ export function Officers() {
         }
     }
 
+    async function getTeams() {
+        try {
+            await teamsService.getAllTeams()
+                .then((result) => {
+                    console.log(result);
+                    const mappedResult = {};
+                    result.data.forEach((item) => {
+                        mappedResult[item.id] = item;
+                    });
+
+                    setTeams(mappedResult)
+
+                });
+        } catch (error) {
+            console.log(error);
+            navigate('/*');
+        }
+    }
+
     useEffect(() => {
         getOfficers();
+        getTeams();
     }, []);
 
     function handleNewOfficer() {
@@ -101,6 +124,7 @@ export function Officers() {
                             console.log('aaa')
                             console.log(result)
                             getOfficers();
+                            setAlert({ show: true, variant: 'warning', message: 'Policial está associado a operação, então não pode ser excluído do sistema. Registro do policial foi inativado.' })
                             //setShowModal(false);
                         });
 
@@ -110,40 +134,89 @@ export function Officers() {
                         .then((result) => {
                             console.log(result)
                             getOfficers();
+                            setAlert({ show: true, variant: 'success', message: 'Policial foi excluido com sucesso.' })
                             //setShowModal(false);
                         });
                 }
                 // Close the delete confirmation modal
                 setShowDeleteModal(false);
-
             }
 
         } catch (error) {
-
             console.error(error);
-
         }
     }
 
     const [search, setSearch] = useState('')
+    const [searchField, setSearchField] = useState('')
 
     const handleSearch = () => {
-        console.log(search)
-        console.log(data)
+        var filteredData;
 
-        const filteredData = Object.keys(data).filter(key =>
-            data[key].name.toLowerCase().includes(search.toLowerCase())
-        );
+        if (searchField == 'name') {
+            filteredData = Object.keys(data).filter(key =>
+                data[key].name.toLowerCase().includes(search.toLowerCase())
+            );
+        } else if (searchField == 'team_name') {
 
+            const teamsArray = Object.values(teams);
+
+            const filteredTeams = teamsArray.filter(team =>
+                team.team_name.toLowerCase().includes(search.toLowerCase())
+            );
+
+            const teamIds = filteredTeams.map(team => team.id);
+
+            filteredData = Object.keys(data).filter(key =>
+                teamIds.includes(data[key].team_id)
+            );
+
+        } else {
+            filteredData = data;
+        }
         console.log(filteredData.map(key => data[key]));
         setData(filteredData.map(key => data[key]))
-
     }
 
     const clearFilter = () => {
-        setSearch('')
-        getOfficers()
+        setSearch('');
+        setSearchField('');
+        getOfficers();
     }
+
+    const popoverTeam = (
+        <Popover id="popover-basic">
+            <Popover.Header as="h3">Pesquisar por equipe</Popover.Header>
+            <Popover.Body>
+                <InputGroup>
+                    <Form.Control
+                        type="text"
+                        size='sm'
+                        placeholder="Nome da equipe"
+                        value={search}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setSearchField('team_name');
+                        }}
+                    />
+                    <Button
+                        type='submit'
+                        variant='dark'
+                        onClick={handleSearch}
+                    >
+                        <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: '16px' }}
+                        > search
+                        </span>
+                    </Button>
+                </InputGroup>
+                <div className='mt-2'>
+                    <a href="#" className="text-primary" onClick={clearFilter}>Limpar filtro</a>
+                </div >
+            </Popover.Body>
+        </Popover>
+    );
 
     const popover = (
         <Popover id="popover-basic">
@@ -155,7 +228,10 @@ export function Officers() {
                         size='sm'
                         placeholder="Nome do policial"
                         value={search}
-                        onChange={(e) => { setSearch(e.target.value) }}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setSearchField('name');
+                        }}
                     />
                     <Button
                         type='submit'
@@ -213,7 +289,25 @@ export function Officers() {
                                         </OverlayTrigger>
                                     </div>
                                 </th>
-                                <th>Equipe</th>
+                                <th>
+                                    <div className='d-flex justify-content-between'>
+                                        Equipe
+                                        <OverlayTrigger trigger="click" placement="top" overlay={popoverTeam}>
+                                            <Button
+                                                variant='dark'
+                                                size='sm'
+                                                style={{ height: "20px", width: "20px", padding: "0px" }}
+                                            >
+                                                <span
+                                                    className="material-symbols-outlined"
+                                                    style={{ fontSize: '16px' }}
+                                                > filter_alt
+                                                </span>
+                                            </Button>
+                                        </OverlayTrigger>
+                                    </div>
+                                </th>
+                                <th>Status</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
